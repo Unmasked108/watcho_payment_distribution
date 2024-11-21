@@ -3,6 +3,7 @@ import { LoginComponent } from './login/login.component';
 import { LayoutComponent } from './layout/layout.component';
 import { TeamsComponent } from './teams/teams.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { TeamManagerComponent } from './team-manager/team-manager.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },  // Login page
@@ -16,4 +17,5 @@ export const routes: Routes = [
             { path: 'teams', component: TeamsComponent },
         ],
     },
+    { path: 'TeamsManager', component: TeamManagerComponent}
 ];
