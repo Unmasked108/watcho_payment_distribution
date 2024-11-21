@@ -1,0 +1,89 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid">
+      <!-- Company Name -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+        <i class="bi bi-building fs-4 me-2"></i> Rescale
+      </a>
+  
+      <!-- Navigation Links -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/layout/dashboard"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/layout/teams"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Teams
+          </a>
+        </li>
+      </ul>
+  
+      <!-- User Info -->
+      <div class="d-flex align-items-center ms-auto user-info dropdown">
+        <button
+          class="btn btn-light dropdown-toggle d-flex align-items-center"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <div
+            class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+            style="width: 40px; height: 40px;"
+          >
+            {{ initials }}
+          </div>
+          <span class="username">{{ username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-header">
+            <div class="d-flex align-items-center">
+              <div
+                class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 40px; height: 40px;"
+              >
+                {{ initials }}
+              </div>
+              <div>
+                <div class="username">{{ username }}</div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Profile Settings</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Help Center</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" (click)="toggleDarkMode()">
+              <i class="bi bi-moon"></i> Dark Mode
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-arrow-up-right"></i> Upgrade Plan</a>
+          </li>
+          <li>
+            <hr class="dropdown-divider" />
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div>
+    <router-outlet></router-outlet>
+  </div>

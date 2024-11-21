@@ -1,3 +1,19 @@
 import { Routes } from '@angular/router';
+import { LoginComponent } from './login/login.component';
+import { LayoutComponent } from './layout/layout.component';
+import { TeamsComponent } from './teams/teams.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+    { path: 'login', component: LoginComponent },  // Login page
+    { path: '', redirectTo: 'login', pathMatch: 'full' },  // Default to login
+    {
+        path: 'layout',
+        component: LayoutComponent,
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' }, // Default to dashboard within layout
+            { path: 'dashboard', component: DashboardComponent },
+            { path: 'teams', component: TeamsComponent },
+        ],
+    },
+];
