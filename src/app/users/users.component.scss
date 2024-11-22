@@ -1,0 +1,112 @@
+.navbar {
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #333;
+  
+      &:hover {
+        color: #0d6efd;
+        text-decoration: none;
+      }
+    }
+  
+   
+  
+    .user-info {
+      .username {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+  
+        &:hover {
+          color: #0d6efd;
+        }
+      }
+  
+      .dropdown-menu {
+        min-width: 250px;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+ .container{
+    display: flex;
+    flex-direction: row;
+    max-width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    
+ }
+
+  .card-container {
+    background-color: #fff;         // White background for the card
+    border-radius: 8px;             // Rounded corners
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  // Add shadow for card effect
+    padding: 16px;      
+    width:1500px;            // Padding inside the card
+    margin-bottom: 20px; 
+        // Space between cards
+  
+    mat-card-header {
+      background-color: #f8f9fa;    // Light gray background for header
+      border-bottom: 1px solid #ddd; // Divider below the header
+      padding-bottom: 10px;          // Padding below the header
+    }
+  
+    mat-card-title {
+      font-size: 18px;               // Set the title font size
+      font-weight: bold;             // Make the title bold
+    }
+  
+    mat-card-content {
+      font-size: 16px;               // Set font size for content
+      margin-top: 10px;              // Margin to separate content from the header
+    }
+  
+    button {
+      margin-top: 10px;              // Space between content and buttons
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  
+      mat-icon {
+        margin-right: 8px;           // Space between icon and text
+      }
+  
+      &:hover {
+        background-color: #0056b3;   // Button hover effect
+      }
+  
+      &:focus {
+        outline: none;               // Remove focus outline
+      }
+    }
+  
+    input[type="checkbox"] {
+      margin-right: 10px;            // Space between checkbox and label
+    }
+  
+    .ms-2 {
+      margin-left: 10px;             // Space between checkbox and text
+    }
+  }
+  
+  
