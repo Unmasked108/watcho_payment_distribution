@@ -1,0 +1,115 @@
+/* General container styling */
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* Card styling */
+  .custom-card,
+  .form-card,
+  .edit-card {
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .custom-card {
+    background-color: #f5f5f5;
+  }
+  
+  .form-card,
+  .edit-card {
+    background-color: #ffffff;
+  }
+  
+  /* Card title */
+  mat-card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* Form styling */
+  .form-field {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  button {
+    margin-top: 10px;
+  }
+  
+  /* Radio button group */
+  .radio-button {
+    margin-right: 15px;
+    font-size: 16px;
+    color: #555;
+  }
+  
+  /* Table styling */
+  .mat-table {
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+    overflow: hidden;
+  }
+  
+  .mat-header-cell {
+    font-weight: bold;
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .mat-cell {
+    padding: 10px;
+  }
+  
+  .mat-row:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .mat-row:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Edit card styling */
+  .edit-card {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 10;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .edit-card .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      padding: 10px;
+    }
+  
+    .form-field {
+      margin-bottom: 15px;
+    }
+  
+    .edit-card {
+      top: 50px;
+      width: 100%;
+      padding: 20px;
+    }
+  }
+  

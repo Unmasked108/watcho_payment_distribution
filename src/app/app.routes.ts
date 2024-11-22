@@ -3,7 +3,11 @@ import { LoginComponent } from './login/login.component';
 import { LayoutComponent } from './layout/layout.component';
 import { TeamsComponent } from './teams/teams.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+<<<<<<< HEAD
 import { UsersComponent } from './users/users.component';
+=======
+import { TeamManagerComponent } from './team-manager/team-manager.component';
+>>>>>>> 933f8717686517dbff5b250b0245bb0c8e17c8c9
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },  // Login page
@@ -19,4 +23,5 @@ export const routes: Routes = [
            
         ],
     },
+    { path: 'TeamsManager', component: TeamManagerComponent}
 ];

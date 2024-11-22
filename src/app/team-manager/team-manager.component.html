@@ -1,0 +1,129 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid">
+      <!-- Company Name -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+        <i class="bi bi-building fs-4 me-2"></i> Rescale
+      </a>
+  
+      <!-- User Info -->
+      <div class="d-flex align-items-center ms-auto user-info dropdown">
+        <button
+          class="btn btn-light dropdown-toggle d-flex align-items-center"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <div
+            class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+            style="width: 40px; height: 40px;"
+          >
+            {{ initials }}
+          </div>
+          <span class="username">{{ username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-header">
+            <div class="d-flex align-items-center">
+              <div
+                class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 40px; height: 40px;"
+              >
+                {{ initials }}
+              </div>
+              <div>
+                <div class="username">{{ username }}</div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Profile Settings</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Help Center</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" (click)="toggleDarkMode()">
+              <i class="bi bi-moon"></i> Dark Mode
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-arrow-up-right"></i> Upgrade Plan</a>
+          </li>
+          <li>
+            <hr class="dropdown-divider" />
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+    <div class="container mt-4">
+    <!-- Card Component -->
+    <mat-card class="allocation-card">
+      <h3>The leads that are allocated: <span class="lead-count">{{ totalLeads }}</span></h3>
+      <div class="d-flex justify-content-between align-items-center">
+        <span>Allocate the leads to the team members:</span>
+        <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate Leads</button>
+      </div>
+    </mat-card>
+    <!-- </div> -->
+  
+    <!-- Material Table -->
+    <div class="mat-table-container my-custom-style">
+        <table mat-table [dataSource]="teamMembers" class="mat-elevation-z8 mat-table">
+          <!-- Member Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Member Name </th>
+            <td mat-cell *matCellDef="let member"> {{ member.name }} </td>
+          </ng-container>
+      
+          <!-- Member ID Column -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> Member ID </th>
+            <td mat-cell *matCellDef="let member"> {{ member.id }} </td>
+          </ng-container>
+      
+          <!-- Leads Allocated Column -->
+          <ng-container matColumnDef="leads">
+            <th mat-header-cell *matHeaderCellDef> Leads Allocated </th>
+            <td mat-cell *matCellDef="let member">
+              <input type="number" [(ngModel)]="member.leads" class="leads-input" />
+            </td>
+          </ng-container>
+      
+          <!-- Time of Allocation Column -->
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef> Time of Allocation </th>
+            <td mat-cell *matCellDef="let member"> {{ member.time }} </td>
+          </ng-container>
+      
+          <!-- Completion Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef> Completion Status </th>
+            <td mat-cell *matCellDef="let member">
+              <span
+                class="status-chip"
+                [class.completed]="member.status === 'Completed'"
+                [class.pending]="member.status === 'Pending'"
+              >
+                {{ member.status }}
+              </span>
+            </td>
+          </ng-container>
+      
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+      
+  
+    <!-- Save Button -->
+    <div class="save-btn-container mt-4">
+      <button mat-raised-button color="primary" (click)="saveData()">Save</button>
+    </div>
+  </div>
+  

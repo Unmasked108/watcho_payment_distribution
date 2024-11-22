@@ -1,3 +1,89 @@
-<!-- <app-layout></app-layout> -->
-
-<p>teams works!</p>
+<div class="container">
+    <!-- Card Component for Options -->
+    <mat-card class="custom-card">
+      <mat-card-title>Team</mat-card-title>
+      <mat-card-content>
+        <mat-radio-group [(ngModel)]="selectedOption">
+          <mat-radio-button value="manage" class="radio-button">Manage Team</mat-radio-button>
+          <mat-radio-button value="generate" class="radio-button">Generate Team</mat-radio-button>
+        </mat-radio-group>
+      </mat-card-content>
+    </mat-card>
+  
+    <!-- Generate Team Form -->
+    <form *ngIf="selectedOption === 'generate'" (ngSubmit)="onGenerateTeam()">
+      <mat-card class="form-card">
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>Team Name</mat-label>
+          <input matInput [(ngModel)]="teamForm.teamName" name="teamName" required />
+        </mat-form-field>
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>Team Leader</mat-label>
+          <input matInput [(ngModel)]="teamForm.teamLeader" name="teamLeader" required />
+        </mat-form-field>
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>Number of Members</mat-label>
+          <input matInput type="number" [(ngModel)]="teamForm.members" name="members" required />
+        </mat-form-field>
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>Capacity of Team</mat-label>
+          <input matInput type="number" [(ngModel)]="teamForm.capacity" name="capacity" required />
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit">Save Team</button>
+      </mat-card>
+    </form>
+  
+    <!-- Manage Team Table -->
+    <div *ngIf="selectedOption === 'manage'">
+      <mat-table [dataSource]="teams" class="mat-elevation-z8">
+        <!-- Team Name Column -->
+        <ng-container matColumnDef="teamName">
+          <mat-header-cell *matHeaderCellDef> Team Name </mat-header-cell>
+          <mat-cell *matCellDef="let team"> {{ team.teamName }} </mat-cell>
+        </ng-container>
+  
+        <!-- Team ID Column -->
+        <ng-container matColumnDef="teamId">
+          <mat-header-cell *matHeaderCellDef> Team ID </mat-header-cell>
+          <mat-cell *matCellDef="let team"> {{ team.teamId }} </mat-cell>
+        </ng-container>
+  
+        <!-- Capacity Column -->
+        <ng-container matColumnDef="capacity">
+          <mat-header-cell *matHeaderCellDef> Capacity </mat-header-cell>
+          <mat-cell *matCellDef="let team"> {{ team.capacity }} </mat-cell>
+        </ng-container>
+  
+        <!-- Edit Button Column -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+          <mat-cell *matCellDef="let team">
+            <button mat-button color="primary" (click)="editTeam(team)">Edit</button>
+          </mat-cell>
+        </ng-container>
+  
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </div>
+  
+    <!-- Edit Team Card -->
+    <mat-card *ngIf="editingTeam" class="edit-card">
+      <mat-card-title>Edit Team</mat-card-title>
+      <mat-card-content>
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>Team Name</mat-label>
+          <input matInput [(ngModel)]="editingTeam.teamName" name="editTeamName" />
+        </mat-form-field>
+        <mat-form-field class="form-field" appearance="outline">
+          <mat-label>Capacity</mat-label>
+          <input matInput type="number" [(ngModel)]="editingTeam.capacity" name="editCapacity" />
+        </mat-form-field>
+        <div class="actions">
+          <button mat-raised-button color="primary" (click)="saveTeam()">Save</button>
+          <button mat-raised-button color="warn" (click)="deleteTeam(editingTeam.teamId)">Delete</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  
