@@ -1,57 +1,241 @@
+/* General container for the layout */
 .container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f9fa;  /* Light background for contrast */
+  border-radius: 10px;
+}
+
+/* Card component styling */
+.custom-card {
+  margin-top: 50px;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  
+  .card-header {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 20px;
   }
-  
-  .custom-card {
-    padding: 20px;
+
+  .greeting {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+  }
+
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: flex-start;
+
+    span {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .dropdown {
+      width: 160px;
+      .mat-form-field-infix {
+        background-color: #e9ecef;
+      }
+
+      .mat-select-trigger {
+        color: #007bff;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .allocation-action {
+    display: flex;
+    align-items: center; /* Align items inline */
+    gap: 10px;
+    
+    span {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #070707;
+    }
+
+    button {
+      margin-left: 10px; /* Slight gap between the span and button */
+      font-size: 0.9rem;  /* Smaller font size */
+      padding: 8px 16px;  /* Smaller padding */
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+  }
+
+  /* Generate section when 'generate' is selected */
+  .generate-option {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    color: #333;
+
+    hr {
+      border: 1px solid #007bff;
+      margin-bottom: 15px;
+    }
+
+    span {
+      font-size: 1.2rem;
+      font-weight: 600;
+      // color: #007bff;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 8px 16px;  /* Smaller padding */
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+  }
+}
+
+  /* File import section */
+  .file-import {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    .card-header {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    margin-top: 20px;
+
+    label {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #333;
     }
-  
-    .greeting {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #424242;
-    }
-  
-    .task {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-  
-      span {
-        font-size: 1rem;
-        font-weight: 500;
-      }
-  
-      .dropdown {
-        width: 150px;
-      }
-    }
-  }
-  
-  .custom-table {
-    width: 100%;
-    mat-header-cell {
-      font-weight: bold;
-      background-color: #f5f5f5;
-    }
-    mat-cell {
+
+    input[type="file"] {
       padding: 10px;
-    }
-    mat-row:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    mat-row:hover {
-      background-color: #e0f7fa;
+      font-size: 1rem;
+      background-color: #f1f1f1;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s ease;
+
+      &:hover {
+        border-color: #007bff;  /* Blue border on hover */
+      }
     }
   }
+
+
+
+
+/* Styling for the table */
+.custom-table {
+  margin-top: 50px;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
   
+  mat-header-cell {
+    font-weight: bold;
+    background-color: #007bff; /* Blue background for header */
+    color: white;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #e1e1e1;
+  }
+
+  mat-cell {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e1e1e1;
+  }
+
+  mat-row:nth-child(even) {
+    background-color: #f1f9fc; /* Light blue for even rows */
+  }
+
+  mat-row:hover {
+    background-color: #e0f7fa; /* Lighter blue on hover */
+  }
+
+  /* Styling for the status chip */
+  .status-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .status-chip.completed {
+    background-color: #28a745; /* Green for completed */
+    color: white;
+  }
+
+  .status-chip.pending {
+    background-color: #ffc107; /* Yellow for pending */
+    color: black;
+  }
+}
+
+/* Button styling for task allocation */
+.allocate-btn {
+  background-color: #007bff; /* Blue background */
+  color: white;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .task {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dropdown {
+    width: 100%;
+  }
+}
+

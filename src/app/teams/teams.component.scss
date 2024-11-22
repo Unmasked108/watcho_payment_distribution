@@ -1,102 +1,178 @@
-/* General container styling */
+/* General Container Styling */
 .container {
-    max-width: 800px;
+    max-width: 1500px;
     margin: 20px auto;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding: 20px; // Added padding to give some space inside the container
   }
   
-  /* Card styling */
+  /* Card Styling */
   .custom-card,
   .form-card,
   .edit-card {
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
     padding: 20px;
     border-radius: 8px;
+    background-color: #ffffff; // Default white background
   }
   
+  /* Custom Card (light grey background) */
   .custom-card {
     background-color: #f5f5f5;
   }
   
+  /* Form and Edit Cards (White background) */
   .form-card,
   .edit-card {
     background-color: #ffffff;
   }
   
-  /* Card title */
+  /* Card Title */
   mat-card-title {
     font-size: 20px;
     font-weight: bold;
-    color: #333;
+    color: #003366; // Dark blue color for card titles
     margin-bottom: 10px;
   }
   
-  /* Form styling */
+  /* Form Field Styling */
   .form-field {
     width: 100%;
     margin-bottom: 20px;
   }
   
+  /* Button Styling */
   button {
     margin-top: 10px;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    // Default blue button
+    // background-color: #007bff;
+  
+    &:hover {
+      background-color: #0056b3; // Darker blue on hover
+      color: white; // Ensure text is visible on hover
+    }
   }
   
-  /* Radio button group */
+  /* Radio Button Group Styling */
   .radio-button {
     margin-right: 15px;
     font-size: 16px;
     color: #555;
   }
   
-  /* Table styling */
-  .mat-table {
-    width: 100%;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
-    overflow: hidden;
+  /* Mat Table Styling */
+/* Mat Table Styling */
+.custom-table {
+    mat-table {
+      width: 100%;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
+      font-size: 18px; // Larger font for better readability
+    }
+  
+    /* Header Styling */
+    mat-header-row {
+      background-color: #003366 !important; // Blue background for the header row
+      height: 64px; // Increase header row height for better spacing
+    }
+  
+    mat-header-cell {
+      font-weight: bold;
+      color: white; // White text for header cells
+      padding: 20px; // Larger padding for a spacious look
+      text-align: left;
+      font-size: 20px; // Larger font size for header text
+      background-color: #007bff; // Blue background for header
+    }
+  
+    /* Cell Styling */
+    mat-cell {
+      padding: 20px; // Larger padding for table cells
+      text-align: left;
+      font-size: 18px; // Increase font size for content
+      border-bottom: 1px solid #e1e1e1;
+    }
+  
+    mat-row {
+      height: 64px; // Increase row height for more space
+    }
+  
+    mat-row:nth-child(even) {
+      background-color: #f9f9f9; // Alternate row color for better visibility
+    }
+  
+    mat-row:hover {
+      background-color: #e0f0ff; // Light blue background on row hover
+    }
+  
+    /* Add some spacing around buttons */
+    button {
+      margin: 0 5px;
+    }
   }
   
-  .mat-header-cell {
-    font-weight: bold;
-    background-color: #f0f0f0;
-    padding: 10px;
-    text-align: left;
+  /* Edit Button Hover Fix */
+ /* Edit Button Styling */
+button.edit-btn {
+    background-color: #28a745; // Green background for "Edit" button
+    
+    &:hover {
+      background-color: #218838; // Darker green on hover
+      color: white; // Ensure "Edit" text remains visible
+    }
   }
   
-  .mat-cell {
-    padding: 10px;
-  }
-  
-  .mat-row:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  .mat-row:hover {
-    background-color: #f1f1f1;
-  }
-  
-  /* Edit card styling */
+  /* Edit Card Styling */
   .edit-card {
     position: absolute;
     top: 100px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) scale(0.8); // Start with scaled-down effect
     width: 90%;
     max-width: 600px;
     z-index: 10;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: #ffffff;
+    
+    animation: openCard 0.3s ease-out forwards; // Animation to open the card
+    
+    /* Animation keyframes */
+    @keyframes openCard {
+      0% {
+        transform: translateX(-50%) scale(0.8);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+      }
+    }
   }
   
+  /* Background Overlay for Dim Effect */
+  body.modal-open {
+    background-color: rgba(0, 0, 0, 0.5); // Dim background
+    transition: background-color 0.3s ease-in-out; // Smooth transition for dimming
+  }
+  
+  /* Edit Card Actions */
   .edit-card .actions {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
   }
   
-  /* Responsive Design */
+  /* Responsive Design for Smaller Screens */
   @media (max-width: 768px) {
     .container {
       padding: 10px;
@@ -112,4 +188,38 @@
       padding: 20px;
     }
   }
+  .members-card {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    padding: 20px;
   
+    .member-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  
+    button {
+      margin-left: 10px;
+    }
+  
+    mat-card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #003366;
+    }
+  }
+  
+  body.modal-open {
+    background-color: rgba(0, 0, 0, 0.5);
+  }

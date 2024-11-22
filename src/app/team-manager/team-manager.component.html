@@ -74,7 +74,7 @@
   
     <!-- Material Table -->
     <div class="mat-table-container my-custom-style">
-        <table mat-table [dataSource]="teamMembers" class="mat-elevation-z8 mat-table">
+        <mat-table [dataSource]="teamMembers" class="mat-elevation-z8 mat-table custom-table">
           <!-- Member Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef> Member Name </th>
@@ -117,8 +117,9 @@
       
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+        </mat-table>
       </div>
+      
       
   
     <!-- Save Button -->

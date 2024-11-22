@@ -1,45 +1,81 @@
-<!-- <app-layout></app-layout> -->
-
 <div class="container">
-    <!-- Card Component -->
-    <mat-card class="custom-card">
-      <div class="card-header">
-        <div class="greeting">Good Morning</div>
-        <div class="task">
-          <span>Task Generation</span>
-          <mat-form-field class="dropdown" appearance="outline">
-            <mat-label>Options</mat-label>
-            <mat-select>
-              <mat-option value="generate">Generate</mat-option>
-              <mat-option value="import">Import</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+  <!-- Card Component -->
+  <mat-card class="custom-card">
+    <div class="card-header">
+      <div class="greeting">Good Morning</div>
+      <div class="task">
+        <span>Task Generation</span>
+        <mat-form-field class="dropdown" appearance="outline">
+          <mat-label>Options</mat-label>
+          <mat-select [(ngModel)]="taskOption" (selectionChange)="onOptionSelect()">
+            <mat-option value="generate">Generate</mat-option>
+            <mat-option value="import">Import</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
-    </mat-card>
-  
-    <!-- Table Component -->
-    <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
-      <!-- Team Name Column -->
-      <ng-container matColumnDef="teamName">
-        <mat-header-cell *matHeaderCellDef> Team Name </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.teamName }} </mat-cell>
-      </ng-container>
-  
-      <!-- Team ID Column -->
-      <ng-container matColumnDef="teamId">
-        <mat-header-cell *matHeaderCellDef> Team ID </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.teamId }} </mat-cell>
-      </ng-container>
-  
-      <!-- Team Status Column -->
-      <ng-container matColumnDef="teamStatus">
-        <mat-header-cell *matHeaderCellDef> Team Status </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.teamStatus }} </mat-cell>
-      </ng-container>
-  
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
-  </div>
-  
+    </div>
+    
+    <div *ngIf="showFileInput" class="file-import">
+      <label for="fileUpload">Upload File:</label>
+      <input type="file" id="fileUpload" (change)="onFileUpload($event)" />
+    </div>
+    
+    <div *ngIf="taskOption === 'generate'" class="generate-option">
+      <hr />
+      <span>Generate the token</span>
+      <button mat-raised-button color="accent" (click)="generateToken()">Generate</button>
+    </div>
+    
+    <div class="allocation-action">
+      <span>Allocate the leads to the Team Leader</span>
+      <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate</button>
+    </div>
+    
+  </mat-card>
+
+  <!-- Table Component -->
+  <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
+    <!-- Team Name Column -->
+    <ng-container matColumnDef="teamName">
+      <mat-header-cell *matHeaderCellDef> Team Name </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.teamName }} </mat-cell>
+    </ng-container>
+
+    <!-- Team ID Column -->
+    <ng-container matColumnDef="teamId">
+      <mat-header-cell *matHeaderCellDef> Team ID </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.teamId }} </mat-cell>
+    </ng-container>
+
+    <!-- Team Status Column -->
+    <ng-container matColumnDef="teamStatus">
+      <mat-header-cell *matHeaderCellDef> Team Status </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.teamStatus }} </mat-cell>
+    </ng-container>
+
+    <!-- Allocation Column -->
+    <ng-container matColumnDef="allocation">
+      <mat-header-cell *matHeaderCellDef> Allocation </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.allocation }} </mat-cell>
+    </ng-container>
+
+    <!-- Allocated Time Column -->
+    <ng-container matColumnDef="allocatedTime">
+      <mat-header-cell *matHeaderCellDef> Allocated Time </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.allocatedTime || 'N/A' }} </mat-cell>
+    </ng-container>
+
+    <!-- Task Completion Column -->
+    <ng-container matColumnDef="completion">
+      <mat-header-cell *matHeaderCellDef> Task Completion </mat-header-cell>
+      <mat-cell *matCellDef="let team">
+        <button mat-raised-button color="accent" (click)="approveTask(team)">
+          Approve
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

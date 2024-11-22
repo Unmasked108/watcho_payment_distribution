@@ -38,41 +38,45 @@ export class LoginComponent {
     if (form.valid) {
       const email = form.value.email;
       const password = form.value.password;
-
-      this.http.post('http://localhost:5000/api/auth/login', { email, password })
+  
+      this.http.post('http://localhost:5000/login', { email, password })
         .subscribe((response: any) => {
-          console.log('Login Response:', response); // Log the response
-          const token = response.token; 
-          const userId = response._id; // Use the correct property name for user ID
-
+          const token = response.token;
+          const userId = response.id;
+          const role = response.role;
+  
           if (userId) {
             localStorage.setItem('token', token);
-            localStorage.setItem('userId', userId); // Store userId from the response
-            this.router.navigate(['/lead-analytics', userId]); // Pass userId to the route
+            localStorage.setItem('userId', userId);
+  
+            switch (role) {
+              case 'Admin':
+                this.router.navigate(['/layout']);
+                break;
+              case 'TeamLeader':
+                this.router.navigate(['/TeamsManager']);
+                break;
+              default:
+                this.router.navigate(['/members']);
+                break;
+            }
           } else {
-            console.error('User ID is missing in the response');
+            console.error('User ID or role missing in the response');
           }
         }, error => {
           console.error('Login error:', error);
         });
-    }    
+    }
   }
-
+  
   onSignup(form: any) {
     if (form.valid) {
-      const name = form.value.name;
-      const email = form.value.email;
-      const password = form.value.password;
-      const confirmPassword = form.value.confirmPassword;
-
+      const { name, email, password, confirmPassword } = form.value;
+  
       if (password === confirmPassword) {
-        this.http.post('http://localhost:5000/api/auth/signup', { name, email, password })
-          .subscribe((response: any) => {
-            const token = (response as { token: string }).token;
-            localStorage.setItem('token', token);
-            
-            // Navigate to lead processing after successful signup
-            this.router.navigate(['/lead-processing']);
+        this.http.post('http://localhost:5000/register', { name, email, password })
+          .subscribe(() => {
+            this.router.navigate(['/login']); // Redirect to login after successful signup
           }, error => {
             console.error('Signup error:', error);
           });
@@ -81,4 +85,5 @@ export class LoginComponent {
       }
     }
   }
+  
 }
