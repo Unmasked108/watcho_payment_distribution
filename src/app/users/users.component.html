@@ -1,0 +1,134 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid">
+      <!-- Company Name -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+        <i class="bi bi-building fs-4 me-2"></i> Rescale
+      </a>
+  
+      <!-- Navigation Links -->
+  
+  
+      <!-- User Info -->
+      <div class="d-flex align-items-center ms-auto user-info dropdown">
+        <button
+          class="btn btn-light dropdown-toggle d-flex align-items-center"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <div
+            class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+            style="width: 40px; height: 40px;"
+          >
+            {{ initials }}
+          </div>
+          <span class="username">{{ username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-header">
+            <div class="d-flex align-items-center">
+              <div
+                class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 40px; height: 40px;"
+              >
+                {{ initials }}
+              </div>
+              <div>
+                <div class="username">{{ username }}</div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Profile Settings</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-question-circle"></i> Help Center</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#" (click)="toggleDarkMode()">
+              <i class="bi bi-moon"></i> Dark Mode
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-arrow-up-right"></i> Upgrade Plan</a>
+          </li>
+          <li>
+            <hr class="dropdown-divider" />
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+ 
+
+  <div class="container mt-4">
+    <!-- Leads Card -->
+    <mat-card class="card-container">
+      <mat-card-header>
+        <mat-card-title>Allocated Leads</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>The leads that are allocated: <strong>{{ allocatedLeadsCount }}</strong></p>
+        <button mat-flat-button color="primary" (click)="downloadLeads()">
+          <mat-icon>download</mat-icon> Download Leads
+        </button>
+      </mat-card-content>
+    </mat-card>
+  
+    <!-- Task Completed Card -->
+    <mat-card class="card-container">
+      <mat-card-header>
+        <mat-card-title>Task Completed</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="d-flex align-items-center">
+          <input type="checkbox" [(ngModel)]="taskCompleted" /> 
+          <span class="ms-2">Completed</span>
+        </div>
+        <button mat-flat-button color="accent" (click)="uploadTask()">
+          <mat-icon>upload</mat-icon> Upload Completed Task
+        </button>
+        <input type="file" (change)="onFileSelected($event)" hidden #fileInput />
+      </mat-card-content>
+    </mat-card>
+   </div>
+
+ 
+  
+  <!-- Table with Sort and Pagination -->
+  <table mat-table [dataSource]="paginatedData" matSort class="mat-elevation-z8">
+    
+    <!-- Order ID Column -->
+    <ng-container matColumnDef="orderId">
+      <th mat-header-cell *matHeaderCellDef > Order ID </th>
+      <td mat-cell *matCellDef="let element"> {{ element.orderId || "N/A" }} </td>
+    </ng-container>
+  
+    <!-- Link Column -->
+    <ng-container matColumnDef="link">
+      <th mat-header-cell *matHeaderCellDef  > Link </th>
+      <td mat-cell *matCellDef="let element">
+        <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
+      </td>
+    </ng-container>
+  
+    <!-- Payment Status Column -->
+    <ng-container matColumnDef="paymentStatus">
+      <th mat-header-cell *matHeaderCellDef  > Payment Status </th>
+      <td mat-cell *matCellDef="let element"> {{ element.paymentStatus || "N/A" }} </td>
+    </ng-container>
+  
+    <!-- Payment Mode Column -->
+    <ng-container matColumnDef="paymentMode">
+      <th mat-header-cell *matHeaderCellDef  > Payment Mode </th>
+      <td mat-cell *matCellDef="let element"> {{ element.paymentMode || "N/A" }} </td>
+    </ng-container>
+  
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  
