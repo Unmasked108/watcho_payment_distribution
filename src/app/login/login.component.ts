@@ -40,30 +40,21 @@ export class LoginComponent {
       const password = form.value.password;
   
       this.http.post('http://localhost:5000/login', { email, password })
-        .subscribe((response: any) => {
-          const token = response.token;
-          const userId = response.id;
-          const role = response.role;
-  
-          if (userId) {
+      .subscribe(
+        (response: any) => {
+          const { token, id: userId, role } = response;
+
+          if (userId && role) {
+            // Save user data in localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('userId', userId);
-  
-            switch (role) {
-              case 'Admin':
-                this.router.navigate(['/layout']);
-                break;
-              case 'TeamLeader':
-                this.router.navigate(['/TeamsManager']);
-                break;
-              default:
-                this.router.navigate(['/members']);
-                break;
-            }
-          } else {
-            console.error('User ID or role missing in the response');
-          }
-        }, error => {
+            localStorage.setItem('role', role);
+       // Navigate based on role
+       this.redirectUserByRole(role);
+      } else {
+        console.error('User ID or role missing in the response');
+      }
+    },error => {
           console.error('Login error:', error);
         });
     }
@@ -72,18 +63,34 @@ export class LoginComponent {
   onSignup(form: any) {
     if (form.valid) {
       const { name, email, password, confirmPassword } = form.value;
-  
+
       if (password === confirmPassword) {
         this.http.post('http://localhost:5000/register', { name, email, password })
-          .subscribe(() => {
-            this.router.navigate(['/login']); // Redirect to login after successful signup
-          }, error => {
-            console.error('Signup error:', error);
-          });
+          .subscribe(
+            () => {
+              this.router.navigate(['/login']); // Redirect to login after successful signup
+            },
+            (error) => {
+              console.error('Signup error:', error);
+            }
+          );
       } else {
         console.error('Passwords do not match');
       }
     }
   }
-  
+
+  private redirectUserByRole(role: string) {
+    switch (role) {
+      case 'Admin':
+        this.router.navigate(['/layout']); // Admin layout
+        break;
+      case 'TeamLeader':
+        this.router.navigate(['/TeamsManager']); // Team manager page
+        break;
+      default:
+        this.router.navigate(['/members']); // Default for team members
+        break;
+    }
+  }
 }

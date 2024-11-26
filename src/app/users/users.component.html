@@ -99,36 +99,50 @@
 
  
   
-  <!-- Table with Sort and Pagination -->
-  <table mat-table [dataSource]="paginatedData" matSort class="mat-elevation-z8">
-    
+   <mat-table [dataSource]="paginatedData" matSort class="custom-table mat-elevation-z8">
     <!-- Order ID Column -->
     <ng-container matColumnDef="orderId">
-      <th mat-header-cell *matHeaderCellDef > Order ID </th>
-      <td mat-cell *matCellDef="let element"> {{ element.orderId || "N/A" }} </td>
+      <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.orderId || "N/A" }}</mat-cell>
     </ng-container>
   
     <!-- Link Column -->
     <ng-container matColumnDef="link">
-      <th mat-header-cell *matHeaderCellDef  > Link </th>
-      <td mat-cell *matCellDef="let element">
+      <mat-header-cell *matHeaderCellDef>Link</mat-header-cell>
+      <mat-cell *matCellDef="let element">
         <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
-      </td>
+      </mat-cell>
     </ng-container>
   
     <!-- Payment Status Column -->
     <ng-container matColumnDef="paymentStatus">
-      <th mat-header-cell *matHeaderCellDef  > Payment Status </th>
-      <td mat-cell *matCellDef="let element"> {{ element.paymentStatus || "N/A" }} </td>
+      <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.paymentStatus || "N/A" }}</mat-cell>
     </ng-container>
   
     <!-- Payment Mode Column -->
     <ng-container matColumnDef="paymentMode">
-      <th mat-header-cell *matHeaderCellDef  > Payment Mode </th>
-      <td mat-cell *matCellDef="let element"> {{ element.paymentMode || "N/A" }} </td>
+      <mat-header-cell *matHeaderCellDef>Payment Mode</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <mat-select [(value)]="element.paymentMode" (selectionChange)="onPaymentModeChange(element)">
+          <mat-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</mat-option>
+        </mat-select>
+      </mat-cell>
     </ng-container>
   
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+    <!-- Allocation Time Column -->
+    <ng-container matColumnDef="allocationTime">
+      <mat-header-cell *matHeaderCellDef>Allocation Time</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.allocationTime || "N/A" }}</mat-cell>
+    </ng-container>
+  
+    <!-- Endline Time Column -->
+    <ng-container matColumnDef="endlineTime">
+      <mat-header-cell *matHeaderCellDef>Endline Time</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.endlineTime || "N/A" }}</mat-cell>
+    </ng-container>
+  
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
   

@@ -60,51 +60,69 @@
       </div>
     </div>
   </nav>
-  
-    <div class="container mt-4">
-    <!-- Card Component -->
-    <mat-card class="allocation-card">
-      <h3>The leads that are allocated: <span class="lead-count">{{ totalLeads }}</span></h3>
-      <div class="d-flex justify-content-between align-items-center">
-        <span>Allocate the leads to the team members:</span>
-        <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate Leads</button>
-      </div>
-    </mat-card>
-    <!-- </div> -->
+ 
   
     <!-- Material Table -->
-    <div class="mat-table-container my-custom-style">
-        <mat-table [dataSource]="teamMembers" class="mat-elevation-z8 mat-table custom-table">
+    <div class="container mt-4">
+      <!-- Card Component -->
+      <mat-card class="allocation-card">
+        <h3>The leads that are allocated: <span class="lead-count">{{ totalLeads }}</span></h3>
+        <div class="d-flex justify-content-between align-items-center">
+          <span>Allocate the leads to the team members:</span>
+          <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate Leads</button>
+        </div>
+      </mat-card>
+    </div>
+    
+    <div class="table-container mt-4">
+      <!-- Material Table -->
+      <div class="mat-table-container my-custom-style">
+        <mat-table [dataSource]="teamMembers" class="mat-elevation-z8 mat-table custom-table" multiTemplateDataRows>
+          <!-- Select All Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <mat-header-cell *matHeaderCellDef>
+              <mat-checkbox
+                (change)="toggleSelectAll($event)"
+                [checked]="isAllSelected()"
+                [indeterminate]="isIndeterminate()"
+              >
+              </mat-checkbox>
+            </mat-header-cell>
+            <mat-cell *matCellDef="let member">
+              <mat-checkbox [(ngModel)]="member.selected"></mat-checkbox>
+            </mat-cell>
+          </ng-container>
+    
           <!-- Member Name Column -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef> Member Name </th>
-            <td mat-cell *matCellDef="let member"> {{ member.name }} </td>
+            <mat-header-cell *matHeaderCellDef> Member Name </mat-header-cell>
+            <mat-cell *matCellDef="let member"> {{ member.name }} </mat-cell>
           </ng-container>
-      
+    
           <!-- Member ID Column -->
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef> Member ID </th>
-            <td mat-cell *matCellDef="let member"> {{ member.id }} </td>
+            <mat-header-cell *matHeaderCellDef> Member ID </mat-header-cell>
+            <mat-cell *matCellDef="let member"> {{ member.id }} </mat-cell>
           </ng-container>
-      
+    
           <!-- Leads Allocated Column -->
           <ng-container matColumnDef="leads">
-            <th mat-header-cell *matHeaderCellDef> Leads Allocated </th>
-            <td mat-cell *matCellDef="let member">
+            <mat-header-cell *matHeaderCellDef> Leads Allocated </mat-header-cell>
+            <mat-cell *matCellDef="let member">
               <input type="number" [(ngModel)]="member.leads" class="leads-input" />
-            </td>
+            </mat-cell>
           </ng-container>
-      
+    
           <!-- Time of Allocation Column -->
           <ng-container matColumnDef="time">
-            <th mat-header-cell *matHeaderCellDef> Time of Allocation </th>
-            <td mat-cell *matCellDef="let member"> {{ member.time }} </td>
+            <mat-header-cell *matHeaderCellDef> Time of Allocation </mat-header-cell>
+            <mat-cell *matCellDef="let member"> {{ member.time }} </mat-cell>
           </ng-container>
-      
+    
           <!-- Completion Status Column -->
           <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef> Completion Status </th>
-            <td mat-cell *matCellDef="let member">
+            <mat-header-cell *matHeaderCellDef> Completion Status </mat-header-cell>
+            <mat-cell *matCellDef="let member">
               <span
                 class="status-chip"
                 [class.completed]="member.status === 'Completed'"
@@ -112,19 +130,52 @@
               >
                 {{ member.status }}
               </span>
-            </td>
+            </mat-cell>
           </ng-container>
-      
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
+          <!-- Edit Column -->
+          <ng-container matColumnDef="edit">
+            <mat-header-cell *matHeaderCellDef> Edit </mat-header-cell>
+            <mat-cell *matCellDef="let member">
+              <button mat-icon-button color="primary" (click)="openEditCard(member)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-cell>
+          </ng-container>
+    
+          <!-- Header and Row Definitions -->
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
         </mat-table>
       </div>
-      
-      
-  
-    <!-- Save Button -->
-    <div class="save-btn-container mt-4">
-      <button mat-raised-button color="primary" (click)="saveData()">Save</button>
+    
+      <!-- Save Button -->
+      <div class="save-btn-container mt-4">
+        <button mat-raised-button color="primary" (click)="saveData()">Save</button>
+      </div>
+    
+      <!-- Edit Modal -->
+      <div *ngIf="isEditing" class="overlay">
+        <mat-card class="edit-card">
+          <h2>Edit Member Details</h2>
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="editingMember.name" />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>ID</mat-label>
+            <input matInput [(ngModel)]="editingMember.id" />
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Leads</mat-label>
+            <input matInput type="number" [(ngModel)]="editingMember.leads" />
+          </mat-form-field>
+          <div class="edit-card-actions">
+            <button mat-raised-button color="primary" (click)="saveEditedMember()">Save</button>
+            <button mat-raised-button color="warn" (click)="deleteMember()">Delete</button>
+            <button mat-raised-button (click)="closeEditCard()">Cancel</button>
+          </div>
+        </mat-card>
+      </div>
     </div>
-  </div>
-  
+    

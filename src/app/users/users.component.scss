@@ -109,4 +109,37 @@
     }
   }
   
+  .custom-table {
+    margin-top: 20px;
+    width: 90%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  
+    mat-header-cell {
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      padding: 8px; /* Reduced padding for compactness */
+      text-align: left;
+      font-size: 14px; /* Smaller font size */
+      border-bottom: 2px solid #e1e1e1;
+    }
+  
+    mat-cell {
+      padding: 8px; /* Reduced padding */
+      text-align: left;
+      font-size: 14px; /* Smaller font size */
+      border-bottom: 1px solid #e1e1e1;
+    }
+  
+    mat-row:nth-child(even) {
+      background-color: #f1f9fc;
+    }
+  
+    mat-row:hover {
+      background-color: #e0f7fa;
+    }
+  }
   

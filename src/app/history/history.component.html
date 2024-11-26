@@ -1,0 +1,55 @@
+<mat-card class="history-card">
+    <h2 class="card-heading">See History of Particular Date</h2>
+    <div class="form-container">
+      <mat-form-field class="example-full-width">
+        <mat-label>Choose a date</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
+        <mat-hint>MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker">
+          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+        </mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()">Search</button>
+    </div>
+  </mat-card>
+  
+  <div class="table-header">
+    <h2 class="table-heading">Leads Table - {{ selectedDate | date: 'MM/dd/yyyy' }}</h2>
+  </div>
+  
+  <mat-table [dataSource]="filteredData" class="custom-table">
+    <!-- Assigned Teams Column -->
+    <ng-container matColumnDef="assignedTeams">
+      <mat-header-cell *matHeaderCellDef>Assigned Teams</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.assignedTeams }}</mat-cell>
+    </ng-container>
+  
+    <!-- Allocated Date Column -->
+    <ng-container matColumnDef="allocatedDate">
+      <mat-header-cell *matHeaderCellDef>Allocated Date</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.allocatedDate | date: 'MM/dd/yyyy' }}</mat-cell>
+    </ng-container>
+  
+    <!-- Completion Date Column -->
+    <ng-container matColumnDef="completionDate">
+      <mat-header-cell *matHeaderCellDef>Completion Date</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.completionDate | date: 'MM/dd/yyyy' }}</mat-cell>
+    </ng-container>
+  
+    <!-- Order ID Column -->
+    <ng-container matColumnDef="orderId">
+      <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
+    </ng-container>
+  
+    <!-- Completion Status Column -->
+    <ng-container matColumnDef="completionStatus">
+      <mat-header-cell *matHeaderCellDef>Completion Status</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.completionStatus }}</mat-cell>
+    </ng-container>
+  
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+  

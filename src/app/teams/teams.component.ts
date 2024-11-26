@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LayoutComponent } from '../layout/layout.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +8,19 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+interface Team {
+  _id?: string; // MongoDB's unique identifier (optional during creation)
+  teamId: string;
+  teamName: string;
+  teamLeader: string;
+  capacity: number;
+  numMembers: number;
+  membersList: string[]; // Updated property name
+}
 
 @Component({
   selector: 'app-teams',
@@ -20,116 +33,243 @@ import { CommonModule } from '@angular/common';
     MatRadioModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     FormsModule,
     CommonModule,
+    MatSnackBarModule,
   ],
   templateUrl: './teams.component.html',
-  styleUrls: ['./teams.component.scss'], // Fixed typo from 'styleUrl' to 'styleUrls'
+  styleUrls: ['./teams.component.scss'],
 })
-export class TeamsComponent {
+export class TeamsComponent implements OnInit {
   selectedOption: string = 'manage';
-
-  // Define columns, now including numMembers and members actions
   displayedColumns: string[] = ['teamName', 'teamId', 'capacity', 'numMembers', 'members', 'actions'];
-
-  // Sample data with additional entries and the numMembers field
-  teams = [
-    { teamId: '001', teamName: 'Alpha', capacity: 10, numMembers: 8, members: ['John', 'Doe', 'Smith', 'Alice', 'Eve', 'Bob', 'Charlie', 'David'] },
-    { teamId: '002', teamName: 'Beta', capacity: 15, numMembers: 12, members: ['Frank', 'Grace', 'Helen', 'Ivy', 'Jack', 'Kim', 'Laura', 'Mike', 'Nina', 'Oscar', 'Paul', 'Quinn'] },
-    { teamId: '003', teamName: 'Gamma', capacity: 20, numMembers: 18, members: ['Sam', 'Tom', 'Uma', 'Victor', 'Will', 'Xena', 'Yara', 'Zane', 'Adam', 'Bella', 'Cody', 'Diana', 'Eric', 'Fiona', 'George', 'Holly', 'Ian', 'Julia'] },
-    { teamId: '004', teamName: 'Delta', capacity: 25, numMembers: 22, members: ['Luke', 'Mia', 'Nick', 'Olive', 'Peter', 'Queen', 'Rick', 'Sophia', 'Tim', 'Ursula', 'Vince', 'Walter', 'Xavier', 'Yvonne', 'Zara', 'Amy', 'Ben', 'Chris', 'Dana', 'Elliot', 'Faith', 'Greg'] },
-    { teamId: '005', teamName: 'Epsilon', capacity: 30, numMembers: 28, members: ['Harry', 'Isabel', 'Jake', 'Kelly', 'Liam', 'Mason', 'Noah', 'Olivia', 'Peyton', 'Quincy', 'Ryan', 'Sarah', 'Tyler', 'Uma', 'Victor', 'Willow', 'Xander', 'Yasmine', 'Zane', 'Ashley', 'Brian', 'Cathy', 'Dylan', 'Eva', 'Felix', 'Grace', 'Hannah', 'Ian'] },
-  ];
-
-  // Form for adding new teams
-  teamForm = {
+  teams: Team[] = [];
+  teamForm: Team = {
+    teamId: '',
     teamName: '',
     teamLeader: '',
-    members: 0,
     capacity: 0,
+    numMembers: 0,
+    membersList: [],
   };
+  editingTeam: Team | null = null;
+  selectedTeam: Team | null = null;
 
-  // Track the team being edited
-  editingTeam: any = null;
+  private apiUrl = 'http://localhost:5000/api/teams';
 
-  // Track the selected team for managing members
-  selectedTeam: any = null;
+  constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
 
-  // Generate a new team and add to the list
-  onGenerateTeam() {
-    const newTeam = {
-      ...this.teamForm,
-      teamId: (this.teams.length + 1).toString().padStart(3, '0'),
-      numMembers: this.teamForm.members,
-      members: [],
-    };
-    this.teams.push(newTeam);
-    this.teamForm = { teamName: '', teamLeader: '', members: 0, capacity: 0 };
+  ngOnInit(): void {
+    this.loadTeams();
   }
 
-  // Edit a team
-  editTeam(team: any) {
+  loadTeams(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+    console.log(headers)
+
+    const role = localStorage.getItem('role');
+    const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
+
+    this.http.get<Team[]>(url, { headers }).subscribe(
+      (data) => (this.teams = data),
+      (error) => this.showErrorMessage('Error loading teams')
+    );
+  }
+
+  addMemberToForm(): void {
+    this.teamForm.membersList.push('');
+  }
+
+  removeMember(index: number): void {
+    this.teamForm.membersList.splice(index, 1);
+  }
+
+  onGenerateTeam(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+    
+    if (
+      !this.teamForm.teamId ||
+      !this.teamForm.teamName ||
+      !this.teamForm.teamLeader ||
+      !this.teamForm.capacity ||
+      this.teamForm.membersList.length === 0
+    ) {
+      this.showErrorMessage('All fields are required');
+      return;
+    }
+
+    const newTeam = { ...this.teamForm, numMembers: this.teamForm.membersList.length };
+
+    this.http.post(this.apiUrl, newTeam,{headers}).subscribe(
+      (response: any) => {
+        this.teams.push(response.team);
+        this.showSuccessMessage('Team created successfully!');
+        this.resetTeamForm();
+      },
+      () => this.showErrorMessage('Error creating team!')
+    );
+  }
+
+  resetTeamForm(): void {
+    this.teamForm = { teamId: '', teamName: '', teamLeader: '', membersList: [], capacity: 0, numMembers: 0 };
+  }
+
+  editTeam(team: Team): void {
     this.editingTeam = { ...team };
   }
-
-  // Save changes to the edited team
-  saveTeam() {
-    const index = this.teams.findIndex((team) => team.teamId === this.editingTeam.teamId);
-    if (index !== -1) {
-      this.teams[index] = { ...this.editingTeam };
-    }
-    this.editingTeam = null;
+  showMembers(membersList: string[]): void {
+    this.selectedTeam = { membersList } as Team;
+    document.body.classList.add('modal-open');
   }
-
-  // Delete a team by its ID
-  deleteTeam(teamId: string) {
-    this.teams = this.teams.filter((team) => team.teamId !== teamId);
-    this.editingTeam = null;
-  }
-
-  // Show members of a team
-  showMembers(team: any) {
-    this.selectedTeam = team;
-    document.body.classList.add('modal-open'); // Dim background effect
-  }
-
-  // Close the members card
-  closeMembersCard() {
+  
+  closeMembersCard(): void {
     this.selectedTeam = null;
-    document.body.classList.remove('modal-open'); // Remove dim background effect
+    document.body.classList.remove('modal-open');
+  }
+  
+  saveTeam(): void {
+    if (this.editingTeam) {
+      const updatedTeam = { ...this.editingTeam, numMembers: this.editingTeam.membersList.length };
+
+      this.http.put(`${this.apiUrl}/${this.editingTeam._id}`, updatedTeam).subscribe(
+        () => {
+          const index = this.teams.findIndex((team) => team._id === this.editingTeam?._id);
+          if (index !== -1) this.teams[index] = { ...updatedTeam };
+          this.editingTeam = null;
+          this.showSuccessMessage('Team updated successfully!');
+        },
+        () => this.showErrorMessage('Error saving team!')
+      );
+    }
   }
 
-  // Add a new member to the selected team
-  addMember() {
+  deleteTeam(teamId: string): void {
+    if (confirm('Are you sure you want to delete this team?')) {
+      this.http.delete(`${this.apiUrl}/${teamId}`).subscribe(
+        () => {
+          this.teams = this.teams.filter((team) => team.teamId !== teamId);
+          this.showSuccessMessage('Team deleted successfully!');
+        },
+        () => this.showErrorMessage('Error deleting team!')
+      );
+    }
+  }
+
+  showSuccessMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar'],
+    });
+  }
+
+  showErrorMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar'],
+    });
+  }
+
+
+  isAdmin(): boolean {
+    return localStorage.getItem('role') === 'Admin';
+  }
+
+  isTeamLeader(): boolean {
+    return localStorage.getItem('role') === 'TeamLeader';
+  }
+
+  addMember(): void {
     if (this.selectedTeam) {
       const newMember = prompt('Enter new member name:');
       if (newMember) {
-        this.selectedTeam.members.push(newMember);
+        this.selectedTeam.membersList.push(newMember);
         this.selectedTeam.numMembers++;
+
+    
+        this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
+          () => {
+            this.snackBar.open('Member added successfully!', 'Close', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+            });
+          },
+          (error) => {
+            console.error('Error adding member:', error);
+            this.snackBar.open('Error adding member!', 'Close', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+            });
+          }
+        );
       }
     }
   }
 
-  // Edit a specific member
-  editMember(index: number) {
+  editMember(index: number): void {
     if (this.selectedTeam) {
-      const updatedName = prompt('Edit member name:', this.selectedTeam.members[index]);
+      const updatedName = prompt('Edit member name:', this.selectedTeam.membersList[index]);
       if (updatedName) {
-        this.selectedTeam.members[index] = updatedName;
+        this.selectedTeam.membersList[index] = updatedName;
+        this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
+          () => {
+            this.snackBar.open('Member updated successfully!', 'Close', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+            });
+          },
+          (error) => {
+            console.error('Error updating member:', error);
+            this.snackBar.open('Error updating member!', 'Close', {
+              duration: 3000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+            });
+          }
+        );
       }
     }
   }
 
-  // Delete a specific member
-  deleteMember(index: number) {
+  deleteMember(index: number): void {
     if (this.selectedTeam && confirm('Are you sure you want to delete this member?')) {
-      this.selectedTeam.members.splice(index, 1);
+      this.selectedTeam.membersList.splice(index, 1);
       this.selectedTeam.numMembers--;
+      this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
+        () => {
+          this.snackBar.open('Member deleted successfully!', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+          });
+        },
+        (error) => {
+          console.error('Error deleting member:', error);
+          this.snackBar.open('Error deleting member!', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+          });
+        }
+      );
     }
   }
 
-  // Handle animation end for modal effects
+
+
   onAnimationEnd() {
     document.body.classList.add('modal-open');
   }
 }
+  

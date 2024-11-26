@@ -40,7 +40,11 @@
   .container {
     max-width: 1200px;
     margin: 0 auto;
-    // margin-top: 200px;
+  }
+  
+  .table-container {
+    max-width: 1200px;
+    margin: 0 auto;
   }
   
   .allocation-card {
@@ -58,16 +62,16 @@
   }
   
   .custom-table {
-    margin-top: 50px;
+    margin-top: 20px;
     width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
-    
+  
     mat-header-cell {
       font-weight: bold;
-      background-color: #007bff; /* Blue background for header */
+      background-color: #007bff;
       color: white;
       padding: 12px;
       text-align: left;
@@ -81,38 +85,59 @@
     }
   
     mat-row:nth-child(even) {
-      background-color: #f1f9fc; /* Light blue for even rows */
+      background-color: #f1f9fc;
     }
   
     mat-row:hover {
-      background-color: #e0f7fa; /* Lighter blue on hover */
-    }
-   
-    .status-chip {
-      padding: 4px 8px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: bold;
-      color: white;
-      display: inline-block;
-    }
-  
-    .status-chip.completed {
-      background-color: #4caf50; /* Green for completed */
-    }
-  
-    .status-chip.pending {
-      background-color: #f44336; /* Red for pending */
+      background-color: #e0f7fa;
     }
   }
   
+  .leads-input {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
   
-  .save-btn-container {
+  .status-chip {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+  
+    &.completed {
+      background-color: #28a745;
+    }
+  
+    &.pending {
+      background-color: #ffc107;
+    }
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); // Semi-transparent background
     display: flex;
-    justify-content: flex-end;
-  
-    button {
-      font-size: 1rem;
-      padding: 0.5rem 1.5rem;
-    }
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
   }
+  
+  .edit-card {
+    width: 400px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .edit-card-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  

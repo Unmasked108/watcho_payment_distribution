@@ -1,0 +1,88 @@
+.history-card {
+    padding: 16px;
+    margin-top: 50px;  // Added margin from top
+    background-color: #ffffff; 
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    color: #000;
+    border: 1px solid #e1e1e1;
+    max-width: 50%;
+display: flex;
+margin: 50px auto;
+  
+    .card-heading {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+    //   color: #007bff; // Blue color for card heading
+      margin-bottom: 20px;
+    }
+  
+    .form-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-left: 290px;
+  
+      mat-form-field {
+        width: 40%;
+        background-color: #f1f9fc;
+        border-radius: 8px;
+      }
+  
+      .search-btn {
+        background-color: #007bff;
+        color: white;
+        border-radius: 25px;
+        padding: 8px 16px;
+        &:hover {
+          background-color: #0056b3;
+        }
+      }
+    }
+  }
+  
+  .table-header {
+    margin-top: 20px;  // Adds distance between card and table
+    text-align: center;
+  }
+  
+  .table-heading {
+    font-size: 1.25rem;
+    font-weight: bold;
+    // color: #007bff; // Blue color for table heading
+    margin-bottom: 20px;
+  }
+  
+  .custom-table {
+    margin-top: 30px;
+    width: 80%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  
+    mat-header-cell {
+      font-weight: bold;
+      background-color: #007bff; /* Blue background for header */
+      color: white;
+      padding: 12px;
+      text-align: left;
+      border-bottom: 2px solid #e1e1e1;
+    }
+  
+    mat-cell {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e1e1e1;
+    }
+  
+    mat-row:nth-child(even) {
+      background-color: #f1f9fc; /* Light blue for even rows */
+    }
+  
+    mat-row:hover {
+      background-color: #e0f7fa; /* Lighter blue on hover */
+    }
+  }
+  
