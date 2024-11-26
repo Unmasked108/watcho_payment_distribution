@@ -4,13 +4,13 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
-import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormsModule, FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
 
 interface Team {
   _id?: string; // MongoDB's unique identifier (optional during creation)
@@ -37,6 +37,7 @@ interface Team {
     FormsModule,
     CommonModule,
     MatSnackBarModule,
+    ReactiveFormsModule
   ],
   templateUrl: './teams.component.html',
   styleUrls: ['./teams.component.scss'],
@@ -45,25 +46,30 @@ export class TeamsComponent implements OnInit {
   selectedOption: string = 'manage';
   displayedColumns: string[] = ['teamName', 'teamId', 'capacity', 'numMembers', 'members', 'actions'];
   teams: Team[] = [];
-  teamForm: Team = {
-    teamId: '',
-    teamName: '',
-    teamLeader: '',
-    capacity: 0,
-    numMembers: 0,
-    membersList: [],
-  };
+  teamForm: FormGroup; // Using FormGroup for team form
   editingTeam: Team | null = null;
   selectedTeam: Team | null = null;
 
   private apiUrl = 'http://localhost:5000/api/teams';
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private snackBar: MatSnackBar
+  ) {
+    // Initialize teamForm using FormBuilder
+    this.teamForm = this.fb.group({
+      teamId: ['', Validators.required],
+      teamName: ['', Validators.required],
+      teamLeader: ['', Validators.required],
+      capacity: [0, [Validators.required, Validators.min(1)]],
+      membersList: this.fb.array([]), // FormArray for members
+    });
+  }
 
   ngOnInit(): void {
     this.loadTeams();
   }
-
   loadTeams(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -78,13 +84,15 @@ export class TeamsComponent implements OnInit {
       (error) => this.showErrorMessage('Error loading teams')
     );
   }
-
+  get membersList(): FormArray {
+    return this.teamForm.get('membersList') as FormArray;
+  }
   addMemberToForm(): void {
-    this.teamForm.membersList.push('');
+    this.membersList.push(this.fb.control('', Validators.required));
   }
 
   removeMember(index: number): void {
-    this.teamForm.membersList.splice(index, 1);
+    this.membersList.removeAt(index);
   }
 
   onGenerateTeam(): void {
@@ -92,19 +100,15 @@ export class TeamsComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
     
-    if (
-      !this.teamForm.teamId ||
-      !this.teamForm.teamName ||
-      !this.teamForm.teamLeader ||
-      !this.teamForm.capacity ||
-      this.teamForm.membersList.length === 0
-    ) {
+    if (this.teamForm.invalid) {
       this.showErrorMessage('All fields are required');
       return;
     }
 
-    const newTeam = { ...this.teamForm, numMembers: this.teamForm.membersList.length };
-
+    const newTeam = {
+      ...this.teamForm.value,
+      numMembers: this.membersList.length,
+    };
     this.http.post(this.apiUrl, newTeam,{headers}).subscribe(
       (response: any) => {
         this.teams.push(response.team);
@@ -116,7 +120,16 @@ export class TeamsComponent implements OnInit {
   }
 
   resetTeamForm(): void {
-    this.teamForm = { teamId: '', teamName: '', teamLeader: '', membersList: [], capacity: 0, numMembers: 0 };
+    this.teamForm.reset({
+      teamId: '',
+      teamName: '',
+      teamLeader: '',
+      capacity: 0,
+      membersList: [],
+    });
+    while (this.membersList.length) {
+      this.membersList.removeAt(0);
+    }
   }
 
   editTeam(team: Team): void {

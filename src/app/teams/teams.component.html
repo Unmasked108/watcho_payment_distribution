@@ -11,66 +11,56 @@
   </mat-card>
 
   <!-- Generate Team Form -->
-  <form *ngIf="selectedOption === 'generate'" (ngSubmit)="onGenerateTeam()">
+  <form *ngIf="selectedOption === 'generate'" [formGroup]="teamForm" (ngSubmit)="onGenerateTeam()">
     <mat-card class="form-card">
       <mat-form-field class="form-field" appearance="outline">
         <mat-label>Team ID</mat-label>
-        <input matInput [(ngModel)]="teamForm.teamId" name="teamId" required />
+        <input matInput formControlName="teamId" required />
       </mat-form-field>
-
+  
       <mat-form-field class="form-field" appearance="outline">
         <mat-label>Team Name</mat-label>
-        <input matInput [(ngModel)]="teamForm.teamName" name="teamName" required />
+        <input matInput formControlName="teamName" required />
       </mat-form-field>
-
+  
       <mat-form-field class="form-field" appearance="outline">
         <mat-label>Team Leader</mat-label>
-        <input matInput [(ngModel)]="teamForm.teamLeader" name="teamLeader" required />
+        <input matInput formControlName="teamLeader" required />
       </mat-form-field>
-
+  
       <mat-form-field class="form-field" appearance="outline">
         <mat-label>Capacity of Team</mat-label>
-        <input matInput type="number" [(ngModel)]="teamForm.capacity" name="capacity" required />
+        <input matInput type="number" formControlName="capacity" required />
       </mat-form-field>
-
+  
       <mat-form-field class="form-field" appearance="outline">
         <mat-label>Number of Members</mat-label>
-        <input matInput type="number" [(ngModel)]="teamForm.numMembers" name="numMembers" required />
+        <input matInput type="number" [value]="membersList.length" readonly />
       </mat-form-field>
-
-      <div>
-        <label>Members:</label>
-        <div class="member-input-container">
-          <div *ngFor="let member of teamForm.membersList; let i = index" class="member-input">
-            <mat-form-field class="form-field" appearance="outline">
-              <input
-                matInput
-                [(ngModel)]="teamForm.membersList[i]"
-                [ngModelOptions]="{standalone: true}"
-                placeholder="Enter Member Name"
-                required
-              />
-            </mat-form-field>
-            <button
-              mat-raised-button
-              color="warn"
-              class="delete-member-button"
-              (click)="removeMember(i)"
-              type="button"
-            >
-              Remove
-            </button>
-          </div>
-          <button mat-raised-button color="primary" (click)="addMemberToForm()" type="button">
-            Add Member
-          </button>
-          
-        </div>
+  
+      <label>Members:</label>
+      <div *ngFor="let member of membersList.controls; let i = index" class="member-input">
+        <mat-form-field class="form-field" appearance="outline">
+          <input matInput [formControlName]="i" placeholder="Enter Member Name" required />
+        </mat-form-field>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="removeMember(i)"
+          type="button"
+        >
+          Remove
+        </button>
       </div>
-
+  
+      <button mat-raised-button color="primary" (click)="addMemberToForm()" type="button">
+        Add Member
+      </button>
+  
       <button mat-raised-button color="accent" type="submit">Create Team</button>
     </mat-card>
   </form>
+  
 
   <!-- Manage Team Table -->
   <div *ngIf="selectedOption === 'manage'">
