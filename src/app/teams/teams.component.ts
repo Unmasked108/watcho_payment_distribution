@@ -63,8 +63,9 @@ export class TeamsComponent implements OnInit {
       teamName: ['', Validators.required],
       teamLeader: ['', Validators.required],
       capacity: [0, [Validators.required, Validators.min(1)]],
-      membersList: this.fb.array([]), // FormArray for members
+      membersList: this.fb.array([]), // Proper initialization
     });
+    
   }
 
   ngOnInit(): void {
@@ -90,26 +91,30 @@ export class TeamsComponent implements OnInit {
   addMemberToForm(): void {
     this.membersList.push(this.fb.control('', Validators.required));
   }
-
+  
+  
   removeMember(index: number): void {
     this.membersList.removeAt(index);
+    this.teamForm.patchValue({ numMembers: this.membersList.length });
   }
+  
 
   onGenerateTeam(): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-    
     if (this.teamForm.invalid) {
       this.showErrorMessage('All fields are required');
       return;
     }
-
+  
     const newTeam = {
       ...this.teamForm.value,
-      numMembers: this.membersList.length,
+      numMembers: this.membersList.length, // Ensure numMembers is set
     };
-    this.http.post(this.apiUrl, newTeam,{headers}).subscribe(
+  
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    this.http.post(this.apiUrl, newTeam, { headers }).subscribe(
       (response: any) => {
         this.teams.push(response.team);
         this.showSuccessMessage('Team created successfully!');
@@ -118,6 +123,7 @@ export class TeamsComponent implements OnInit {
       () => this.showErrorMessage('Error creating team!')
     );
   }
+  
 
   resetTeamForm(): void {
     this.teamForm.reset({
@@ -146,10 +152,16 @@ export class TeamsComponent implements OnInit {
   }
   
   saveTeam(): void {
-    if (this.editingTeam) {
-      const updatedTeam = { ...this.editingTeam, numMembers: this.editingTeam.membersList.length };
-
-      this.http.put(`${this.apiUrl}/${this.editingTeam._id}`, updatedTeam).subscribe(
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+    if (this.editingTeam && this.editingTeam._id) {
+      const updatedTeam = {
+        ...this.editingTeam,
+        numMembers: this.editingTeam.membersList.length,
+      };
+  
+      this.http.put(`${this.apiUrl}/${this.editingTeam._id}`, updatedTeam,{headers}).subscribe(
         () => {
           const index = this.teams.findIndex((team) => team._id === this.editingTeam?._id);
           if (index !== -1) this.teams[index] = { ...updatedTeam };
@@ -158,20 +170,28 @@ export class TeamsComponent implements OnInit {
         },
         () => this.showErrorMessage('Error saving team!')
       );
+    } else {
+      this.showErrorMessage('No team selected for saving.');
     }
   }
+  
 
   deleteTeam(teamId: string): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
     if (confirm('Are you sure you want to delete this team?')) {
-      this.http.delete(`${this.apiUrl}/${teamId}`).subscribe(
+      console.log(teamId)
+      this.http.delete(`${this.apiUrl}/${teamId}`,{headers}).subscribe(
         () => {
-          this.teams = this.teams.filter((team) => team.teamId !== teamId);
+          this.teams = this.teams.filter((team) => team.teamId !== teamId); // Ensure consistency here
           this.showSuccessMessage('Team deleted successfully!');
         },
         () => this.showErrorMessage('Error deleting team!')
       );
     }
   }
+  
 
   showSuccessMessage(message: string): void {
     this.snackBar.open(message, 'Close', {

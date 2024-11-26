@@ -39,19 +39,13 @@
       </mat-form-field>
   
       <label>Members:</label>
-      <div *ngFor="let member of membersList.controls; let i = index" class="member-input">
+      <div formArrayName="membersList" *ngFor="let member of membersList.controls; let i = index" class="member-input">
         <mat-form-field class="form-field" appearance="outline">
           <input matInput [formControlName]="i" placeholder="Enter Member Name" required />
         </mat-form-field>
-        <button
-          mat-raised-button
-          color="warn"
-          (click)="removeMember(i)"
-          type="button"
-        >
-          Remove
-        </button>
+        <button mat-raised-button color="warn" (click)="removeMember(i)" type="button">Remove</button>
       </div>
+      
   
       <button mat-raised-button color="primary" (click)="addMemberToForm()" type="button">
         Add Member
