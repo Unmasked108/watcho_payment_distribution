@@ -16,10 +16,10 @@ interface Team {
   _id?: string; // MongoDB's unique identifier (optional during creation)
   teamId: string;
   teamName: string;
-  teamLeader: string;
+  teamLeaderEmail: string; // Updated to email
   capacity: number;
   numMembers: number;
-  membersList: string[]; // Updated property name
+  membersList: string[]; // Updated to email array
 }
 
 @Component({
@@ -37,7 +37,7 @@ interface Team {
     FormsModule,
     CommonModule,
     MatSnackBarModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './teams.component.html',
   styleUrls: ['./teams.component.scss'],
@@ -46,7 +46,7 @@ export class TeamsComponent implements OnInit {
   selectedOption: string = 'manage';
   displayedColumns: string[] = ['teamName', 'teamId', 'capacity', 'numMembers', 'members', 'actions'];
   teams: Team[] = [];
-  teamForm: FormGroup; // Using FormGroup for team form
+  teamForm: FormGroup;
   editingTeam: Team | null = null;
   selectedTeam: Team | null = null;
 
@@ -57,25 +57,23 @@ export class TeamsComponent implements OnInit {
     private http: HttpClient,
     private snackBar: MatSnackBar
   ) {
-    // Initialize teamForm using FormBuilder
     this.teamForm = this.fb.group({
       teamId: ['', Validators.required],
       teamName: ['', Validators.required],
-      teamLeader: ['', Validators.required],
+      teamLeaderEmail: ['', [Validators.required, Validators.email]],
       capacity: [0, [Validators.required, Validators.min(1)]],
-      membersList: this.fb.array([]), // Proper initialization
+      membersList: this.fb.array([]),
     });
-    
   }
 
   ngOnInit(): void {
     this.loadTeams();
   }
+
   loadTeams(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-    console.log(headers)
 
     const role = localStorage.getItem('role');
     const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
@@ -85,51 +83,55 @@ export class TeamsComponent implements OnInit {
       (error) => this.showErrorMessage('Error loading teams')
     );
   }
+
   get membersList(): FormArray {
     return this.teamForm.get('membersList') as FormArray;
   }
+
   addMemberToForm(): void {
-    this.membersList.push(this.fb.control('', Validators.required));
+    this.membersList.push(this.fb.control('', [Validators.required, Validators.email]));
   }
-  
-  
+
   removeMember(index: number): void {
     this.membersList.removeAt(index);
-    this.teamForm.patchValue({ numMembers: this.membersList.length });
   }
-  
 
   onGenerateTeam(): void {
     if (this.teamForm.invalid) {
       this.showErrorMessage('All fields are required');
       return;
     }
-  
+
     const newTeam = {
       ...this.teamForm.value,
-      numMembers: this.membersList.length, // Ensure numMembers is set
+      memberEmails: this.membersList.value, // Rename membersList to memberEmails
+      numMembers: this.membersList.length, // Optional, backend overwrites
     };
-  
+
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-  
+
     this.http.post(this.apiUrl, newTeam, { headers }).subscribe(
+      
       (response: any) => {
+        console.log('Response from Server:', response); // Debugging: Log the server response
+
         this.teams.push(response.team);
         this.showSuccessMessage('Team created successfully!');
         this.resetTeamForm();
+
       },
+      
       () => this.showErrorMessage('Error creating team!')
     );
   }
-  
 
   resetTeamForm(): void {
     this.teamForm.reset({
       teamId: '',
       teamName: '',
-      teamLeader: '',
+      teamLeaderEmail: '',
       capacity: 0,
       membersList: [],
     });
@@ -137,7 +139,6 @@ export class TeamsComponent implements OnInit {
       this.membersList.removeAt(0);
     }
   }
-
   editTeam(team: Team): void {
     this.editingTeam = { ...team };
   }

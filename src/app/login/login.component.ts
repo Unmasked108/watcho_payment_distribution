@@ -89,7 +89,7 @@ export class LoginComponent {
         this.router.navigate(['/TeamsManager']); // Team manager page
         break;
       default:
-        this.router.navigate(['/members']); // Default for team members
+        this.router.navigate(['/users']); // Default for team members
         break;
     }
   }
