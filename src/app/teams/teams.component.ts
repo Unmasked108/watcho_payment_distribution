@@ -19,7 +19,7 @@ interface Team {
   teamLeaderEmail: string; // Updated to email
   capacity: number;
   numMembers: number;
-  membersList: string[]; // Updated to email array
+  membersList: { userId: string; name: string }[]; // Updated to array of objects
 }
 
 @Component({
@@ -142,8 +142,8 @@ export class TeamsComponent implements OnInit {
   editTeam(team: Team): void {
     this.editingTeam = { ...team };
   }
-  showMembers(membersList: string[]): void {
-    this.selectedTeam = { membersList } as Team;
+  showMembers(membersList: { userId: string; name: string }[]): void {
+    this.selectedTeam = { ...this.selectedTeam, membersList } as Team;
     document.body.classList.add('modal-open');
   }
   
@@ -223,12 +223,14 @@ export class TeamsComponent implements OnInit {
 
   addMember(): void {
     if (this.selectedTeam) {
-      const newMember = prompt('Enter new member name:');
-      if (newMember) {
+      const memberName = prompt('Enter new member name:');
+      const memberEmail = prompt('Enter new member email:'); // Or userId if preferred
+  
+      if (memberName && memberEmail) {
+        const newMember = { name: memberName, userId: memberEmail }; // Update structure
         this.selectedTeam.membersList.push(newMember);
         this.selectedTeam.numMembers++;
-
-    
+  
         this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
           () => {
             this.snackBar.open('Member added successfully!', 'Close', {
@@ -249,12 +251,17 @@ export class TeamsComponent implements OnInit {
       }
     }
   }
+  
 
   editMember(index: number): void {
     if (this.selectedTeam) {
-      const updatedName = prompt('Edit member name:', this.selectedTeam.membersList[index]);
-      if (updatedName) {
-        this.selectedTeam.membersList[index] = updatedName;
+      const member = this.selectedTeam.membersList[index];
+      const updatedName = prompt('Edit member name:', member.name);
+      const updatedEmail = prompt('Edit member email:', member.userId);
+  
+      if (updatedName && updatedEmail) {
+        this.selectedTeam.membersList[index] = { name: updatedName, userId: updatedEmail };
+  
         this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
           () => {
             this.snackBar.open('Member updated successfully!', 'Close', {
@@ -275,11 +282,13 @@ export class TeamsComponent implements OnInit {
       }
     }
   }
+  
 
   deleteMember(index: number): void {
     if (this.selectedTeam && confirm('Are you sure you want to delete this member?')) {
       this.selectedTeam.membersList.splice(index, 1);
       this.selectedTeam.numMembers--;
+  
       this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
         () => {
           this.snackBar.open('Member deleted successfully!', 'Close', {
@@ -299,7 +308,7 @@ export class TeamsComponent implements OnInit {
       );
     }
   }
-
+  
 
 
   onAnimationEnd() {

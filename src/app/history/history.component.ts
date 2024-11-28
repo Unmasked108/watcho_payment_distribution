@@ -7,6 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule,HttpHeaders} from '@angular/common/http';
+import moment from 'moment';
 
 @Component({
   selector: 'app-history',
@@ -19,7 +21,8 @@ import { CommonModule } from '@angular/common';
     MatInputModule,
     MatTableModule,
     FormsModule,
-    CommonModule
+    CommonModule,
+    HttpClientModule
   ],
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss'],
@@ -34,38 +37,36 @@ export class HistoryComponent {
     'orderId',
     'completionStatus',
   ];
+  data: any[] = [];
+  filteredData: any[] = [];
 
-  data = [
-    {
-      assignedTeams: 'Team A',
-      allocatedDate: new Date('2024-11-23'),
-      completionDate: new Date('2024-11-24'),
-      orderId: 'ORD12345',
-      completionStatus: 'Completed',
-    },
-    {
-      assignedTeams: 'Team B',
-      allocatedDate: new Date('2024-11-24'),
-      completionDate: new Date('2024-11-25'),
-      orderId: 'ORD67890',
-      completionStatus: 'Pending',
-    },
-    {
-      assignedTeams: 'Team C',
-      allocatedDate: new Date('2024-11-24'),
-      completionDate: new Date('2024-11-27'),
-      orderId: 'ORD11112',
-      completionStatus: 'In Progress',
-    },
-  ];
+  // Replace with your actual API endpoint
+  private readonly apiUrl = 'http://localhost:5000/api/history-data';
 
-  filteredData = [...this.data]; // Initialize with all data
+  constructor(private http: HttpClient) {}
 
+  ngOnInit(): void {
+    this.loadHistoryData(); // Load data for the default date
+  }
+
+  loadHistoryData(): void {
+    const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD'); // Format date for API
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`, // Add the token for authorization
+    });
+  
+    this.http.get<any[]>(`${this.apiUrl}?date=${formattedDate}`, { headers }).subscribe({
+      next: (response) => {
+        this.data = response;
+        this.filteredData = [...this.data]; // Initialize filtered data
+      },
+      error: (error) => {
+        console.error('Error fetching history data:', error);
+      },
+    });
+  }
+  
   searchByDate(): void {
-    // Filter the data based on the selected date
-    const searchDate = this.selectedDate.toDateString();
-    this.filteredData = this.data.filter(
-      (item) => item.allocatedDate.toDateString() === searchDate
-    );
+    this.loadHistoryData(); // Reload data for the selected date
   }
 }

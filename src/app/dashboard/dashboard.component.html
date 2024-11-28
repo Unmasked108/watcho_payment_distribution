@@ -17,7 +17,8 @@
     
     <div *ngIf="showFileInput" class="file-import">
       <label for="fileUpload">Upload File:</label>
-      <input type="file" id="fileUpload" (change)="onFileUpload($event)" />
+      <input type="file" id="fileUpload" accept=".csv, .pdf" (change)="onFileUpload($event)" />
+      <button mat-raised-button color="primary" (click)="onSaveFile()">Save</button>
     </div>
     
     <div *ngIf="taskOption === 'generate'" class="generate-option">
@@ -55,14 +56,21 @@
 
     <!-- Allocation Column -->
     <ng-container matColumnDef="allocation">
-      <mat-header-cell *matHeaderCellDef> Allocation </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef> Allocation Status </mat-header-cell>
       <mat-cell *matCellDef="let team"> {{ team.allocation }} </mat-cell>
     </ng-container>
 
     <!-- Allocated Time Column -->
     <ng-container matColumnDef="allocatedTime">
       <mat-header-cell *matHeaderCellDef> Allocated Time </mat-header-cell>
-      <mat-cell *matCellDef="let team"> {{ team.allocatedTime || 'N/A' }} </mat-cell>
+      <mat-cell *matCellDef="let team">
+        {{ team.allocatedTime ? team.allocatedTime : 'Not Allocated' }}
+      </mat-cell>
+    </ng-container>
+  
+    <ng-container matColumnDef="teamCapacity">
+      <mat-header-cell *matHeaderCellDef> Team Capacity </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.teamCapacity || 'N/A' }} </mat-cell>
     </ng-container>
 
     <!-- Task Completion Column -->

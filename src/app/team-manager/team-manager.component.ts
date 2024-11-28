@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox'; // Added for checkboxes
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
@@ -16,48 +17,64 @@ import { NgFor, NgIf } from '@angular/common';
     MatTableModule,
     MatInputModule,
     MatButtonModule,
-    MatCheckboxModule, // Added for checkbox functionality
+    MatCheckboxModule,
     MatIconModule,
     FormsModule,
     NgFor,
-    NgIf
+    NgIf,
   ],
   templateUrl: './team-manager.component.html',
   styleUrls: ['./team-manager.component.scss'],
 })
-export class TeamManagerComponent {
+export class TeamManagerComponent implements OnInit {
   username: string = 'John Doe'; // Default username
   initials: string = this.getInitials(this.username); // Initials based on username
   isDarkMode: boolean = false; // Tracks the current theme mode
 
-  totalLeads: number = 50; // Total leads to allocate
-
+  totalLeads: number = 0; // Total leads allocated to the team
   displayedColumns: string[] = ['select', 'name', 'id', 'leads', 'time', 'status', 'edit'];
-  teamMembers: any[] = [
-    { name: 'John Doe', id: '123', leads: 0, time: '', status: 'Pending', selected: false },
-    { name: 'Jane Smith', id: '124', leads: 0, time: '', status: 'Pending', selected: false },
-    { name: 'Alice Brown', id: '125', leads: 0, time: '', status: 'Pending', selected: false }
-  ];
+  teamMembers: any[] = []; // Holds team members' data
+  isEditing: boolean = false;
+  editingMember: any = null;
+  teamId: string = 'teamId123'; // Replace with actual teamId
+
+  constructor(private http: HttpClient) {} // Inject HttpClient
 
   ngOnInit(): void {
-    this.isDarkMode = localStorage.getItem('theme') === 'dark'; // Initialize dark mode
-    this.applyTheme();
+    this.fetchTeamData();
   }
 
-  toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light'); // Save theme preference
-    this.applyTheme();
+  fetchTeamData(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    const role = localStorage.getItem('role');
+    const url = role === 'TeamLeader' 
+      ? `http://localhost:5000/api/teams?teamId=${this.teamId}`
+      : '';  // You can adjust the URL based on the role if necessary.
+  
+    this.http.get(url, { headers }).subscribe({
+      next: (response: any) => {
+        const team = response.find((team: any) => team.teamId === this.teamId);
+        if (team) {
+          this.totalLeads = team.capacity || 0;
+          this.teamMembers = team.membersList.map((member: any) => ({
+            name: member.name,
+            id: member.userId,
+            leads: 0,
+            time: '',
+            status: 'Pending',
+            selected: false,
+          }));
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching team data:', err);
+      },
+    });
   }
-
-  applyTheme() {
-    const body = document.body;
-    if (this.isDarkMode) {
-      body.classList.add('dark-mode');
-    } else {
-      body.classList.remove('dark-mode');
-    }
-  }
+  
 
   getInitials(name: string): string {
     return name
@@ -80,12 +97,7 @@ export class TeamManagerComponent {
     return selectedCount > 0 && selectedCount < this.teamMembers.length;
   }
 
-  editMember(member: any): void {
-    console.log('Edit member:', member);
-    // Implement edit functionality here, such as opening a dialog or editing inline
-  }
-
-  allocateLeads() {
+  allocateLeads(): void {
     const selectedMembers = this.teamMembers.filter((member) => member.selected);
 
     if (selectedMembers.length === 0) {
@@ -105,26 +117,30 @@ export class TeamManagerComponent {
     console.log('Leads allocated:', selectedMembers);
   }
 
-  saveData() {
+  saveData(): void {
+    console.log('Saving data...');
     const selectedMembers = this.teamMembers.filter((member) => member.selected);
-    console.log('Data saved for selected members:', selectedMembers);
-    // Implement database save logic here.
+    this.http.post('/api/allocate-orders', { selectedMembers }).subscribe({
+      next: (response) => {
+        console.log('Data saved successfully:', response);
+      },
+      error: (err) => {
+        console.error('Error saving data:', err);
+      },
+    });
   }
 
-  isEditing: boolean = false;
-  editingMember: any = null;
-
-  openEditCard(member: any) {
+  openEditCard(member: any): void {
     this.editingMember = { ...member }; // Create a copy of the member
     this.isEditing = true;
   }
 
-  closeEditCard() {
+  closeEditCard(): void {
     this.isEditing = false;
     this.editingMember = null;
   }
 
-  saveEditedMember() {
+  saveEditedMember(): void {
     const index = this.teamMembers.findIndex((m) => m.id === this.editingMember.id);
     if (index !== -1) {
       this.teamMembers[index] = { ...this.editingMember };
@@ -132,7 +148,7 @@ export class TeamManagerComponent {
     this.closeEditCard();
   }
 
-  deleteMember() {
+  deleteMember(): void {
     this.teamMembers = this.teamMembers.filter((m) => m.id !== this.editingMember.id);
     this.closeEditCard();
   }
