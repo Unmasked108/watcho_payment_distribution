@@ -101,31 +101,34 @@ export class TeamsComponent implements OnInit {
       this.showErrorMessage('All fields are required');
       return;
     }
-
+  
+    // Prepare the data for submission
     const newTeam = {
       ...this.teamForm.value,
       memberEmails: this.membersList.value, // Rename membersList to memberEmails
-      numMembers: this.membersList.length, // Optional, backend overwrites
+      numMembers: this.membersList.length, // Optional, backend overwrites this
     };
-
+  
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-
+  
+    console.log('Submitting Team:', newTeam); // Debugging log
+  
     this.http.post(this.apiUrl, newTeam, { headers }).subscribe(
-      
       (response: any) => {
-        console.log('Response from Server:', response); // Debugging: Log the server response
-
+        console.log('Response from Server:', response); // Debugging log
         this.teams.push(response.team);
         this.showSuccessMessage('Team created successfully!');
         this.resetTeamForm();
-
       },
-      
-      () => this.showErrorMessage('Error creating team!')
+      (error) => {
+        console.error('Error creating team:', error); // Debugging log
+        this.showErrorMessage('Error creating team!');
+      }
     );
   }
+  
 
   resetTeamForm(): void {
     this.teamForm.reset({
