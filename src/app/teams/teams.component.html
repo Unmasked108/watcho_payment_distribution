@@ -82,7 +82,7 @@
       <ng-container matColumnDef="members">
         <mat-header-cell *matHeaderCellDef> Members </mat-header-cell>
         <mat-cell *matCellDef="let team">
-          <button mat-button color="primary" (click)="showMembers(team.membersList)">Show Members</button>
+          <button mat-button color="primary" (click)="selectTeam(team); showMembers(team.membersList)">Show Members</button>
         </mat-cell>
       </ng-container>
 
@@ -108,12 +108,12 @@
 <mat-card *ngIf="selectedTeam" class="members-card">
   <mat-card-title>
     {{ selectedTeam.teamName }} Members
-    <button mat-button color="accent" (click)="addMember()">+ Add Member</button>
+    <button mat-button color="accent" (click)="addMember(selectedTeam.teamId)">+ Add Member</button>
   </mat-card-title>
   <mat-card-content>
     <div *ngFor="let member of selectedTeam.membersList; let i = index" class="member-row">
       <span>{{ member.name }}</span>
-      <button mat-button color="primary" (click)="editMember(i)">Edit</button>
+      <button mat-button color="primary" (click)="editMember(selectedTeam.teamId,i)">Edit</button>
       <button mat-button color="warn" (click)="deleteMember(i)">Delete</button>
     </div>
   </mat-card-content>
@@ -134,7 +134,7 @@
       <input matInput type="number" [(ngModel)]="editingTeam.capacity" name="editCapacity" />
     </mat-form-field>
     <div class="actions">
-      <button mat-raised-button color="primary" (click)="saveTeam()">Save</button>
+      <button mat-raised-button color="primary" (click)="saveTeam(editingTeam.teamId)">Save</button>
       <button mat-raised-button color="warn" (click)="deleteTeam(editingTeam.teamId)">Delete</button>
     </div>
   </mat-card-content>

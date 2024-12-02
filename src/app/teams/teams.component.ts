@@ -161,43 +161,86 @@ export class TeamsComponent implements OnInit {
       this.membersList.removeAt(0);
     }
   }
+
+
   editTeam(team: Team): void {
     this.editingTeam = { ...team };
   }
-  showMembers(membersList: { userId: string; name: string }[]): void {
-    this.selectedTeam = { ...this.selectedTeam, membersList } as Team;
-    document.body.classList.add('modal-open');
-  }
+
   
   closeMembersCard(): void {
     this.selectedTeam = null;
     document.body.classList.remove('modal-open');
   }
-  
-  saveTeam(): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-    if (this.editingTeam && this.editingTeam._id) {
-      const updatedTeam = {
-        ...this.editingTeam,
-        numMembers: this.editingTeam.membersList.length,
-      };
-  
-      this.http.put(`${this.apiUrl}/${this.editingTeam._id}`, updatedTeam,{headers}).subscribe(
-        () => {
-          const index = this.teams.findIndex((team) => team._id === this.editingTeam?._id);
-          if (index !== -1) this.teams[index] = { ...updatedTeam };
-          this.editingTeam = null;
-          this.showSuccessMessage('Team updated successfully!');
-        },
-        () => this.showErrorMessage('Error saving team!')
-      );
-    } else {
-      this.showErrorMessage('No team selected for saving.');
+  selectTeam(team: Team): void {
+    this.selectedTeam = team;  // Check if selectedTeam is set correctly
+  }
+  showMembers(membersList: { userId: string; name: string }[]): void {
+    if (!this.selectedTeam) {
+      console.error('No team selected');
+      return;
     }
+    
+    this.selectedTeam = { ...this.selectedTeam, membersList } as Team;
+
+    document.body.classList.add('modal-open');
   }
   
+  
+  // saveTeam(teamId:string): void {
+  //   const headers = new HttpHeaders({
+  //     Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //   });
+  //   if (this.editingTeam && this.editingTeam._id) {
+  //     const updatedTeam = {
+  //       ...this.editingTeam,
+  //       numMembers: this.editingTeam.membersList.length,
+  //     };
+  
+  //     this.http.put(`${this.apiUrl}/${this.editingTeam._id}`, updatedTeam,{headers}).subscribe(
+  //       () => {
+  //         const index = this.teams.findIndex((team) => team._id === this.editingTeam?._id);
+  //         if (index !== -1) this.teams[index] = { ...updatedTeam };
+  //         this.editingTeam = null;
+  //         this.showSuccessMessage('Team updated successfully!');
+  //       },
+  //       () => this.showErrorMessage('Error saving team!')
+  //     );
+  //   } else {
+  //     this.showErrorMessage('No team selected for saving.');
+  //   }
+  // }
+ saveTeam(teamId: string): void {
+    if (!this.editingTeam) {
+      console.error('No team data to save');
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json',
+    });
+
+    const body = {
+      teamName: this.editingTeam.teamName,
+      capacity: this.editingTeam.capacity,
+    };
+
+    this.http
+      .put(`${this.apiUrl}/${teamId}`, body, { headers })
+      .subscribe({
+        next: (response) => {
+          console.log('Team updated successfully', response);
+          this.editingTeam = null; // Reset the editing team
+          this.loadTeams();
+        },
+        error: (error) => {
+          console.error('Error updating team', error);
+        },
+      });
+  }
+
+
 
   deleteTeam(teamId: string): void {
     const headers = new HttpHeaders({
@@ -243,51 +286,68 @@ export class TeamsComponent implements OnInit {
     return localStorage.getItem('role') === 'TeamLeader';
   }
 
-  addMember(): void {
-    if (this.teamData && this.teamData.teamId) {
-      const memberName = prompt('Enter new member name:');
-      const memberEmail = prompt('Enter new member email:'); // Or userId if preferred
-    
-      if (memberName && memberEmail) {
-        const newMember = { name: memberName, userId: memberEmail }; // Update structure
-        this.teamData.membersList.push(newMember);
-        this.teamData.numMembers++;
-    
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        });
-    
-        // Include teamId in the update
-        this.http.put(`${this.apiUrl}/${this.teamData.teamId}`, {
-          ...this.teamData,
-          teamId: this.teamData.teamId, // Include teamId in the request
-        }, { headers }).subscribe(
-          () => {
+  addMember(teamId: string): void {
+    if (!teamId) {
+      console.error('Invalid team ID!');
+      this.snackBar.open('Team ID is not valid!', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+      });
+      return;
+    }
+  
+    // Get member details from the user
+    const memberName = prompt('Enter new member name:');
+    const memberId = prompt('Enter new member ID:');
+  
+    // Validate inputs
+    if (!memberName || !memberId) {
+      this.snackBar.open('Member name and ID are required!', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+      });
+      return;
+    }
+  
+    // Construct new member object
+    const newMember = { name: memberName, userId: memberId };
+  
+    // Set headers for the API request
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    // API call to add the member
+    this.http
+      .post(`${this.apiUrl}/${teamId}`, newMember, { headers })
+      .subscribe(
+        (response: any) => {
+          // Ensure selectedTeam is not null
+          if (this.selectedTeam) {
+            this.selectedTeam.membersList.push(newMember);
+            this.selectedTeam.numMembers++;
+  
             this.snackBar.open('Member added successfully!', 'Close', {
               duration: 3000,
               horizontalPosition: 'right',
               verticalPosition: 'top',
             });
-          },
-          (error) => {
-            console.error('Error adding member:', error);
-            this.snackBar.open('Error adding member!', 'Close', {
-              duration: 3000,
-              horizontalPosition: 'right',
-              verticalPosition: 'top',
-            });
           }
-        );
-      }
-    } else {
-      console.error('Team or TeamId is not valid!');
-      this.snackBar.open('Team is not selected or valid!', 'Close', {
-        duration: 3000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-      });
-    }
+        },
+        (error) => {
+          console.error('Error adding member:', error);
+          this.snackBar.open('Failed to add member!', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+          });
+        }
+      );
   }
+  
+  
 
   
   
