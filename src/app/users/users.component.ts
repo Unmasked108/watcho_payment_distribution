@@ -8,6 +8,8 @@ import { MatSortModule } from '@angular/material/sort'; // Import MatSortModule
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MatTableDataSource } from '@angular/material/table'; // Import MatTableDataSource
+import { ViewChild } from '@angular/core';
 
 
 @Component({
@@ -27,6 +29,9 @@ export class UsersComponent implements OnInit {
   itemsPerPage: number = 10;
   totalRecords: number = 0;
   allocatedLeadsCount: number = 0; // Updated to fetch dynamically
+
+  dataSource = new MatTableDataSource<any>(this.paginatedData);
+
 
   constructor(private http: HttpClient) {}
 
@@ -51,13 +56,7 @@ export class UsersComponent implements OnInit {
     // Implement logic for downloading leads (e.g., triggering a download of a file)
   }
 
-  uploadTask() {
-    // Trigger file input click or handle any other actions
-    const fileInput: HTMLInputElement | null = document.querySelector('#fileInput');
-    if (fileInput) { // Ensure the element exists before clicking
-      fileInput.click();
-    }
-  }
+ 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input?.files?.length) {
@@ -71,7 +70,7 @@ export class UsersComponent implements OnInit {
 
   // Pagination related variables
 
-  displayedColumns: string[] = ['orderId', 'link', 'paymentStatus', 'paymentMode', 'allocationTime', 'endlineTime'];
+  displayedColumns: string[] = ['orderId', 'link', 'paymentStatus', 'paymentMode', 'allocationTime','allocationDate'];
 
 
   paymentModes: string[] = ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash'];
@@ -129,13 +128,25 @@ export class UsersComponent implements OnInit {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
+  
     const leadIdsQuery = this.leadIds.join(',');
-    const url = `http://localhost:5000/api/orders?leadIds=${leadIdsQuery}&page=${this.currentPage}&limit=${this.itemsPerPage}`;
-
+    const url = `http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
+  
     this.http.get<any>(url, { headers }).subscribe({
       next: (response) => {
-        this.paginatedData = response.data;
-        this.totalRecords = response.total;
+        this.paginatedData = response.data.map((order: any) => {
+          const updatedAt = order.updatedAt ? new Date(order.updatedAt) : null;
+          return {
+            orderId: order.orderId || 'N/A',
+            link: order.link || 'N/A',
+            paymentStatus: order.paymentStatus || 'Unpaid',
+            paymentMode: order.paymentModeBy || 'N/A', // Adjusted for 'paymentModeBy'
+            allocationDate: updatedAt ? updatedAt.toLocaleDateString() : 'N/A', // Format to show date
+            allocationTime: updatedAt ? updatedAt.toLocaleTimeString() : 'N/A', // Format to show time
+          };
+        });
+  
+        this.dataSource.data = this.paginatedData;
         console.log('Orders Response:', response);
       },
       error: (error) => {
@@ -143,7 +154,40 @@ export class UsersComponent implements OnInit {
       },
     });
   }
+  
+  currentTask = {
+    paymentStatus: 'Paid', // Default status or update dynamically
+    leadId: '',           // Populate this based on the specific lead/task
+  };
+  
+  savePaymentStatus(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    // Create an array of payloads with orderId and paymentStatus for each order that has been modified
+    const payload = this.paginatedData.map((order: any) => ({
+      orderId: order.orderId,  // Order ID
+      paymentStatus: order.paymentStatus,  // Updated payment status
+    }));
+    console.log('Payload being sent to the server:', payload);
 
+    // Send all updates in one request
+    this.http
+      .patch('http://localhost:5000/api/orders/payment-status', { orders: payload }, { headers })
+      .subscribe({
+        next: (response) => {
+          console.log('Payment status updated:', response);
+        },
+        error: (error) => {
+          console.error('Error updating payment status:', error);
+        },
+      });
+  }
+  
+  
+  
+  
 
   onPageChange(event: any) {
     this.currentPage = event.pageIndex + 1;

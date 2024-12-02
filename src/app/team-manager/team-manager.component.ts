@@ -8,6 +8,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-team-manager',
@@ -22,6 +23,8 @@ import { NgFor, NgIf } from '@angular/common';
     FormsModule,
     NgFor,
     NgIf,
+    RouterLink,
+    RouterOutlet
   ],
   templateUrl: './team-manager.component.html',
   styleUrls: ['./team-manager.component.scss'],

@@ -6,6 +6,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { UsersComponent } from './users/users.component';
 import { TeamManagerComponent } from './team-manager/team-manager.component';
 import { HistoryComponent } from './history/history.component';
+import { TLHistoryComponent } from './tlhistory/tlhistory.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },  // Login page
@@ -22,5 +23,6 @@ export const routes: Routes = [
            
         ],
     },
-    { path: 'TeamsManager', component: TeamManagerComponent}
+    { path: 'TeamsManager', component: TeamManagerComponent},
+    {path: 'TLhistory' , component: TLHistoryComponent}
 ];

@@ -1,0 +1,136 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
+    <div class="container-fluid">
+      <!-- Company Name -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+        <i class="bi bi-building fs-4 me-2"></i> Rescale
+      </a>
+  
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/TeamsManager"
+            routerLinkActive="active"
+          >
+           Teams
+          </a>
+        </li>
+      
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/TLhistory"
+            routerLinkActive="active"
+          >
+            History
+          </a>
+        </li>
+      </ul>
+
+      <!-- User Info -->
+      <div class="d-flex align-items-center ms-auto user-info dropdown">
+        <button
+          class="btn btn-light dropdown-toggle d-flex align-items-center"
+          type="button"
+          id="dropdownMenuButton"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <div
+            class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+            style="width: 40px; height: 40px;"
+          >
+            {{ initials }}
+          </div>
+          <span class="username">{{ username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+          <li class="dropdown-header">
+            <div class="d-flex align-items-center">
+              <div
+                class="user-initials bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                style="width: 40px; height: 40px;"
+              >
+                {{ initials }}
+              </div>
+              <div>
+                <div class="username">{{ username }}</div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Profile Settings</a>
+          </li>
+        
+          <li>
+            <hr class="dropdown-divider" />
+          </li>
+          <li>
+            <a class="dropdown-item text-danger" href="#"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+ 
+  <mat-card class="history-card">
+    <h2 class="card-heading">See History of Particular Date</h2>
+    <div class="form-container">
+      <mat-form-field class="example-full-width">
+        <mat-label>Choose a date</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
+        <mat-hint>MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker">
+          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+        </mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()">Search</button>
+    </div>
+  </mat-card>
+  
+  <div class="table-header">
+    <h2 class="table-heading">Leads Table - {{ selectedDate | date: 'MM/dd/yyyy' }}</h2>
+  </div>
+
+
+  <div class="mat-table-container my-custom-style">
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z8 mat-table custom-table" multiTemplateDataRows>
+   
+   
+  
+      <!-- Order ID Column -->
+      <ng-container matColumnDef="orderId">
+        <mat-header-cell *matHeaderCellDef> Order ID </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.orderId }} </mat-cell>
+      </ng-container>
+  
+      <!-- Member Name Column -->
+      <ng-container matColumnDef="membername">
+        <mat-header-cell *matHeaderCellDef> Member Name </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.membername }} </mat-cell>
+      </ng-container>
+  
+      <!-- Payment Status Column -->
+      <ng-container matColumnDef="paymentstatus">
+        <mat-header-cell *matHeaderCellDef> Payment Status </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.paymentstatus }} </mat-cell>
+      </ng-container>
+  
+      <!-- Payment Money Column -->
+      <ng-container matColumnDef="paymentMethod">
+        <mat-header-cell *matHeaderCellDef> Payment Method </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.paymentMethod }} </mat-cell>
+      </ng-container>
+  
+      <!-- Completed Time Column -->
+      <ng-container matColumnDef="completedTime">
+        <mat-header-cell *matHeaderCellDef> Completed Time </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.completedTime }} </mat-cell>
+      </ng-container>
+  
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  </div>
+  

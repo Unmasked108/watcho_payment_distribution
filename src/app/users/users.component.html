@@ -75,64 +75,62 @@
         <mat-card-title>Task Completed</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="d-flex align-items-center">
-          <input type="checkbox" [(ngModel)]="taskCompleted" /> 
-          <span class="ms-2">Completed</span>
-        </div>
-        <button mat-flat-button color="accent" (click)="uploadTask()">
-          <mat-icon>upload</mat-icon> Upload Completed Task
+        <button mat-flat-button color="primary" (click)="savePaymentStatus()">
+          <mat-icon>save</mat-icon> Save
         </button>
-        <input type="file" (change)="onFileSelected($event)" hidden #fileInput />
       </mat-card-content>
     </mat-card>
-   </div>
+  </div>  
 
- 
-  
-   <mat-table [dataSource]="paginatedData" matSort class="custom-table mat-elevation-z8">
-    <!-- Order ID Column -->
-    <ng-container matColumnDef="orderId">
-      <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.orderId || "N/A" }}</mat-cell>
-    </ng-container>
-  
-    <!-- Link Column -->
-    <ng-container matColumnDef="link">
-      <mat-header-cell *matHeaderCellDef>Link</mat-header-cell>
-      <mat-cell *matCellDef="let element">
-        <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
-      </mat-cell>
-    </ng-container>
-  
-    <!-- Payment Status Column -->
-    <ng-container matColumnDef="paymentStatus">
-      <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.paymentStatus || "N/A" }}</mat-cell>
-    </ng-container>
-  
-    <!-- Payment Mode Column -->
-    <ng-container matColumnDef="paymentMode">
-      <mat-header-cell *matHeaderCellDef>Payment Mode</mat-header-cell>
-      <mat-cell *matCellDef="let element">
-        <mat-select [(value)]="element.paymentMode" (selectionChange)="onPaymentModeChange(element)">
-          <mat-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</mat-option>
-        </mat-select>
-      </mat-cell>
-    </ng-container>
-  
-    <!-- Allocation Time Column -->
-    <ng-container matColumnDef="allocationTime">
-      <mat-header-cell *matHeaderCellDef>Allocation Time</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.allocationTime || "N/A" }}</mat-cell>
-    </ng-container>
-  
-    <!-- Endline Time Column -->
-    <ng-container matColumnDef="endlineTime">
-      <mat-header-cell *matHeaderCellDef>Endline Time</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.endlineTime || "N/A" }}</mat-cell>
-    </ng-container>
-  
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  </mat-table>
-  
+    <mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
+      <!-- Order ID Column -->
+      <ng-container matColumnDef="orderId">
+        <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.orderId || "N/A" }}</mat-cell>
+      </ng-container>
+    
+      <!-- Link Column -->
+      <ng-container matColumnDef="link">
+        <mat-header-cell *matHeaderCellDef>Link</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
+        </mat-cell>
+      </ng-container>
+    
+      <!-- Payment Status Column -->
+      <ng-container matColumnDef="paymentStatus">
+        <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-select [(value)]="element.paymentStatus">
+            <mat-option value="Paid">Paid</mat-option>
+            <mat-option value="Unpaid">Unpaid</mat-option>
+          </mat-select>
+        </mat-cell>
+      </ng-container>
+    
+      <!-- Payment Mode Column -->
+      <ng-container matColumnDef="paymentMode">
+        <mat-header-cell *matHeaderCellDef>Payment Mode</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-select [(value)]="element.paymentMode">
+            <mat-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</mat-option>
+          </mat-select>
+        </mat-cell>
+      </ng-container>
+    
+      <!-- Allocation Date Column -->
+      <ng-container matColumnDef="allocationDate">
+        <mat-header-cell *matHeaderCellDef>Allocation Date</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.allocationDate || "N/A" }}</mat-cell>
+      </ng-container>
+    
+      <!-- Allocation Time Column -->
+      <ng-container matColumnDef="allocationTime">
+        <mat-header-cell *matHeaderCellDef>Allocation Time</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.allocationTime || "N/A" }}</mat-cell>
+      </ng-container>
+    
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+    
