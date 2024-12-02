@@ -7,6 +7,7 @@ import { MatTableModule } from '@angular/material/table'; // Import MatTableModu
 import { MatSortModule } from '@angular/material/sort'; // Import MatSortModule
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 
 @Component({
@@ -17,40 +18,34 @@ import { MatSelectModule } from '@angular/material/select';
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
-  username: string = 'John Doe'; // Default username
-  initials: string = this.getInitials(this.username); // Initials based on username
-  isDarkMode: boolean = false; // Tracks the current theme mode
+  username: string = ''; 
+  initials: string = ''; 
+  isDarkMode: boolean = false; 
+  paginatedData: any[] = []; 
+  leadIds: string[] = []; 
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalRecords: number = 0;
+  allocatedLeadsCount: number = 0; // Updated to fetch dynamically
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.isDarkMode = localStorage.getItem('theme') === 'dark'; // Initialize dark mode
-    this.applyTheme();
-    this.totalRecords = this.paginatedData.length;
-  }
-
-  toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light'); // Save theme preference
-    this.applyTheme();
-  }
-
-  applyTheme() {
-    const body = document.body;
-    if (this.isDarkMode) {
-      body.classList.add('dark-mode');
-    } else {
-      body.classList.remove('dark-mode');
-    }
+    
+    this.isDarkMode = localStorage.getItem('theme') === 'dark'; 
+    this.username = localStorage.getItem('username') || ''; 
+    this.initials = this.getInitials(this.username); // Generate initials from username
+    this.fetchAllocatedLeads(); // Fetch allocated leads count
   }
 
   getInitials(name: string): string {
     return name
       .split(' ')
       .map((n) => n[0])
-      .join('');
+      .join('')
+      .toUpperCase(); // Ensure initials are uppercase
   }
-
-  allocatedLeadsCount = 5; // Just an example, you can set the actual count dynamically
-  taskCompleted = false;
+   taskCompleted = false;
 
   downloadLeads() {
     // Implement logic for downloading leads (e.g., triggering a download of a file)
@@ -75,47 +70,10 @@ export class UsersComponent implements OnInit {
   
 
   // Pagination related variables
-  currentPage: number = 1;
-  itemsPerPage: number = 10; // Default items per page
-  totalRecords: number = 0; // Will be updated dynamically based on the data
 
   displayedColumns: string[] = ['orderId', 'link', 'paymentStatus', 'paymentMode', 'allocationTime', 'endlineTime'];
 
-  // Sample data with new fields
-  paginatedData = [
-    {
-      orderId: 1,
-      link: 'http://example.com',
-      paymentStatus: 'Completed',
-      paymentMode: 'Credit Card',
-      allocationTime: '2024-11-24 09:00 AM',
-      endlineTime: '2024-11-24 05:00 PM',
-    },
-    {
-      orderId: 2,
-      link: 'http://example2.com',
-      paymentStatus: 'Pending',
-      paymentMode: 'PayPal',
-      allocationTime: '2024-11-24 10:30 AM',
-      endlineTime: '2024-11-24 06:30 PM',
-    },
-    {
-      orderId: 3,
-      link: 'http://example3.com',
-      paymentStatus: 'Failed',
-      paymentMode: 'Debit Card',
-      allocationTime: '2024-11-24 08:00 AM',
-      endlineTime: '2024-11-24 04:00 PM',
-    },
-    {
-      orderId: 4,
-      link: 'http://example4.com',
-      paymentStatus: 'Completed',
-      paymentMode: 'Net Banking',
-      allocationTime: '2024-11-24 07:45 AM',
-      endlineTime: '2024-11-24 03:45 PM',
-    },
-  ];
+
   paymentModes: string[] = ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash'];
 
   // Event triggered when payment mode is changed
@@ -123,16 +81,74 @@ export class UsersComponent implements OnInit {
     console.log(`Payment mode updated for Order ID ${element.orderId}:`, element.paymentMode);
     // Additional logic like saving the updated value to the backend can go here
   }
+  fetchAllocatedLeads(): void {
+    const token = localStorage.getItem('token'); // Retrieve the token
+    const loggedInUserId = localStorage.getItem('userId'); // Retrieve the userId from localStorage
   
-  // Method to handle pagination change
+    if (!token) {
+      console.error('Token not found in localStorage.');
+      return;
+    }
+  
+    if (!loggedInUserId) {
+      console.error('User ID not found in localStorage.');
+      return;
+    }
+  
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`, // Include the token
+    });
+  
+    this.http
+      .get<any>('http://localhost:5000/api/lead-allocations', { headers })
+      .subscribe({
+        next: (response) => {
+          console.log('Lead Allocations Response:', response);
+  
+          const currentMember = response.find(
+            (alloc: any) => alloc.memberId._id === loggedInUserId
+          );
+  
+          if (currentMember) {
+            this.leadIds = currentMember.leadIds || [];
+            this.allocatedLeadsCount = this.leadIds.length;
+            this.fetchOrders(); // Fetch orders based on leads
+          } else {
+            console.warn('No allocations found for the logged-in user.');
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching allocated leads:', error);
+        },
+      });
+  }
+  
+  
+  
+  fetchOrders(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+    const leadIdsQuery = this.leadIds.join(',');
+    const url = `http://localhost:5000/api/orders?leadIds=${leadIdsQuery}&page=${this.currentPage}&limit=${this.itemsPerPage}`;
+
+    this.http.get<any>(url, { headers }).subscribe({
+      next: (response) => {
+        this.paginatedData = response.data;
+        this.totalRecords = response.total;
+        console.log('Orders Response:', response);
+      },
+      error: (error) => {
+        console.error('Error fetching orders:', error);
+      },
+    });
+  }
+
+
   onPageChange(event: any) {
-    this.currentPage = event.pageIndex + 1; // Adjust for zero-based page index
-    this.itemsPerPage = event.pageSize; // Adjust the number of items per page
-    // Implement any logic to fetch or display paginated data here
-    // For now, this will just slice the data based on currentPage and itemsPerPage
-    this.paginatedData = this.paginatedData.slice(
-      (this.currentPage - 1) * this.itemsPerPage,
-      this.currentPage * this.itemsPerPage
-    );
+    this.currentPage = event.pageIndex + 1;
+    this.itemsPerPage = event.pageSize;
+    this.fetchOrders(); // Fetch paginated data on page change
   }
 }
+

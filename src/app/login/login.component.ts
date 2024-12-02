@@ -42,13 +42,15 @@ export class LoginComponent {
       this.http.post('http://localhost:5000/login', { email, password })
       .subscribe(
         (response: any) => {
-          const { token, id: userId, role } = response;
+          const { token, id: userId, role ,username} = response;
 
           if (userId && role) {
             // Save user data in localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('userId', userId);
             localStorage.setItem('role', role);
+            localStorage.setItem('username', username); // Store username
+
        // Navigate based on role
        this.redirectUserByRole(role);
       } else {

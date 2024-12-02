@@ -49,6 +49,8 @@ export class TeamsComponent implements OnInit {
   teamForm: FormGroup;
   editingTeam: Team | null = null;
   selectedTeam: Team | null = null;
+  teamData: Team | null = null; // Hold the selected team's data
+
 
   private apiUrl = 'http://localhost:5000/api/teams';
 
@@ -79,8 +81,24 @@ export class TeamsComponent implements OnInit {
     const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
 
     this.http.get<Team[]>(url, { headers }).subscribe(
-      (data) => (this.teams = data),
-      (error) => this.showErrorMessage('Error loading teams')
+      (data) => {
+        console.log('Data received from backend:', data); // Log the received data
+        this.teams = data; // Assign the data to the component property
+      },      (error) => this.showErrorMessage('Error loading teams')
+    );
+  }
+  loadTeamData(teamId: string): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    this.http.get<Team>(`${this.apiUrl}/${teamId}`, { headers }).subscribe(
+      (data) => {
+        this.teamData = data; // Assign team data when fetched
+      },
+      (error) => {
+        this.showErrorMessage('Error loading team data');
+      }
     );
   }
 
@@ -108,7 +126,8 @@ export class TeamsComponent implements OnInit {
       memberEmails: this.membersList.value, // Rename membersList to memberEmails
       numMembers: this.membersList.length, // Optional, backend overwrites this
     };
-  
+    console.log('Team Form Submission:', this.teamForm.value);
+
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
@@ -225,16 +244,24 @@ export class TeamsComponent implements OnInit {
   }
 
   addMember(): void {
-    if (this.selectedTeam) {
+    if (this.teamData && this.teamData.teamId) {
       const memberName = prompt('Enter new member name:');
       const memberEmail = prompt('Enter new member email:'); // Or userId if preferred
-  
+    
       if (memberName && memberEmail) {
         const newMember = { name: memberName, userId: memberEmail }; // Update structure
-        this.selectedTeam.membersList.push(newMember);
-        this.selectedTeam.numMembers++;
-  
-        this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
+        this.teamData.membersList.push(newMember);
+        this.teamData.numMembers++;
+    
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        });
+    
+        // Include teamId in the update
+        this.http.put(`${this.apiUrl}/${this.teamData.teamId}`, {
+          ...this.teamData,
+          teamId: this.teamData.teamId, // Include teamId in the request
+        }, { headers }).subscribe(
           () => {
             this.snackBar.open('Member added successfully!', 'Close', {
               duration: 3000,
@@ -252,20 +279,32 @@ export class TeamsComponent implements OnInit {
           }
         );
       }
+    } else {
+      console.error('Team or TeamId is not valid!');
+      this.snackBar.open('Team is not selected or valid!', 'Close', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+      });
     }
   }
-  
 
+  
+  
   editMember(index: number): void {
     if (this.selectedTeam) {
       const member = this.selectedTeam.membersList[index];
       const updatedName = prompt('Edit member name:', member.name);
       const updatedEmail = prompt('Edit member email:', member.userId);
-  
+    
       if (updatedName && updatedEmail) {
         this.selectedTeam.membersList[index] = { name: updatedName, userId: updatedEmail };
-  
-        this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
+    
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        });
+    
+        this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam, { headers }).subscribe(
           () => {
             this.snackBar.open('Member updated successfully!', 'Close', {
               duration: 3000,
@@ -286,13 +325,16 @@ export class TeamsComponent implements OnInit {
     }
   }
   
-
   deleteMember(index: number): void {
     if (this.selectedTeam && confirm('Are you sure you want to delete this member?')) {
       this.selectedTeam.membersList.splice(index, 1);
       this.selectedTeam.numMembers--;
-  
-      this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam).subscribe(
+    
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      });
+    
+      this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam, { headers }).subscribe(
         () => {
           this.snackBar.open('Member deleted successfully!', 'Close', {
             duration: 3000,
@@ -311,6 +353,7 @@ export class TeamsComponent implements OnInit {
       );
     }
   }
+  
   
 
 

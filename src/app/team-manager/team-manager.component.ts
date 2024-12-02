@@ -27,8 +27,8 @@ import { NgFor, NgIf } from '@angular/common';
   styleUrls: ['./team-manager.component.scss'],
 })
 export class TeamManagerComponent implements OnInit {
-  username: string = 'John Doe'; // Default username
-  initials: string = this.getInitials(this.username); // Initials based on username
+  username: string = ''; // Dynamically set username
+  initials: string = ''; // Dynamically set initials// Initials based on username
   isDarkMode: boolean = false; // Tracks the current theme mode
 
   totalLeads: number = 0; // Total leads allocated to the team
@@ -36,7 +36,7 @@ export class TeamManagerComponent implements OnInit {
   teamMembers: any[] = []; // Holds team members' data
   isEditing: boolean = false;
   editingMember: any = null;
-  teamId: string = 'teamId123'; // Replace with actual teamId
+  teamId: string = ''; // Dynamically set teamId
 
   constructor(private http: HttpClient) {} // Inject HttpClient
 
@@ -49,30 +49,80 @@ export class TeamManagerComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
   
-    const role = localStorage.getItem('role');
-    const url = role === 'TeamLeader' 
-      ? `http://localhost:5000/api/teams?teamId=${this.teamId}`
-      : '';  // You can adjust the URL based on the role if necessary.
+    const teamLeaderId = localStorage.getItem('userId'); // Fetch userId from localStorage
+    const role = localStorage.getItem('role'); // Fetch role from localStorage
   
-    this.http.get(url, { headers }).subscribe({
-      next: (response: any) => {
-        const team = response.find((team: any) => team.teamId === this.teamId);
-        if (team) {
-          this.totalLeads = team.capacity || 0;
-          this.teamMembers = team.membersList.map((member: any) => ({
-            name: member.name,
-            id: member.userId,
-            leads: 0,
-            time: '',
-            status: 'Pending',
-            selected: false,
-          }));
-        }
-      },
-      error: (err) => {
-        console.error('Error fetching team data:', err);
-      },
-    });
+    if (role === 'TeamLeader') {
+      const teamUrl = `http://localhost:5000/api/teams`;
+      const allocationUrl = `http://localhost:5000/api/allocate-orders`;
+  
+      this.http.get(teamUrl, { headers }).subscribe({
+        next: (response: any) => {
+          console.log('Response from API:', response);
+  
+          // Filter teams associated with this TeamLeader
+          const teams = response.filter(
+            (team: any) => team.teamLeader._id === teamLeaderId
+          );
+          console.log('Filtered teams:', teams);
+  
+          if (teams.length > 0) {
+            const team = teams[0]; // Assuming the TeamLeader manages a single team
+            this.teamId = team.teamId; // Dynamically set teamId
+            this.username = team.teamLeaderName || 'Team Leader'; // Add teamLeaderName in backend response
+            this.initials = this.getInitials(this.username);
+  
+            // Map members list
+            this.teamMembers = team.membersList.map((member: any) => ({
+              name: member.name,
+              id: member.userId,
+              leads: 0,
+              time: '',
+              status: 'Pending',
+              selected: false,
+            }));
+  
+            console.log('Team members:', this.teamMembers);
+            console.log('Fetching allocations for teamId:', team._id); // Log teamId
+
+            // Fetch allocated leads for the team
+            this.http
+              .get(`${allocationUrl}?teamId=${team._id}`, { headers })
+              .subscribe({
+                next: (allocationData: any) => {
+                  const allocatedLeadsCount = allocationData.reduce(
+                    (total: number, allocation: any) =>
+                      total + allocation.orderIds.length,
+                    0
+                  );
+  
+                  this.totalLeads = allocatedLeadsCount;
+                  console.log('Allocated leads count:', this.totalLeads);
+  
+                  // Map orderIds for allocation
+                  this.teamMembers.forEach((member) => {
+                    member.orderIds = allocationData.flatMap(
+                      (allocation: any) => allocation.orderIds
+                    );
+                  });
+  
+                  console.log('Order IDs for allocation:', this.teamMembers);
+                },
+                error: (err) => {
+                  console.error('Error fetching allocations:', err);
+                },
+              });
+          } else {
+            console.warn('No teams found for this TeamLeader');
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching teams:', err);
+        },
+      });
+    } else {
+      console.warn('User is not authorized to view teams');
+    }
   }
   
 
@@ -99,37 +149,62 @@ export class TeamManagerComponent implements OnInit {
 
   allocateLeads(): void {
     const selectedMembers = this.teamMembers.filter((member) => member.selected);
+  
+    if (selectedMembers.length === 0) {
+      console.warn('No team members selected for allocation.');
+      return;
+    }
+  
+    const leadsPerMember = Math.floor(this.totalLeads / selectedMembers.length);
+    const currentTime = new Date().toLocaleTimeString();
+  
+    const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
+  
+    this.teamMembers = this.teamMembers.map((member, index) =>
+      member.selected
+        ? {
+            ...member,
+            leads: leadsPerMember,
+            orderIds: allOrderIds.slice(
+              index * leadsPerMember,
+              (index + 1) * leadsPerMember
+            ),
+            time: currentTime,
+            status: 'Completed',
+          }
+        : member
+    );
+  
+    console.log('Leads allocated:', selectedMembers);
+  }
+  
 
+  saveData(): void {
+    const selectedMembers = this.teamMembers
+    .filter((member) => member.selected)
+    .map((member) => ({
+      ...member,
+      teamId: this.teamId, // Add teamId to each member
+    }));
     if (selectedMembers.length === 0) {
       console.warn('No team members selected for allocation.');
       return;
     }
 
-    const leadsPerMember = Math.floor(this.totalLeads / selectedMembers.length);
-    const currentTime = new Date().toLocaleTimeString();
-
-    this.teamMembers = this.teamMembers.map((member) =>
-      member.selected
-        ? { ...member, leads: leadsPerMember, time: currentTime, status: 'Completed' }
-        : member
-    );
-
-    console.log('Leads allocated:', selectedMembers);
-  }
-
-  saveData(): void {
-    console.log('Saving data...');
-    const selectedMembers = this.teamMembers.filter((member) => member.selected);
-    this.http.post('/api/allocate-orders', { selectedMembers }).subscribe({
-      next: (response) => {
-        console.log('Data saved successfully:', response);
-      },
-      error: (err) => {
-        console.error('Error saving data:', err);
-      },
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-  }
 
+    this.http.post('http://localhost:5000/api/lead-allocations', { selectedMembers }, { headers })
+      .subscribe({
+        next: (response) => {
+          console.log('Data saved successfully:', response);
+        },
+        error: (err) => {
+          console.error('Error saving data:', err);
+        },
+      });
+  }
   openEditCard(member: any): void {
     this.editingMember = { ...member }; // Create a copy of the member
     this.isEditing = true;
