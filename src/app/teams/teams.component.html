@@ -113,8 +113,9 @@
   <mat-card-content>
     <div *ngFor="let member of selectedTeam.membersList; let i = index" class="member-row">
       <span>{{ member.name }}</span>
-      <button mat-button color="primary" (click)="editMember(selectedTeam.teamId,i)">Edit</button>
-      <button mat-button color="warn" (click)="deleteMember(i)">Delete</button>
+      <button mat-button color="primary"  (click)="editMember(selectedTeam.teamId,member.userId)" >Edit</button>
+
+      <button mat-button color="warn" (click)="deleteMember(selectedTeam.teamId,member.userId)">Delete</button>
     </div>
   </mat-card-content>
   <button mat-raised-button color="warn" (click)="closeMembersCard()">Close</button>

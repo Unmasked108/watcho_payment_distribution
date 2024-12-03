@@ -181,7 +181,12 @@ export class TeamsComponent implements OnInit {
       return;
     }
     
-    this.selectedTeam = { ...this.selectedTeam, membersList } as Team;
+    this.selectedTeam = {
+      ...this.selectedTeam,
+      membersList: membersList.length ? membersList : this.selectedTeam.membersList,
+    } as Team;
+  
+    console.log('Updated selected team:', this.selectedTeam);
 
     document.body.classList.add('modal-open');
   }
@@ -351,21 +356,43 @@ export class TeamsComponent implements OnInit {
 
   
   
-  editMember(index: number): void {
-    if (this.selectedTeam) {
-      const member = this.selectedTeam.membersList[index];
-      const updatedName = prompt('Edit member name:', member.name);
-      const updatedEmail = prompt('Edit member email:', member.userId);
-    
-      if (updatedName && updatedEmail) {
-        this.selectedTeam.membersList[index] = { name: updatedName, userId: updatedEmail };
-    
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        });
-    
-        this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam, { headers }).subscribe(
-          () => {
+  editMember(teamId: string, userId: string): void {
+    if (!this.selectedTeam) {
+      console.error('No team selected');
+      return;
+    }
+  
+    // Find the member to edit
+    const member = this.selectedTeam.membersList.find((m) => m.userId === userId);
+  
+    if (!member) {
+      console.error('Member not found');
+      return;
+    }
+  
+    // Prompt for updated values
+    const updatedName = prompt('Edit member name:', member.name);
+  
+    if (updatedName) {
+      // Prepare the updated member data
+      const updatedMember = { name: updatedName };
+  
+      // Call the API to update the member
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      });
+
+      this.http
+        .put(`${this.apiUrl}/${teamId}/members/${userId}`, updatedMember, { headers })
+        .subscribe(
+          (response: any) => {
+            // Update the local membersList with the updated member data
+            const memberIndex = this.selectedTeam!.membersList.findIndex((m) => m.userId === userId);
+            if (memberIndex > -1) {
+              this.selectedTeam!.membersList[memberIndex] = { ...member, ...updatedMember };
+            }
+  
+            // Show success notification
             this.snackBar.open('Member updated successfully!', 'Close', {
               duration: 3000,
               horizontalPosition: 'right',
@@ -381,21 +408,42 @@ export class TeamsComponent implements OnInit {
             });
           }
         );
-      }
     }
   }
   
-  deleteMember(index: number): void {
-    if (this.selectedTeam && confirm('Are you sure you want to delete this member?')) {
-      this.selectedTeam.membersList.splice(index, 1);
-      this.selectedTeam.numMembers--;
-    
-      const headers = new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      });
-    
-      this.http.put(`${this.apiUrl}/${this.selectedTeam._id}`, this.selectedTeam, { headers }).subscribe(
-        () => {
+  
+  deleteMember(teamId: string, userId: string): void {
+    if (!this.selectedTeam) {
+      console.error('No team selected');
+      return;
+    }
+  
+    // Find the member to delete
+    const member = this.selectedTeam.membersList.find((m) => m.userId === userId);
+  
+    if (!member) {
+      console.error('Member not found');
+      return;
+    }
+  
+    // Confirm deletion
+    const confirmDeletion = confirm(`Are you sure you want to delete member: ${member.name}?`);
+    if (!confirmDeletion) {
+      return;
+    }
+  
+    // Call the API to delete the member
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+    this.http
+      .delete(`${this.apiUrl}/${teamId}/members/${userId}`, { headers })
+      .subscribe(
+        (response: any) => {
+          // Remove the member from the local membersList
+          this.selectedTeam!.membersList = this.selectedTeam!.membersList.filter((m) => m.userId !== userId);
+  
+          // Show success notification
           this.snackBar.open('Member deleted successfully!', 'Close', {
             duration: 3000,
             horizontalPosition: 'right',
@@ -411,8 +459,8 @@ export class TeamsComponent implements OnInit {
           });
         }
       );
-    }
   }
+  
   
   
 
