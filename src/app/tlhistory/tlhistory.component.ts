@@ -60,21 +60,30 @@ export class TLHistoryComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
   
-    const formattedDate = this.selectedDate.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+    console.log('Selected Date:', this.selectedDate);
+
+    // Format the selected date to YYYY-MM-DD
+    const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
+    console.log('Formatted Date:', formattedDate); // Debugging
+    
     const allocationsUrl = `http://localhost:5000/api/lead-allocations`;
   
-    // Step 1: Fetch allocations for the selected date
+    // Fetch allocations for the selected date
     this.http
-      .get<any[]>(allocationsUrl, { headers, params: { date: formattedDate } }) // Specify the type here
+      .get<any[]>(allocationsUrl, { headers, params: { date: formattedDate } })
       .subscribe({
-        next: (allocations: any[]) => { // TypeScript now knows allocations is of type any[]
-          const leadIds = allocations.flatMap((allocation) => allocation.leadIds); // Extract leadIds
+        
+        next: (allocations: any[]) => {
+          const leadIds = allocations.flatMap((allocation) => allocation.leadIds);
           const memberMap = new Map(
             allocations.map((allocation) => [
               allocation.leadIds.join(','), 
-              allocation.memberId._id // Use populated memberId
+              allocation.memberId._id, // Use populated memberId
             ])
+            
           );
+          console.log('Allocations:', allocations);
+
   
           const userMap = new Map(
             allocations.map((allocation) => [
@@ -83,9 +92,9 @@ export class TLHistoryComponent implements OnInit {
             ])
           );
   
-          // Step 2: Fetch orders using leadIds
+          // Fetch orders using leadIds
           this.http
-            .get<any>(`http://localhost:5000/api/orders`, { // Specify type for order response
+            .get<any>(`http://localhost:5000/api/orders`, {
               headers,
               params: { leadIds: leadIds.join(',') },
             })
@@ -93,7 +102,7 @@ export class TLHistoryComponent implements OnInit {
               next: (response: any) => {
                 const orders = response.data;
   
-                // Step 3: Map member names to orders and set up table data
+                // Map member names to orders and set up table data
                 this.teamMembers = orders.map((order: any) => {
                   const memberId = memberMap.get(order._id);
                   return {
@@ -106,6 +115,7 @@ export class TLHistoryComponent implements OnInit {
                   };
                 });
   
+                // Update the dataSource with the new data
                 this.dataSource.data = this.teamMembers;
               },
               error: (err) => console.error('Error fetching orders:', err),

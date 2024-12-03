@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule,HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ import { Router } from '@angular/router';
     FormsModule,
     CommonModule,
     RouterModule,
-    HttpClientModule
+    HttpClientModule,
+    MatSnackBarModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -28,7 +30,7 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   isLoginMode: boolean = true;
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router, private snackBar: MatSnackBar) {}
 
   toggleMode() {
     this.isLoginMode = !this.isLoginMode;
@@ -61,27 +63,32 @@ export class LoginComponent {
         });
     }
   }
-  
+  showSuccessModal = false;
+
   onSignup(form: any) {
     if (form.valid) {
       const { name, email, password, confirmPassword } = form.value;
-
+  
       if (password === confirmPassword) {
-        this.http.post('http://localhost:5000/register', { name, email, password })
-          .subscribe(
-            () => {
-              this.router.navigate(['/login']); // Redirect to login after successful signup
-            },
-            (error) => {
-              console.error('Signup error:', error);
-            }
-          );
+        this.http.post('http://localhost:5000/register', { name, email, password }).subscribe(
+          () => {
+            this.showSuccessModal = true; // Show the success modal
+          },
+          (error) => {
+            console.error('Signup error:', error);
+            alert('Signup failed. Please try again.'); // Use a simple alert for failure
+          }
+        );
       } else {
-        console.error('Passwords do not match');
+        alert('Passwords do not match.'); // Use a simple alert for password mismatch
       }
     }
   }
-
+  
+  redirectToLogin() {
+    this.showSuccessModal = false; // Hide the modal
+    this.router.navigate(['/login']); // Redirect to login
+  }
   private redirectUserByRole(role: string) {
     switch (role) {
       case 'Admin':

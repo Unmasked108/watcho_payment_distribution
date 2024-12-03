@@ -160,6 +160,7 @@ export class TeamManagerComponent implements OnInit {
   
     const leadsPerMember = Math.floor(this.totalLeads / selectedMembers.length);
     const currentTime = new Date().toLocaleTimeString();
+    const currentDate = new Date().toISOString(); // Get current date in ISO format
   
     const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
   
@@ -173,6 +174,7 @@ export class TeamManagerComponent implements OnInit {
               (index + 1) * leadsPerMember
             ),
             time: currentTime,
+            date: currentDate, // Add the date
             status: 'Completed',
           }
         : member

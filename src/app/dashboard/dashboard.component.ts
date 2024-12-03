@@ -211,23 +211,31 @@ export class DashboardComponent  {
       }
     );
   }
-
+  showAlert = false; // Tracks if the alert is visible
+  alertMessage = ''; // Stores the alert message
+  
   allocateLeads(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-  
     this.http.post('http://localhost:5000/api/allocate-orders', {}, { headers }).subscribe(
       (response: any) => {
         console.log('Leads allocated successfully:', response);
+        this.alertMessage = 'Leads allocated successfully!';
+        this.showAlert = true; // Show the alert
         this.getTeams(); // Refresh the teams' data to reflect updated allocations
       },
       (error) => {
         console.error('Error during lead allocation:', error);
+        this.alertMessage = 'Error during lead allocation.';
+        this.showAlert = true; // Show the alert with error message
       }
     );
   }
   
+closeAlert(): void {
+  this.showAlert = false; // Hide the alert
+}
 
   approveTask(team: any) {
     console.log(`Task approved for team: ${team.teamName}`);

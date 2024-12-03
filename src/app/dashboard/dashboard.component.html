@@ -33,6 +33,12 @@
     </div>
     
   </mat-card>
+  <div class="custom-alert" *ngIf="showAlert">
+    <div class="alert-content">
+      <p>{{ alertMessage }}</p>
+      <button (click)="closeAlert()">OK</button>
+    </div>
+  </div>
 
   <!-- Table Component -->
   <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">

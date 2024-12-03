@@ -42,6 +42,14 @@
             <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Login</a>
           </p>
         </form>
+
+        <div class="modal-overlay" *ngIf="showSuccessModal">
+          <div class="modal-content">
+            <h2>Signup Successful</h2>
+            <p>You have successfully signed up!</p>
+            <button (click)="redirectToLogin()">OK</button>
+          </div>
+        </div>
       </ng-template>
     </mat-card>
   </div>
