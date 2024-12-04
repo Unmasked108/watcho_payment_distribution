@@ -21,6 +21,13 @@
       <button mat-raised-button color="primary" (click)="onSaveFile()">Save</button>
     </div>
     
+    <div *ngIf="showFileUploadAlert" class="custom-alert">
+      <div class="alert-content">
+        <p>{{ fileUploadAlertMessage }}</p>
+        <button (click)="closeFileUploadAlert()">OK</button>
+      </div>
+    </div>
+
     <div *ngIf="taskOption === 'generate'" class="generate-option">
       <hr />
       <span>Generate the token</span>
@@ -33,6 +40,15 @@
     </div>
     
   </mat-card>
+
+   
+  <div *ngIf="showFileUploadAlert" class="custom-alert">
+    <div class="alert-content">
+      <p>{{ fileUploadAlertMessage }}</p>
+      <button (click)="closeFileUploadAlert()">OK</button>
+    </div>
+  </div>
+  
   <div class="custom-alert" *ngIf="showAlert">
     <div class="alert-content">
       <p>{{ alertMessage }}</p>

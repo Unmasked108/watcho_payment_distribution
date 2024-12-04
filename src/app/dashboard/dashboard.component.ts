@@ -140,39 +140,51 @@ export class DashboardComponent  {
       console.error('Unsupported file format. Please upload a CSV or PDF file.');
     }
   }
+// File Upload Alert
+showFileUploadAlert: boolean = false;
+fileUploadAlertMessage: string = '';
 
-  // Process CSV file
-  private processCSV() {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const csvData = reader.result as string;
-      const headers = ['customerId', 'source', 'coupon', 'status', 'orderId', 'link']; // Predefined headers
-      const parsedData = this.parseCSV(csvData, headers);
-  
-      if (parsedData.length > 5000) {
-        console.error('The file contains more than 5000 records. Only the first 5000 will be processed.');
-        parsedData.length = 5000; // Truncate to 5000 records
+// Process CSV file
+private processCSV() {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const csvData = reader.result as string;
+    const headers = ['customerId', 'source', 'coupon', 'status', 'orderId', 'link']; // Predefined headers
+    const parsedData = this.parseCSV(csvData, headers);
+
+    if (parsedData.length > 5000) {
+      console.error('The file contains more than 5000 records. Only the first 5000 will be processed.');
+      parsedData.length = 5000; // Truncate to 5000 records
+    }
+
+    console.log('Parsed CSV data:', parsedData);
+
+    const httpHeaders = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    // Send data to the backend
+    this.http.post('http://localhost:5000/api/orders', parsedData, { headers: httpHeaders }).subscribe(
+      (response) => {
+        console.log('Data saved successfully:', response);
+        this.fileUploadAlertMessage = 'Data saved successfully!';
+        this.showFileUploadAlert = true; // Show the file upload alert
+      },
+      (error) => {
+        console.error('Error saving data:', error);
+        this.fileUploadAlertMessage = 'Error saving data. Please try again.';
+        this.showFileUploadAlert = true; // Show the file upload alert
       }
-  
-      console.log('Parsed CSV data:', parsedData);
-  
-      const httpHeaders = new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      });
-  
-      // Send data to the backend
-      this.http.post('http://localhost:5000/api/orders', parsedData, { headers: httpHeaders }).subscribe(
-        (response) => {
-          console.log('Data saved successfully:', response);
-        },
-        (error) => {
-          console.error('Error saving data:', error);
-        }
-      );
-    };
-    reader.readAsText(this.selectedFile!);
-  }
-  
+    );
+  };
+  reader.readAsText(this.selectedFile!);
+}
+
+// Close the file upload alert
+closeFileUploadAlert() {
+  this.showFileUploadAlert = false; // Hide the file upload alert
+}
+
   // Parse CSV data
   private parseCSV(csvData: string, headers: string[]): any[] {
     const rows = csvData.split('\n').filter(row => row.trim() !== ''); // Split rows and remove empty lines
