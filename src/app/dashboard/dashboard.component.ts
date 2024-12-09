@@ -9,6 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { ChangeDetectorRef } from '@angular/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 
 interface Team {
   teamName: string;
@@ -28,12 +31,14 @@ interface Team {
     MatButtonModule,
     MatCardModule,
     MatTableModule,
-    MatFormFieldModule,
     MatSelectModule,
     FormsModule,
     CommonModule, // Add CommonModule to the imports array
     MatGridListModule,
-    MatCardModule
+    MatCardModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatNativeDateModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -42,6 +47,52 @@ export class DashboardComponent  {
   taskOption: string | null = null;
   showFileInput = false;
   selectedFile: File | null = null;
+  selectedDateRange: string = 'today'; // Set default to "Today"
+  customStartDate: Date | null = null;
+  customEndDate: Date | null = null;
+  
+  applyDateFilter(): void {
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+  
+    // Determine start and end dates based on the selected range
+    if (this.selectedDateRange === 'today') {
+      const today = new Date();
+      startDate = endDate = today;
+    } else if (this.selectedDateRange === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      startDate = endDate = yesterday;
+    } else if (this.selectedDateRange === 'thisWeek') {
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      startDate = startOfWeek;
+      endDate = today;
+    } else if (this.selectedDateRange === 'thisMonth') {
+      const today = new Date();
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      startDate = startOfMonth;
+      endDate = today;
+    } else if (this.selectedDateRange === 'custom') {
+      if (!this.customStartDate || !this.customEndDate) {
+        console.warn('Incomplete custom date range!');
+        return;
+      }
+      startDate = this.customStartDate;
+      endDate = this.customEndDate;
+    }
+  
+    // Display the selected date range
+    console.log('Selected Date Range:', {
+      start: startDate,
+      end: endDate,
+    });
+  }
+  
+  
+
+  
 
   displayedColumns: string[] = [
     'teamName',
@@ -182,6 +233,7 @@ getAllocations(): void {
     const fileExtension = this.selectedFile.name.split('.').pop()?.toLowerCase();
     if (fileExtension === 'csv') {
       this.processCSV();
+
     } else if (fileExtension === 'pdf') {
       this.uploadPDF();
     } else {
@@ -216,7 +268,8 @@ private processCSV() {
       (response) => {
         console.log('Data saved successfully:', response);
         this.fileUploadAlertMessage = 'Data saved successfully!';
-        this.showFileUploadAlert = true; // Show the file upload alert
+        this.showFileUploadAlert = true;
+        
       },
       (error) => {
         console.error('Error saving data:', error);
