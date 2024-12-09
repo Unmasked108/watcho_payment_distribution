@@ -38,7 +38,9 @@ interface Team {
     MatCardModule,
     MatDatepickerModule,
     MatInputModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatFormFieldModule,
+    
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -47,15 +49,19 @@ export class DashboardComponent  {
   taskOption: string | null = null;
   showFileInput = false;
   selectedFile: File | null = null;
-  selectedDateRange: string = 'today'; // Set default to "Today"
+  selectedDateRange: string = 'today'; // Default to "Today"
   customStartDate: Date | null = null;
   customEndDate: Date | null = null;
+
+  totalLeadsAllocated: number = 0; // Total allocated leads
+  totalLeadsCompleted: number = 0; // Total completed leads
+
   
   applyDateFilter(): void {
     let startDate: Date | null = null;
     let endDate: Date | null = null;
-  
-    // Determine start and end dates based on the selected range
+
+    // Determine the date range
     if (this.selectedDateRange === 'today') {
       const today = new Date();
       startDate = endDate = today;
@@ -82,15 +88,42 @@ export class DashboardComponent  {
       startDate = this.customStartDate;
       endDate = this.customEndDate;
     }
-  
-    // Display the selected date range
-    console.log('Selected Date Range:', {
-      start: startDate,
-      end: endDate,
-    });
+
+    // Fetch data for the selected date range
+    this.fetchLeadsData(startDate, endDate);
   }
-  
-  
+
+  fetchLeadsData(startDate: Date | null, endDate: Date | null): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    const params = {
+      startDate: startDate ? startDate.toISOString() : '',
+      endDate: endDate ? endDate.toISOString() : '',
+    };
+
+    this.http.get<any[]>(this.allocationUrl, { headers, params }).subscribe(
+      (allocations) => {
+        let allocatedTotal = 0;
+        let completedTotal = 0;
+
+        allocations.forEach((allocation) => {
+          allocatedTotal += allocation.leadsAllocated || 0;
+          completedTotal += allocation.leadsCompleted || 0;
+        });
+
+        this.totalLeadsAllocated = allocatedTotal;
+        this.totalLeadsCompleted = completedTotal;
+
+        // Trigger UI update
+        this.cdRef.detectChanges();
+      },
+      (error) => {
+        console.error('Error fetching leads data:', error);
+      }
+    );
+  }
 
   
 
@@ -118,6 +151,7 @@ export class DashboardComponent  {
     this.getTeams();
     this.getAllocations();
     console.log('Teams:', this.teams);  // Log teams to see if the data is populated
+    this.applyDateFilter(); // Fetch data for "Today" by default
 
   }
 

@@ -1,46 +1,47 @@
 <div class="container">
  
-  <div class="datedown">
-    <div class="date-container">
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Date Filter</mat-label>
-        <mat-select [(value)]="selectedDateRange" (selectionChange)="applyDateFilter()">
-          <mat-option value="today">Today</mat-option>
-          <mat-option value="yesterday">Yesterday</mat-option>
-          <mat-option value="thisWeek">This Week</mat-option>
-          <mat-option value="thisMonth">This Month</mat-option>
-          <mat-option value="custom">Custom Range</mat-option>
-        </mat-select>
-      </mat-form-field>
-  
-      <!-- Custom Range Date Pickers -->
-      <div *ngIf="selectedDateRange === 'custom'" class="custom-date-range">
+  <div class="dashboard-container">
+    <div class="datedown">
+      <div class="date-container">
         <mat-form-field appearance="outline" class="date-field">
-          <mat-label>Start Date</mat-label>
-          <input
-            matInput
-            [(ngModel)]="customStartDate"
-            placeholder="MM/DD/YYYY"
-            [matDatepicker]="startPicker"
-            (ngModelChange)="applyDateFilter()"
-          />
-          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-          <mat-datepicker #startPicker></mat-datepicker>
+          <mat-label>Date Filter</mat-label>
+          <mat-select [(value)]="selectedDateRange" (selectionChange)="applyDateFilter()">
+            <mat-option value="today">Today</mat-option>
+            <mat-option value="yesterday">Yesterday</mat-option>
+            <mat-option value="thisWeek">This Week</mat-option>
+            <mat-option value="thisMonth">This Month</mat-option>
+            <mat-option value="custom">Custom Range</mat-option>
+          </mat-select>
         </mat-form-field>
   
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>End Date</mat-label>
-          <input
-            matInput
-            [(ngModel)]="customEndDate"
-            placeholder="MM/DD/YYYY"
-            [matDatepicker]="endPicker"
-            (ngModelChange)="applyDateFilter()"
-          />
-          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-          <mat-datepicker #endPicker></mat-datepicker>
-        </mat-form-field>
+        <div *ngIf="selectedDateRange === 'custom'" class="custom-date-range">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Start Date</mat-label>
+            <input matInput [(ngModel)]="customStartDate" [matDatepicker]="startPicker" />
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>End Date</mat-label>
+            <input matInput [(ngModel)]="customEndDate" [matDatepicker]="endPicker" />
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
       </div>
+    </div>
+  
+    <div class="cards-container">
+      <mat-card class="leads-card allocated">
+        <mat-card-title>Total Leads Allocated</mat-card-title>
+        <mat-card-content>{{ totalLeadsAllocated }}</mat-card-content>
+      </mat-card>
+  
+      <mat-card class="leads-card completed">
+        <mat-card-title>Total Leads Completed</mat-card-title>
+        <mat-card-content>{{ totalLeadsCompleted }}</mat-card-content>
+      </mat-card>
     </div>
   </div>
   
