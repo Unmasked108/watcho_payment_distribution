@@ -56,6 +56,19 @@
     </div>
   </div>
 
+  <div class="team-container">
+    <div class="team-card" *ngFor="let team of teams">
+      <div class="card-header"></div>
+      <div class="card-content">
+        <h3>{{ team.teamName }}</h3>
+        <p><strong>Team ID:</strong> {{ team.teamId }}</p>
+        <p><strong>Leads Allocated:</strong> {{ team.leadsAllocated }}</p>
+        <p><strong>Leads Completed:</strong> {{ team.leadsCompleted }}</p>
+      </div>
+    </div>
+  </div>
+  
+  
   <!-- Table Component -->
   <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
     <!-- Team Name Column -->

@@ -7,6 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';  // Import CommonModule
 import { MatButtonModule } from '@angular/material/button';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { ChangeDetectorRef } from '@angular/core';
 
 interface Team {
   teamName: string;
@@ -15,7 +17,8 @@ interface Team {
   allocation: string;
   allocatedTime: string | null;
   teamCapacity: number | null; // Add this field
-
+  leadsAllocated: number | null;  // Allowing null
+  leadsCompleted: number | null;  // Allowing null
 }
 
 @Component({
@@ -29,6 +32,8 @@ interface Team {
     MatSelectModule,
     FormsModule,
     CommonModule, // Add CommonModule to the imports array
+    MatGridListModule,
+    MatCardModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -52,66 +57,109 @@ export class DashboardComponent  {
 
   private apiUrl = 'http://localhost:5000/api/teams';
   private allocationUrl = 'http://localhost:5000/api/allocate-orders';
+  private ordersUrl = 'http://localhost:5000/api/orders';
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     // Fetch teams data on component initialization
     this.getTeams();
     this.getAllocations();
+    console.log('Teams:', this.teams);  // Log teams to see if the data is populated
 
   }
 
   // Fetch teams from backend
-  getTeams(): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
+ 
 
-    const role = localStorage.getItem('role');
-    const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
+getTeams(): void {
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  });
 
-    this.http.get<any[]>(url, {headers}).subscribe(
-      (data) => {
-        // Populate teams array with relevant data
-        this.teams = data.map(team => ({
-          teamName: team.teamName,
-          teamId: team.teamId,
-          teamStatus: 'Active', // Assuming a default value, adjust if needed
-          allocation: 'Not Allocated', // Adjust logic as per requirements
-          allocatedTime: null,
-          teamCapacity: team.capacity, // Populate capacity from the backend response
+  const role = localStorage.getItem('role');
+  const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
 
-        }));
-      },
-      (error) => {
-        console.error('Error fetching teams data:', error);
-      }
-    );
-  }
+  this.http.get<any[]>(url, { headers }).subscribe(
+    (data) => {
+      // Populate teams array with relevant data
+      console.log('Teams data:', data); // Log the response to check the data
+      this.teams = data.map(team => ({
+        teamName: team.teamName,
+        teamId: team.teamId,
+        teamStatus: 'Active', // Assuming a default value, adjust if needed
+        allocation: team.allocationStatus || 'Not Allocated', // Use the backend's allocation status
+        allocatedTime: team.allocatedTime || null, // Use the backend's allocated time
+        teamCapacity: team.capacity, // Populate capacity from the backend response
+        leadsAllocated: null, // Initialize with null or placeholder until fetched
+        leadsCompleted: null,
+      }));
+      // Now call getAllocations after teams are populated
+      this.getAllocations();
+    },
+    (error) => {
+      console.error('Error fetching teams data:', error);
+    }
+  );
+}
    // Fetch allocations and update the table
-   getAllocations(): void {
+   
+getAllocations(): void {
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  });
+
+  this.http.get<any[]>(this.allocationUrl, { headers }).subscribe(
+    (allocations) => {
+      allocations.forEach((allocation) => {
+        const team = this.teams.find((t) => t.teamId === allocation.teamId.teamId);
+        console.log('Allocations:', allocations);
+        if (team) {
+          team.allocation = allocation.status || 'Allocated';
+          team.allocatedTime = new Date(allocation.allocationDate).toLocaleString();
+          team.leadsAllocated = allocation.leadsAllocated;  // Now populated from the API
+          team.leadsCompleted = allocation.leadsCompleted;  // Now populated from the API
+        }
+      });
+
+      // Explicitly trigger change detection to update the UI
+      this.cdRef.detectChanges();
+    },
+    (error) => {
+      console.error('Error fetching allocations:', error);
+    }
+  );
+}
+  
+  fetchOrderDetails(teamId: string, leadIds: string[]): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-
-    this.http.get<any[]>(this.allocationUrl, { headers }).subscribe(
-      (allocations) => {
-        allocations.forEach((allocation) => {
-          const team = this.teams.find((t) => t.teamId === allocation.teamId);
-          if (team) {
-            team.allocation = allocation.status || 'Allocated';
-            team.allocatedTime = new Date(allocation.allocationDate).toLocaleString();
-          }
-        });
+  
+    const leadIdsParam = leadIds.join(',');
+    this.http.get<any>(`${this.ordersUrl}?leadIds=${leadIdsParam}`, { headers }).subscribe(
+      (response) => {
+        const orders = response.data || [];
+        const team = this.teams.find((t) => t.teamId === teamId);
+        console.log("This is response", response);
+        
+        if (team) {
+          // Update the leadsAllocated and leadsCompleted values based on the response
+          team.leadsAllocated = response.leadsAllocated;  // This is the count of allocated orders
+          team.leadsCompleted = response.leadsCompleted;  // This is the count of completed orders (based on paymentStatus)
+  
+          // Log the updated values to the console
+          console.log(`Leads Allocated: ${team.leadsAllocated}`);
+          console.log(`Leads Completed: ${team.leadsCompleted}`);
+        }
       },
       (error) => {
-        console.error('Error fetching allocations:', error);
+        console.error(`Error fetching orders for team ${teamId}:`, error);
       }
     );
   }
-
+  
   onOptionSelect() {
     this.showFileInput = this.taskOption === 'import';
   }
@@ -233,7 +281,7 @@ closeFileUploadAlert() {
     this.http.post('http://localhost:5000/api/allocate-orders', {}, { headers }).subscribe(
       (response: any) => {
         console.log('Leads allocated successfully:', response);
-        this.alertMessage = 'Leads allocated successfully!';
+        this.alertMessage = response.message || 'Leads allocated successfully!';
         this.showAlert = true; // Show the alert
         this.getTeams(); // Refresh the teams' data to reflect updated allocations
       },
@@ -257,4 +305,10 @@ closeAlert(): void {
   generateToken() {
     console.log('Token generation logic not implemented yet.');
   }
+
+
+//this is for grid 
+
+
+
 }

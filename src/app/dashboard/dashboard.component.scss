@@ -295,3 +295,65 @@
     transform: scale(1);
   }
 }
+
+
+//card/* Container for Team Cards */
+.team-container {
+  display: flex;
+  flex-wrap: wrap; /* Cards will wrap to the next line if space runs out */
+  justify-content: center; /* Center cards horizontally */
+  gap: 24px; /* Space between cards */
+  padding: 16px;
+}
+
+/* Team Card Styling */
+.team-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%; /* Full width on small screens */
+  max-width: 400px; /* Restrict card width for better appearance */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-header {
+    background-color: #007bff; /* Blue top strip */
+    height: 8px; /* Height of the strip */
+    width: 100%;
+  }
+
+  .card-content {
+    padding: 16px;
+
+    h3 {
+      color: #007bff; /* Team name in blue */
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 4px 0;
+      color: #333;
+    }
+  }
+}
+
+/* Responsive Breakpoints */
+@media screen and (min-width: 768px) {
+  .team-card {
+    flex: 1 1 calc(50% - 24px); /* Two cards per row on medium screens */
+    max-width: calc(50% - 24px);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .team-card {
+    flex: 1 1 calc(33.333% - 24px); /* Three cards per row on larger screens */
+    max-width: calc(33.333% - 24px);
+  }
+}
