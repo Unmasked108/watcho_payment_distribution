@@ -3,7 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';  // Import CommonModule
 import { MatButtonModule } from '@angular/material/button';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -40,6 +40,7 @@ interface Team {
     MatInputModule,
     MatNativeDateModule,
     MatFormFieldModule,
+    ReactiveFormsModule
     
   ],
   templateUrl: './dashboard.component.html',
@@ -58,8 +59,10 @@ export class DashboardComponent  {
 
   
   applyDateFilter(): void {
+   
     let startDate: Date | null = null;
     let endDate: Date | null = null;
+
 
     // Determine the date range
     if (this.selectedDateRange === 'today') {
@@ -85,12 +88,18 @@ export class DashboardComponent  {
         console.warn('Incomplete custom date range!');
         return;
       }
-      startDate = this.customStartDate;
-      endDate = this.customEndDate;
+      startDate = new Date(this.customStartDate);
+      endDate = new Date(this.customEndDate);
+      console.log('Selected Date Range:', this.selectedDateRange);
+      console.log('Start Date:', this.customStartDate);
+      console.log('End Date:', this.customEndDate);
+    
+      console.log(startDate,endDate)
     }
 
     // Fetch data for the selected date range
     this.fetchLeadsData(startDate, endDate);
+    
   }
 
   fetchLeadsData(startDate: Date | null, endDate: Date | null): void {
@@ -139,9 +148,9 @@ export class DashboardComponent  {
   ];
   teams: Team[] = [];  // Update the type here
 
-  private apiUrl = 'http://localhost:5000/api/teams';
-  private allocationUrl = 'http://localhost:5000/api/allocate-orders';
-  private ordersUrl = 'http://localhost:5000/api/orders';
+  private apiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
+  private allocationUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders';
+  private ordersUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders';
 
 
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef) {}
@@ -189,33 +198,66 @@ getTeams(): void {
   );
 }
    // Fetch allocations and update the table
-   
-getAllocations(): void {
-  const headers = new HttpHeaders({
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  });
-
-  this.http.get<any[]>(this.allocationUrl, { headers }).subscribe(
-    (allocations) => {
-      allocations.forEach((allocation) => {
-        const team = this.teams.find((t) => t.teamId === allocation.teamId.teamId);
-        console.log('Allocations:', allocations);
-        if (team) {
-          team.allocation = allocation.status || 'Allocated';
-          team.allocatedTime = new Date(allocation.allocationDate).toLocaleString();
-          team.leadsAllocated = allocation.leadsAllocated;  // Now populated from the API
-          team.leadsCompleted = allocation.leadsCompleted;  // Now populated from the API
-        }
-      });
-
-      // Explicitly trigger change detection to update the UI
-      this.cdRef.detectChanges();
-    },
-    (error) => {
-      console.error('Error fetching allocations:', error);
+   getAllocations(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    // Get the current date range
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+  
+    if (this.selectedDateRange === 'today') {
+      const today = new Date();
+      startDate = endDate = today;
+    } else if (this.selectedDateRange === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      startDate = endDate = yesterday;
+    } else if (this.selectedDateRange === 'thisWeek') {
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      startDate = startOfWeek;
+      endDate = today;
+    } else if (this.selectedDateRange === 'thisMonth') {
+      const today = new Date();
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      startDate = startOfMonth;
+      endDate = today;
+    } else if (this.selectedDateRange === 'custom') {
+      if (this.customStartDate && this.customEndDate) {
+        startDate = new Date(this.customStartDate);
+        endDate = new Date(this.customEndDate);
+      }
     }
-  );
-}
+  
+    const params = {
+      startDate: startDate ? startDate.toISOString() : '',
+      endDate: endDate ? endDate.toISOString() : '',
+    };
+  
+    this.http.get<any[]>(this.allocationUrl, { headers, params }).subscribe(
+      (allocations) => {
+        allocations.forEach((allocation) => {
+          const team = this.teams.find((t) => t.teamId === allocation.teamId.teamId);
+          if (team) {
+            team.allocation = allocation.status || 'Allocated';
+            team.allocatedTime = new Date(allocation.allocationDate).toLocaleString();
+            team.leadsAllocated = allocation.leadsAllocated; // Filtered data
+            team.leadsCompleted = allocation.leadsCompleted; // Filtered data
+          }
+        });
+  
+        // Explicitly trigger change detection to update the UI
+        this.cdRef.detectChanges();
+      },
+      (error) => {
+        console.error('Error fetching allocations:', error);
+      }
+    );
+  }
+  
   
   fetchOrderDetails(teamId: string, leadIds: string[]): void {
     const headers = new HttpHeaders({

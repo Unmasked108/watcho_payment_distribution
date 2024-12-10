@@ -99,7 +99,7 @@ export class UsersComponent implements OnInit {
     });
   
     this.http
-      .get<any>('http://localhost:5000/api/lead-allocations', { headers })
+      .get<any>('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/lead-allocations', { headers })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
@@ -130,7 +130,7 @@ export class UsersComponent implements OnInit {
     });
   
     const leadIdsQuery = this.leadIds.join(',');
-    const url = `http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
+    const url = `https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders?leadIds=${leadIdsQuery}`;
   
     this.http.get<any>(url, { headers }).subscribe({
       next: (response) => {
@@ -174,7 +174,7 @@ export class UsersComponent implements OnInit {
 
     // Send all updates in one request
     this.http
-      .patch('http://localhost:5000/api/orders/payment-status', { orders: payload }, { headers })
+      .patch('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/payment-status', { orders: payload }, { headers })
       .subscribe({
         next: (response) => {
           console.log('Payment status updated:', response);

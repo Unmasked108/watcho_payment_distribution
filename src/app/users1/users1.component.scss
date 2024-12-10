@@ -1,0 +1,164 @@
+.navbar {
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #333;
+  
+      &:hover {
+        color: #0d6efd;
+        text-decoration: none;
+      }
+    }
+  
+   
+  
+    .user-info {
+      .username {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #333;
+  
+        &:hover {
+          color: #0d6efd;
+        }
+      }
+  
+      .dropdown-menu {
+        min-width: 250px;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }.table-container {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    width: 100%;
+    overflow-x: auto; /* For horizontal scrolling on smaller screens */
+  }
+  
+  .custom-table {
+    width: auto; /* Table width adjusts according to its content */
+    background-color: #fff;
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    overflow: hidden; /* Ensures rounded corners are applied to the table */
+    border-collapse: separate; /* Prevents border overlapping on rounded corners */
+  
+    mat-header-cell,
+    mat-cell {
+      padding: 8px;
+      font-size: 14px;
+    }
+  
+    mat-header-cell {
+      font-weight: bold;
+      background-color: #007bff;
+      color: white;
+      text-align: left;
+      border-bottom: 2px solid #e1e1e1;
+    }
+  
+    mat-cell {
+      border-bottom: 1px solid #e1e1e1;
+    }
+  
+    .order-id-cell {
+      word-break: break-word; /* Handle long text */
+    }
+  
+    .undo-cell {
+      text-align: center;
+    }
+  
+    mat-row:nth-child(even) {
+      background-color: #f1f9fc;
+    }
+  
+    mat-row:hover {
+      background-color: #e0f7fa;
+    }
+  
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      mat-header-cell,
+      mat-cell {
+        font-size: 12px; /* Smaller text for smaller screens */
+        padding: 6px;
+      }
+    }
+  }
+  
+
+  .card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    width: 100%;
+  }
+  
+  .card {
+    width: 300px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow */
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+  
+    &:hover {
+      transform: scale(1.05); /* Scale effect on hover */
+    }
+  
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px; /* Space between lead rows */
+    }
+  
+    .lead-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  
+      .lead-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+      }
+  
+      .lead-number {
+        font-size: 18px;
+        font-weight: bold;
+      }
+  
+      .allocated {
+        color: #28a745; /* Green color for allocated leads */
+      }
+  
+      .remaining {
+        color: #dc3545; /* Red color for remaining leads */
+      }
+    }
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .card {
+      width: 90%; /* Adjust card width on smaller screens */
+    }
+  }
+
+  

@@ -7,6 +7,7 @@ import { UsersComponent } from './users/users.component';
 import { TeamManagerComponent } from './team-manager/team-manager.component';
 import { HistoryComponent } from './history/history.component';
 import { TLHistoryComponent } from './tlhistory/tlhistory.component';
+import { Users1Component } from './users1/users1.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },  // Login page
@@ -24,5 +25,6 @@ export const routes: Routes = [
         ],
     },
     { path: 'TeamsManager', component: TeamManagerComponent},
-    {path: 'TLhistory' , component: TLHistoryComponent}
+    {path: 'TLhistory' , component: TLHistoryComponent},
+    {path: 'users1', component:Users1Component}
 ];

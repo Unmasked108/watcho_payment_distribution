@@ -66,7 +66,7 @@ export class TLHistoryComponent implements OnInit {
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
     console.log('Formatted Date:', formattedDate); // Debugging
     
-    const allocationsUrl = `http://localhost:5000/api/lead-allocations`;
+    const allocationsUrl = `https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/lead-allocations`;
   
     // Fetch allocations for the selected date
     this.http
@@ -94,7 +94,7 @@ export class TLHistoryComponent implements OnInit {
   
           // Fetch orders using leadIds
           this.http
-            .get<any>(`http://localhost:5000/api/orders`, {
+            .get<any>(`https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders`, {
               headers,
               params: { leadIds: leadIds.join(',') },
             })
