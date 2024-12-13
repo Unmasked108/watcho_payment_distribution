@@ -53,54 +53,57 @@ export class DashboardComponent  {
   selectedDateRange: string = 'today'; // Default to "Today"
   customStartDate: Date | null = null;
   customEndDate: Date | null = null;
+  username: string = ''; 
+  initials: string = ''; 
 
   totalLeadsAllocated: number = 0; // Total allocated leads
   totalLeadsCompleted: number = 0; // Total completed leads
+// Add the global date range variables
+selectedStartDate: Date | null = null;
+selectedEndDate: Date | null = null;
 
-  
-  applyDateFilter(): void {
-   
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
+applyDateFilter(): void {
+  let startDate: Date | null = null;
+  let endDate: Date | null = null;
 
-
-    // Determine the date range
-    if (this.selectedDateRange === 'today') {
-      const today = new Date();
-      startDate = endDate = today;
-    } else if (this.selectedDateRange === 'yesterday') {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      startDate = endDate = yesterday;
-    } else if (this.selectedDateRange === 'thisWeek') {
-      const today = new Date();
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      startDate = startOfWeek;
-      endDate = today;
-    } else if (this.selectedDateRange === 'thisMonth') {
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      startDate = startOfMonth;
-      endDate = today;
-    } else if (this.selectedDateRange === 'custom') {
-      if (!this.customStartDate || !this.customEndDate) {
-        console.warn('Incomplete custom date range!');
-        return;
-      }
-      startDate = new Date(this.customStartDate);
-      endDate = new Date(this.customEndDate);
-      console.log('Selected Date Range:', this.selectedDateRange);
-      console.log('Start Date:', this.customStartDate);
-      console.log('End Date:', this.customEndDate);
-    
-      console.log(startDate,endDate)
+  // Determine the date range based on the selected option
+  if (this.selectedDateRange === 'today') {
+    const today = new Date();
+    startDate = endDate = today;
+  } else if (this.selectedDateRange === 'yesterday') {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    startDate = endDate = yesterday;
+  } else if (this.selectedDateRange === 'thisWeek') {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startDate = startOfWeek;
+    endDate = today;
+  } else if (this.selectedDateRange === 'thisMonth') {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    startDate = startOfMonth;
+    endDate = today;
+  } else if (this.selectedDateRange === 'custom') {
+    if (!this.customStartDate || !this.customEndDate) {
+      console.warn('Incomplete custom date range!');
+      return;
     }
-
-    // Fetch data for the selected date range
-    this.fetchLeadsData(startDate, endDate);
-    
+    startDate = new Date(this.customStartDate);
+    endDate = new Date(this.customEndDate);
   }
+
+  // Store the selected date range globally
+  this.selectedStartDate = startDate;
+  this.selectedEndDate = endDate;
+
+  // Fetch data for the selected date range
+  this.fetchLeadsData(startDate, endDate);
+
+  // Call method to update allocations based on the selected date range
+  this.updateAllocationsBasedOnDateRange();
+}
 
   fetchLeadsData(startDate: Date | null, endDate: Date | null): void {
     const headers = new HttpHeaders({
@@ -134,6 +137,17 @@ export class DashboardComponent  {
     );
   }
 
+  updateAllocationsBasedOnDateRange(): void {
+    // If no date range is selected, don't update
+    if (!this.selectedStartDate || !this.selectedEndDate) {
+      console.warn('Date range is not selected.');
+      return;
+    }
+  
+    // Call getAllocations() with the globally selected date range
+    this.getAllocations();
+  }
+  
   
 
   displayedColumns: string[] = [
@@ -148,11 +162,14 @@ export class DashboardComponent  {
   ];
   teams: Team[] = [];  // Update the type here
 
-  private apiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
-  private allocationUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders';
-  private ordersUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders';
+  private apiUrl = 'http://localhost:5000/api/teams';
+  private allocationUrl = 'http://localhost:5000/api/allocate-orders';
+  private ordersUrl = 'http://localhost:5000/api/orders';
 
 
+  // private apiUrl = 'http://localhost:5000/api/teams';
+  // private allocationUrl = 'http://localhost:5000/api/allocate-orders';
+  // private ordersUrl = 'http://localhost:5000/api/orders';
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -161,103 +178,121 @@ export class DashboardComponent  {
     this.getAllocations();
     console.log('Teams:', this.teams);  // Log teams to see if the data is populated
     this.applyDateFilter(); // Fetch data for "Today" by default
+    this.username = localStorage.getItem('username') || ''; 
+    this.initials = this.getInitials(this.username); // Generate initials from username
 
   }
 
+  getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase(); // Ensure initials are uppercase
+  }
   // Fetch teams from backend
  
+  getTeams(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    const role = localStorage.getItem('role');
+    const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
+  
+    this.http.get<any[]>(url, { headers }).subscribe(
+      (data) => {
+        // Populate teams array with relevant data
+        console.log('Teams data:', data); // Log the response to check the data
+        this.teams = data.map(team => ({
+          teamName: team.teamName,
+          teamId: team.teamId, // Assuming teamId is either a string or an object
+          teamStatus: 'Active', // Assuming a default value, adjust if needed
+          allocation: team.allocationStatus || 'Not Allocated', // Use the backend's allocation status
+          allocatedTime: team.allocatedTime || null, // Use the backend's allocated time
+          teamCapacity: team.capacity, // Populate capacity from the backend response
+          leadsAllocated: null, // Initialize with null or placeholder until fetched
+          leadsCompleted: null, // Initialize with null or placeholder until fetched
+        }));
+        console.log('Teams array after population:', this.teams);
 
-getTeams(): void {
-  const headers = new HttpHeaders({
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  });
-
-  const role = localStorage.getItem('role');
-  const url = role === 'Admin' ? `${this.apiUrl}` : this.apiUrl;
-
-  this.http.get<any[]>(url, { headers }).subscribe(
-    (data) => {
-      // Populate teams array with relevant data
-      console.log('Teams data:', data); // Log the response to check the data
-      this.teams = data.map(team => ({
-        teamName: team.teamName,
-        teamId: team.teamId,
-        teamStatus: 'Active', // Assuming a default value, adjust if needed
-        allocation: team.allocationStatus || 'Not Allocated', // Use the backend's allocation status
-        allocatedTime: team.allocatedTime || null, // Use the backend's allocated time
-        teamCapacity: team.capacity, // Populate capacity from the backend response
-        leadsAllocated: null, // Initialize with null or placeholder until fetched
-        leadsCompleted: null,
-      }));
-      // Now call getAllocations after teams are populated
-      this.getAllocations();
-    },
-    (error) => {
-      console.error('Error fetching teams data:', error);
-    }
-  );
-}
+        // Now call getAllocations after teams are populated
+        this.getAllocations(); // Call allocations after teams are loaded
+      },
+      (error) => {
+        console.error('Error fetching teams data:', error);
+      }
+    );
+  }
+  
    // Fetch allocations and update the table
    getAllocations(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
   
-    // Get the current date range
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
-  
-    if (this.selectedDateRange === 'today') {
-      const today = new Date();
-      startDate = endDate = today;
-    } else if (this.selectedDateRange === 'yesterday') {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      startDate = endDate = yesterday;
-    } else if (this.selectedDateRange === 'thisWeek') {
-      const today = new Date();
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      startDate = startOfWeek;
-      endDate = today;
-    } else if (this.selectedDateRange === 'thisMonth') {
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      startDate = startOfMonth;
-      endDate = today;
-    } else if (this.selectedDateRange === 'custom') {
-      if (this.customStartDate && this.customEndDate) {
-        startDate = new Date(this.customStartDate);
-        endDate = new Date(this.customEndDate);
-      }
-    }
-  
     const params = {
-      startDate: startDate ? startDate.toISOString() : '',
-      endDate: endDate ? endDate.toISOString() : '',
+      startDate: this.selectedStartDate ? this.selectedStartDate.toISOString() : '',
+      endDate: this.selectedEndDate ? this.selectedEndDate.toISOString() : '',
     };
+  
+    console.log('Fetching allocations data with params:', params);
   
     this.http.get<any[]>(this.allocationUrl, { headers, params }).subscribe(
       (allocations) => {
+        let totalLeadsAllocated = 0;
+        let totalLeadsCompleted = 0;
+  
+        // Clear previous data
+        this.teams.forEach((team) => {
+          team.leadsAllocated = 0;
+          team.leadsCompleted = 0;
+        });
+  
         allocations.forEach((allocation) => {
-          const team = this.teams.find((t) => t.teamId === allocation.teamId.teamId);
+          const teamId = allocation.teamId.teamId;
+          console.log('Processing allocation for teamId:', teamId);
+  
+          // Find the team with the matching teamId
+          const team = this.teams.find((t) => t.teamId === teamId);
+  
           if (team) {
+            console.log(`Found matching team: ${team.teamName}`);
             team.allocation = allocation.status || 'Allocated';
             team.allocatedTime = new Date(allocation.allocationDate).toLocaleString();
-            team.leadsAllocated = allocation.leadsAllocated; // Filtered data
-            team.leadsCompleted = allocation.leadsCompleted; // Filtered data
+  
+            // Add leads for this allocation
+            team.leadsAllocated = (team.leadsAllocated || 0) + (allocation.leadsAllocated || 0);
+            team.leadsCompleted = (team.leadsCompleted || 0) + (allocation.leadsCompleted || 0);
+  
+            // Add to total leads
+            totalLeadsAllocated += allocation.leadsAllocated || 0;
+            totalLeadsCompleted += allocation.leadsCompleted || 0;
+  
+            console.log('Updated team:', team);
+          } else {
+            console.log('No matching team found for teamId:', teamId);
           }
         });
   
-        // Explicitly trigger change detection to update the UI
+        // Log the total leads
+        console.log('Total Leads Allocated:', totalLeadsAllocated);
+        console.log('Total Leads Completed:', totalLeadsCompleted);
+  
+        // Store totals in variables for the UI
+        this.totalLeadsAllocated = totalLeadsAllocated;
+        this.totalLeadsCompleted = totalLeadsCompleted;
+  
+        // Trigger change detection to update the UI
         this.cdRef.detectChanges();
+        console.log('Allocation data:', allocations);
       },
       (error) => {
         console.error('Error fetching allocations:', error);
       }
     );
   }
-  
+    
   
   fetchOrderDetails(teamId: string, leadIds: string[]): void {
     const headers = new HttpHeaders({
@@ -340,7 +375,8 @@ private processCSV() {
     });
 
     // Send data to the backend
-    this.http.post('http://localhost:5000/api/orders', parsedData, { headers: httpHeaders }).subscribe(
+    this.http.post('http://localhost:5000/api/orders ' //http://localhost:5000/api/orders
+      , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
         console.log('Data saved successfully:', response);
         this.fileUploadAlertMessage = 'Data saved successfully!';
@@ -391,7 +427,8 @@ closeFileUploadAlert() {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    this.http.post('http://localhost:5000/api/orders/upload-pdf', formData).subscribe(
+    this.http.post('http://localhost:5000/api/orders/upload-pdf' //http://localhost:5000/api/orders/upload-pdf
+      , formData).subscribe(
       (response) => {
         console.log('PDF uploaded successfully:', response);
       },
@@ -402,12 +439,19 @@ closeFileUploadAlert() {
   }
   showAlert = false; // Tracks if the alert is visible
   alertMessage = ''; // Stores the alert message
-  
   allocateLeads(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-    this.http.post('http://localhost:5000/api/allocate-orders', {}, { headers }).subscribe(
+  
+    const allocationDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
+    console.log('Frontend allocationDate:', allocationDate); // Log the allocation date sent to the backend
+  
+    this.http.post(
+      'http://localhost:5000/api/allocate-orders',
+      { allocationDate },
+      { headers }
+    ).subscribe(
       (response: any) => {
         console.log('Leads allocated successfully:', response);
         this.alertMessage = response.message || 'Leads allocated successfully!';
@@ -421,6 +465,8 @@ closeFileUploadAlert() {
       }
     );
   }
+  
+  
   
 closeAlert(): void {
   this.showAlert = false; // Hide the alert

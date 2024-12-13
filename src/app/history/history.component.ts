@@ -41,7 +41,7 @@ export class HistoryComponent {
   filteredData: any[] = [];
 
   // Replace with your actual API endpoint
-  private readonly apiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/history-data';
+  private readonly apiUrl = 'http://localhost:5000/api/history-data';
 
   constructor(private http: HttpClient) {}
 

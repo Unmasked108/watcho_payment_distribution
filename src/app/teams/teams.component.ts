@@ -52,7 +52,7 @@ export class TeamsComponent implements OnInit {
   teamData: Team | null = null; // Hold the selected team's data
 
 
-  private apiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
+  private apiUrl = 'http://localhost:5000/api/teams';
 
   constructor(
     private fb: FormBuilder,
@@ -293,8 +293,7 @@ export class TeamsComponent implements OnInit {
 
   addMember(teamId: string): void {
     if (!teamId) {
-      console.error('Invalid team ID!');
-      this.snackBar.open('Team ID is not valid!', 'Close', {
+      this.snackBar.open('Invalid team ID!', 'Close', {
         duration: 3000,
         horizontalPosition: 'right',
         verticalPosition: 'top',
@@ -302,13 +301,12 @@ export class TeamsComponent implements OnInit {
       return;
     }
   
-    // Get member details from the user
-    const memberName = prompt('Enter new member name:');
-    const memberId = prompt('Enter new member ID:');
+    // Get member email from the user
+    const memberEmail = prompt('Enter new member email:');
   
-    // Validate inputs
-    if (!memberName || !memberId) {
-      this.snackBar.open('Member name and ID are required!', 'Close', {
+    // Validate email input
+    if (!memberEmail || !memberEmail.trim()) {
+      this.snackBar.open('Member email is required!', 'Close', {
         duration: 3000,
         horizontalPosition: 'right',
         verticalPosition: 'top',
@@ -316,8 +314,8 @@ export class TeamsComponent implements OnInit {
       return;
     }
   
-    // Construct new member object
-    const newMember = { name: memberName, userId: memberId };
+    // Construct request payload
+    const payload = { email: memberEmail };
   
     // Set headers for the API request
     const headers = new HttpHeaders({
@@ -326,13 +324,11 @@ export class TeamsComponent implements OnInit {
   
     // API call to add the member
     this.http
-      .post(`${this.apiUrl}/${teamId}`, newMember, { headers })
+      .post(`${this.apiUrl}/${teamId}`, payload, { headers })
       .subscribe(
         (response: any) => {
-          // Ensure selectedTeam is not null
-          if (this.selectedTeam) {
-            this.selectedTeam.membersList.push(newMember);
-            this.selectedTeam.numMembers++;
+          if (response?.team) {
+            this.selectedTeam = response.team;
   
             this.snackBar.open('Member added successfully!', 'Close', {
               duration: 3000,
@@ -352,8 +348,6 @@ export class TeamsComponent implements OnInit {
       );
   }
   
-  
-
   
   
   editMember(teamId: string, userId: string): void {

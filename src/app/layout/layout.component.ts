@@ -9,13 +9,22 @@ import { RouterModule, RouterOutlet } from '@angular/router';
   styleUrls: ['./layout.component.scss'],
 })
 export class LayoutComponent implements OnInit {
-  username: string = 'John Doe'; // Default username
-  initials: string = this.getInitials(this.username); // Initials based on username
+  username: string = ''; 
+  initials: string = ''; 
   isDarkMode: boolean = false; // Tracks the current theme mode
 
   ngOnInit(): void {
     this.isDarkMode = localStorage.getItem('theme') === 'dark'; // Initialize dark mode
     this.applyTheme();
+    this.username = localStorage.getItem('username') || ''; 
+    this.initials = this.getInitials(this.username); // Generate initials from username
+  }
+  getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase(); // Ensure initials are uppercase
   }
 
   toggleDarkMode() {
@@ -33,10 +42,4 @@ export class LayoutComponent implements OnInit {
     }
   }
 
-  getInitials(name: string): string {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('');
-  }
 }
