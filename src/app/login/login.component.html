@@ -1,56 +1,64 @@
 <div class="container d-flex justify-content-center align-items-center vh-100">
-    <mat-card class="login-card">
-      <form *ngIf="isLoginMode; else signupTemplate" #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
-        <h2 class="text-center mat-title">Login</h2>
+  <mat-card class="login-card">
+    <form *ngIf="isLoginMode; else signupTemplate" #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
+      <h2 class="text-center mat-title">Login</h2>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" name="email" ngModel required placeholder="Enter your email">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput [type]="showLoginPassword ? 'text' : 'password'" name="password" ngModel required placeholder="Enter your password">
+        <button mat-icon-button matSuffix (click)="toggleLoginPasswordVisibility()" type="button" tabindex="-1">
+          <mat-icon>{{ showLoginPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" class="full-width">Login</button>
+      <p class="text-center mt-2">
+        Don't have an account? 
+        <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Sign Up</a>
+      </p>
+    </form>
+
+    <ng-template #signupTemplate>
+      <form #signupForm="ngForm" (ngSubmit)="onSignup(signupForm)">
+        <h2 class="text-center mat-title">Sign Up</h2>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput type="text" name="name" ngModel required placeholder="Enter your name">
+        </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
           <input matInput type="email" name="email" ngModel required placeholder="Enter your email">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
-          <input matInput type="password" name="password" ngModel required placeholder="Enter your password">
+          <input matInput [type]="showSignupPassword ? 'text' : 'password'" name="password" ngModel required placeholder="Enter your password">
+          <button mat-icon-button matSuffix (click)="toggleSignupPasswordVisibility()" type="button" tabindex="-1">
+            <mat-icon>{{ showSignupPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
         </mat-form-field>
-        <button mat-raised-button color="primary" type="submit" class="full-width">Login</button>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Re-enter Password</mat-label>
+          <input matInput [type]="showSignupConfirmPassword ? 'text' : 'password'" name="confirmPassword" ngModel required placeholder="Re-enter your password">
+          <button mat-icon-button matSuffix (click)="toggleSignupConfirmPasswordVisibility()" type="button" tabindex="-1">
+            <mat-icon>{{ showSignupConfirmPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" class="full-width">Sign Up</button>
         <p class="text-center mt-2">
-          Don't have an account? 
-          <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Sign Up</a>
+          Already have an account? 
+          <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Login</a>
         </p>
       </form>
-  
-      <ng-template #signupTemplate>
-        <form #signupForm="ngForm" (ngSubmit)="onSignup(signupForm)">
-          <h2 class="text-center mat-title">Sign Up</h2>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Name</mat-label>
-            <input matInput type="text" name="name" ngModel required placeholder="Enter your name">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email</mat-label>
-            <input matInput type="email" name="email" ngModel required placeholder="Enter your email">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Password</mat-label>
-            <input matInput type="password" name="password" ngModel required placeholder="Enter your password">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Re-enter Password</mat-label>
-            <input matInput type="password" name="confirmPassword" ngModel required placeholder="Re-enter your password">
-          </mat-form-field>
-          <button mat-raised-button color="primary" type="submit" class="full-width">Sign Up</button>
-          <p class="text-center mt-2">
-            Already have an account? 
-            <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Login</a>
-          </p>
-        </form>
 
-        <div class="modal-overlay" *ngIf="showSuccessModal">
-          <div class="modal-content">
-            <h2>Signup Successful</h2>
-            <p>You have successfully signed up!</p>
-            <button (click)="redirectToLogin()">OK</button>
-          </div>
+      <div class="modal-overlay" *ngIf="showSuccessModal">
+        <div class="modal-content">
+          <h2>Signup Successful</h2>
+          <p>You have successfully signed up!</p>
+          <button (click)="redirectToLogin()">OK</button>
         </div>
-      </ng-template>
-    </mat-card>
-  </div>
-  
+      </div>
+    </ng-template>
+  </mat-card>
+</div>

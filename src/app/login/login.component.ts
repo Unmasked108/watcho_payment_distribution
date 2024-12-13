@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClientModule,HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     CommonModule,
     RouterModule,
     HttpClientModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatIconModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -31,7 +33,22 @@ export class LoginComponent {
   isLoginMode: boolean = true;
 
   constructor(private http: HttpClient, private router: Router, private snackBar: MatSnackBar) {}
-
+  showLoginPassword = false;
+  showSignupPassword = false;
+  showSignupConfirmPassword = false;
+  
+  toggleLoginPasswordVisibility(): void {
+    this.showLoginPassword = !this.showLoginPassword;
+  }
+  
+  toggleSignupPasswordVisibility(): void {
+    this.showSignupPassword = !this.showSignupPassword;
+  }
+  
+  toggleSignupConfirmPasswordVisibility(): void {
+    this.showSignupConfirmPassword = !this.showSignupConfirmPassword;
+  }
+  
   toggleMode() {
     this.isLoginMode = !this.isLoginMode;
   }
