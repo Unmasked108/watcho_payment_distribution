@@ -158,14 +158,14 @@
     </ng-container>
 
     <!-- Task Completion Column -->
-    <ng-container matColumnDef="completion">
+    <!-- <ng-container matColumnDef="completion">
       <mat-header-cell *matHeaderCellDef> Task Completion </mat-header-cell>
       <mat-cell *matCellDef="let team">
         <button mat-raised-button color="accent" (click)="approveTask(team)">
           Approve
         </button>
       </mat-cell>
-    </ng-container>
+    </ng-container> -->
 
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>

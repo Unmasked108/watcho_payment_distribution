@@ -158,7 +158,7 @@ applyDateFilter(): void {
     'allocatedTime',
     'teamCapacity', // Add this
 
-    'completion',
+    // 'completion',
   ];
   teams: Team[] = [];  // Update the type here
 
@@ -401,9 +401,8 @@ closeFileUploadAlert() {
   // Parse CSV data
   private parseCSV(csvData: string, headers: string[]): any[] {
     const rows = csvData.split('\n').filter(row => row.trim() !== ''); // Split rows and remove empty lines
-    
-    // Skip the first row (headers) and start parsing data from the second row
-    return rows.slice(1).map((row) => {
+  
+    return rows.map((row, rowIndex) => {
       const values = row.split(','); // Split columns by comma
       const record: any = {};
       headers.forEach((header, index) => {
@@ -416,7 +415,7 @@ closeFileUploadAlert() {
       record.paymentModeBy = record.paymentModeBy || 'Cash';
   
       return record;
-    });
+    }).filter(record => record.customerId && record.orderId); // Ensure mandatory fields are present
   }
   
   
