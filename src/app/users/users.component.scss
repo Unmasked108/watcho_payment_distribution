@@ -107,39 +107,69 @@
     .ms-2 {
       margin-left: 10px;             // Space between checkbox and text
     }
-  }
-  
+  }.table-container {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto; /* Horizontal scroll for smaller screens */
+  margin: 20px auto; /* Center the table container */
+
   .custom-table {
-    margin-top: 20px;
-    width: 90%;
+    margin: 0; /* Remove extra margins */
+    width: 100%; /* Default width for smaller screens */
+    min-width: 600px; /* Ensure a minimum width for usability */
+    max-width: 100%; /* Prevent exceeding the container size */
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow */
     overflow: hidden;
-  
+
     mat-header-cell {
       font-weight: bold;
       background-color: #007bff;
       color: white;
-      padding: 8px; /* Reduced padding for compactness */
+      padding: 8px; /* Compact padding */
       text-align: left;
-      font-size: 14px; /* Smaller font size */
+      font-size: 14px; /* Adjust font size for responsiveness */
       border-bottom: 2px solid #e1e1e1;
     }
-  
+
     mat-cell {
-      padding: 8px; /* Reduced padding */
+      padding: 8px; /* Compact padding */
       text-align: left;
-      font-size: 14px; /* Smaller font size */
+      font-size: 14px; /* Adjust font size */
       border-bottom: 1px solid #e1e1e1;
+      white-space: nowrap; /* Prevent text wrapping */
     }
-  
+
     mat-row:nth-child(even) {
       background-color: #f1f9fc;
     }
-  
+
     mat-row:hover {
       background-color: #e0f7fa;
     }
   }
-  
+
+  /* Media query for desktop screens */
+  @media (min-width: 1024px) {
+    .custom-table {
+      width: 70%; /* Table takes up to 70% of the screen width */
+      max-width: 70%; /* Ensure it doesn't exceed 70% */
+      margin: 0 auto; /* Center the table on larger screens */
+    }
+  }
+
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .custom-table {
+      min-width: 100%; /* Ensure the table takes full width on small screens */
+      font-size: 12px; /* Adjust font size for smaller screens */
+    }
+
+    mat-header-cell,
+    mat-cell {
+      padding: 6px; /* Reduce padding for smaller screens */
+    }
+  }
+}

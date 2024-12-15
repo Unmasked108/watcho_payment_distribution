@@ -63,9 +63,9 @@
       </mat-card-header>
       <mat-card-content>
         <p>The leads that are allocated: <strong>{{ allocatedLeadsCount }}</strong></p>
-        <button mat-flat-button color="primary" (click)="downloadLeads()">
+        <!-- <button mat-flat-button color="primary" (click)="downloadLeads()">
           <mat-icon>download</mat-icon> Download Leads
-        </button>
+        </button> -->
       </mat-card-content>
     </mat-card>
   
@@ -82,20 +82,24 @@
     </mat-card>
   </div>  
 
+  <div class="table-container">
     <mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
       <!-- Order ID Column -->
       <ng-container matColumnDef="orderId">
         <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
-        <mat-cell *matCellDef="let element">{{ element.orderId || "N/A" }}</mat-cell>
+        <mat-cell *matCellDef="let element">
+          <a [href]="element.link" target="_blank">{{ element.orderId || "N/A" }}</a>
+        </mat-cell>
       </ng-container>
+
     
-      <!-- Link Column -->
+      <!-- Link Column
       <ng-container matColumnDef="link">
         <mat-header-cell *matHeaderCellDef>Link</mat-header-cell>
         <mat-cell *matCellDef="let element">
           <a [href]="element.link" target="_blank">{{ element.link || "N/A" }}</a>
         </mat-cell>
-      </ng-container>
+      </ng-container> -->
     
       <!-- Payment Status Column -->
       <ng-container matColumnDef="paymentStatus">
@@ -109,14 +113,14 @@
       </ng-container>
     
       <!-- Payment Mode Column -->
-      <ng-container matColumnDef="paymentMode">
+      <!-- <ng-container matColumnDef="paymentMode">
         <mat-header-cell *matHeaderCellDef>Payment Mode</mat-header-cell>
         <mat-cell *matCellDef="let element">
           <mat-select [(value)]="element.paymentMode">
             <mat-option *ngFor="let mode of paymentModes" [value]="mode">{{ mode }}</mat-option>
           </mat-select>
         </mat-cell>
-      </ng-container>
+      </ng-container> -->
     
       <!-- Allocation Date Column -->
       <ng-container matColumnDef="allocationDate">
@@ -133,4 +137,4 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
-    
+  </div>

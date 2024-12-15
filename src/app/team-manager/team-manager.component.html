@@ -167,7 +167,13 @@
       <div class="save-btn-container mt-4">
         <button mat-raised-button color="primary" (click)="saveData()">Save</button>
       </div>
-    
+
+      <!-- <div class="custom-alert" *ngIf="showAlert">
+        <div class="alert-content">
+          <p>{{ alertMessage }}</p>
+          <button (click)="closeAlert()">OK</button>
+        </div>
+      </div> -->
       <!-- Edit Modal -->
       <div *ngIf="isEditing" class="overlay">
         <mat-card class="edit-card">

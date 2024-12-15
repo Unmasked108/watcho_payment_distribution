@@ -70,10 +70,10 @@ export class UsersComponent implements OnInit {
 
   // Pagination related variables
 
-  displayedColumns: string[] = ['orderId', 'link', 'paymentStatus', 'paymentMode', 'allocationTime','allocationDate'];
+  displayedColumns: string[] = ['orderId', 'paymentStatus', 'allocationTime','allocationDate'];
 
 
-  paymentModes: string[] = ['Credit Card', 'PayPal', 'Bank Transfer', 'Cash'];
+  paymentModes: string[] = ['PhonepeW', 'Upi'];
 
   // Event triggered when payment mode is changed
   onPaymentModeChange(element: any): void {
@@ -123,7 +123,6 @@ export class UsersComponent implements OnInit {
   }
   
   
-  
   fetchOrders(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -138,7 +137,7 @@ export class UsersComponent implements OnInit {
           const updatedAt = order.updatedAt ? new Date(order.updatedAt) : null;
           return {
             orderId: order.orderId || 'N/A',
-            link: order.link || 'N/A',
+            link: order.link || '#', // Fallback to '#' if no link is provided
             paymentStatus: order.paymentStatus || 'Unpaid',
             paymentMode: order.paymentModeBy || 'N/A', // Adjusted for 'paymentModeBy'
             allocationDate: updatedAt ? updatedAt.toLocaleDateString() : 'N/A', // Format to show date
@@ -154,6 +153,7 @@ export class UsersComponent implements OnInit {
       },
     });
   }
+  
   
   currentTask = {
     paymentStatus: 'Paid', // Default status or update dynamically
