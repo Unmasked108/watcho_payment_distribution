@@ -141,14 +141,14 @@
     <!-- Allocation Column -->
     <ng-container matColumnDef="allocation">
       <mat-header-cell *matHeaderCellDef> Allocation Status </mat-header-cell>
-      <mat-cell *matCellDef="let team"> {{ team.allocation }} </mat-cell>
+      <mat-cell *matCellDef="let team"> {{ team.allocation || "Not Allocated"}} </mat-cell>
     </ng-container>
 
     <!-- Allocated Time Column -->
     <ng-container matColumnDef="allocatedTime">
-      <mat-header-cell *matHeaderCellDef> Allocated Time </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef> Allocated Date</mat-header-cell>
       <mat-cell *matCellDef="let team">
-        {{ team.allocatedTime ? team.allocatedTime : 'Not Allocated' }}
+        {{ team.allocatedTime ? team.allocatedTime : 'Not Allocated' || "null" }}
       </mat-cell>
     </ng-container>
   
