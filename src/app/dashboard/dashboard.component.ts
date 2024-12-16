@@ -11,7 +11,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { ChangeDetectorRef } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule } from '@angular/material/core'
 
 interface Team {
   teamName: string;
@@ -242,11 +242,14 @@ applyDateFilter(): void {
       (allocations) => {
         let totalLeadsAllocated = 0;
         let totalLeadsCompleted = 0;
+      
   
         // Clear previous data
         this.teams.forEach((team) => {
           team.leadsAllocated = 0;
           team.leadsCompleted = 0;
+          team.allocation = 'Not Allocated';
+          team.allocatedTime = null;
         });
   
         allocations.forEach((allocation) => {
@@ -258,10 +261,9 @@ applyDateFilter(): void {
   
           if (team) {
             console.log(`Found matching team: ${team.teamName}`);
-            team.allocation = allocation.status || 'Allocated';
-            team.allocatedTime = new Date(allocation.allocationDate).toLocaleString();
-  
-            // Add leads for this allocation
+            team.allocation = allocation.status || 'Not Allocated';
+            team.allocatedTime = new Date(allocation.allocationDate).toLocaleDateString()||null;
+
             team.leadsAllocated = (team.leadsAllocated || 0) + (allocation.leadsAllocated || 0);
             team.leadsCompleted = (team.leadsCompleted || 0) + (allocation.leadsCompleted || 0);
   
