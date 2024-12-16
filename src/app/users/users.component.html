@@ -55,43 +55,44 @@
   </nav>
  
 
-  <div class="container mt-4">
-    <!-- Leads Card -->
-    <mat-card class="card-container">
-      <mat-card-header>
-        <mat-card-title>Allocated Leads</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>The leads that are allocated: <strong>{{ allocatedLeadsCount }}</strong></p>
-        <!-- <button mat-flat-button color="primary" (click)="downloadLeads()">
-          <mat-icon>download</mat-icon> Download Leads
-        </button> -->
-      </mat-card-content>
-    </mat-card>
+  <div class="card-container">
+    <!-- Allocated Leads Card -->
+    <div class="card">
+      <div class="card-header"></div>
+      <div class="card-content">
+        <h3>Allocated Leads</h3>
+        <p><strong>{{ allocatedLeadsCount }}</strong></p>
+      </div>
+    </div>
   
-    <!-- Task Completed Card -->
-    <mat-card class="card-container">
-      <mat-card-header>
-        <mat-card-title>Task Completed</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <button mat-flat-button color="primary" (click)="savePaymentStatus()">
-          <mat-icon>save</mat-icon> Save
-        </button>
-      </mat-card-content>
-    </mat-card>
-  </div>  
+    <!-- Leads Remaining Card -->
+    <!-- <div class="card">
+      <div class="card-header"></div>
+      <div class="card-content">
+        <h3>Leads Remaining</h3>
+        
+      </div>
+    </div> -->
+  </div>
+  
 
-  <div class="table-container">
+
     <mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
       <!-- Order ID Column -->
       <ng-container matColumnDef="orderId">
         <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          <a [href]="element.link" target="_blank">{{ element.orderId || "N/A" }}</a>
+          <a
+            [href]="element.link"
+            target="_blank"
+            (click)="updatePaymentStatus(element)"
+            [class.disabled]="element.paymentStatus === 'Paid'"
+            [attr.tabindex]="element.paymentStatus === 'Paid' ? -1 : 0"
+          >
+            {{ element.orderId || 'N/A' }}
+          </a>
         </mat-cell>
       </ng-container>
-
     
       <!-- Link Column
       <ng-container matColumnDef="link">
@@ -121,7 +122,18 @@
           </mat-select>
         </mat-cell>
       </ng-container> -->
-    
+      <ng-container matColumnDef="undo">
+        <mat-header-cell *matHeaderCellDef>Undo</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="undo-cell">
+          <button mat-icon-button (click)="undoPaymentStatus(element)" [disabled]="element.paymentStatus !== 'Paid'">
+            <i class="fas fa-undo-alt"></i>
+          </button>
+        </mat-cell>
+      </ng-container>
+      
+      
+      
+      
       <!-- Allocation Date Column -->
       <ng-container matColumnDef="allocationDate">
         <mat-header-cell *matHeaderCellDef>Allocation Date</mat-header-cell>
@@ -137,4 +149,4 @@
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
-  </div>
+  

@@ -56,8 +56,8 @@ export class TeamManagerComponent implements OnInit {
     const role = localStorage.getItem('role'); // Fetch role from localStorage
   
     if (role === 'TeamLeader') {
-      const teamUrl = `http://localhost:5000/api/teams`;
-      const allocationUrl = `http://localhost:5000/api/allocate-orders`;
+      const teamUrl = ` http://localhost:5000/api/teams`;
+      const allocationUrl = ` http://localhost:5000/api/allocate-orders`;
   
       this.http.get(teamUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -200,7 +200,7 @@ export class TeamManagerComponent implements OnInit {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
 
-    this.http.post('http://localhost:5000/api/lead-allocations', { selectedMembers }, { headers })
+    this.http.post(' http://localhost:5000/api/lead-allocations', { selectedMembers }, { headers })
       .subscribe({
         next: (response) => {
           console.log('Data saved successfully:', response);

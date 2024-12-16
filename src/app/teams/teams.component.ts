@@ -52,7 +52,7 @@ export class TeamsComponent implements OnInit {
   teamData: Team | null = null; // Hold the selected team's data
 
 
-  private apiUrl = 'http://localhost:5000/api/teams';
+  private apiUrl = ' http://localhost:5000/api/teams';
 
   constructor(
     private fb: FormBuilder,

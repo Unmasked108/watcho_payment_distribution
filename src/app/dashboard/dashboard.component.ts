@@ -162,14 +162,14 @@ applyDateFilter(): void {
   ];
   teams: Team[] = [];  // Update the type here
 
-  private apiUrl = 'http://localhost:5000/api/teams';
-  private allocationUrl = 'http://localhost:5000/api/allocate-orders';
-  private ordersUrl = 'http://localhost:5000/api/orders';
+  private apiUrl = ' http://localhost:5000/api/teams';
+  private allocationUrl = ' http://localhost:5000/api/allocate-orders';
+  private ordersUrl = ' http://localhost:5000/api/orders';
 
 
-  // private apiUrl = 'http://localhost:5000/api/teams';
-  // private allocationUrl = 'http://localhost:5000/api/allocate-orders';
-  // private ordersUrl = 'http://localhost:5000/api/orders';
+  // private apiUrl = ' http://localhost:5000/api/teams';
+  // private allocationUrl = ' http://localhost:5000/api/allocate-orders';
+  // private ordersUrl = ' http://localhost:5000/api/orders';
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -375,7 +375,7 @@ private processCSV() {
     });
 
     // Send data to the backend
-    this.http.post('http://localhost:5000/api/orders ' //http://localhost:5000/api/orders
+    this.http.post(' http://localhost:5000/api/orders ' // http://localhost:5000/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
         console.log('Data saved successfully:', response);
@@ -426,7 +426,7 @@ closeFileUploadAlert() {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    this.http.post('http://localhost:5000/api/orders/upload-pdf' //http://localhost:5000/api/orders/upload-pdf
+    this.http.post(' http://localhost:5000/api/orders/upload-pdf' // http://localhost:5000/api/orders/upload-pdf
       , formData).subscribe(
       (response) => {
         console.log('PDF uploaded successfully:', response);
@@ -447,7 +447,7 @@ closeFileUploadAlert() {
     console.log('Frontend allocationDate:', allocationDate); // Log the allocation date sent to the backend
   
     this.http.post(
-      'http://localhost:5000/api/allocate-orders',
+      ' http://localhost:5000/api/allocate-orders',
       { allocationDate },
       { headers }
     ).subscribe(

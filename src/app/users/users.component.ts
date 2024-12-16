@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table'; // Import MatTableDataSource
 import { ViewChild } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'; // Import BreakpointObserver
 
 
 @Component({
@@ -29,11 +30,13 @@ export class UsersComponent implements OnInit {
   itemsPerPage: number = 10;
   totalRecords: number = 0;
   allocatedLeadsCount: number = 0; // Updated to fetch dynamically
+  totalLeads: number = 0; // Total leads to calculate remaining leads
+  remainingLeads: number = 0; // The remaining leads after allocation
 
   dataSource = new MatTableDataSource<any>(this.paginatedData);
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit(): void {
     
@@ -41,6 +44,18 @@ export class UsersComponent implements OnInit {
     this.username = localStorage.getItem('username') || ''; 
     this.initials = this.getInitials(this.username); // Generate initials from username
     this.fetchAllocatedLeads(); // Fetch allocated leads count
+  
+     // Watch for screen size changes
+     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
+      if (result.matches) {
+        // On mobile, show only 'orderId' and 'undo' columns
+        this.displayedColumns = ['orderId', 'undo'];
+      } else {
+        // On larger screens, show all columns
+        this.displayedColumns = ['orderId', 'undo', 'paymentStatus', 'allocationDate', 'allocationTime'];
+      }
+    });
+  
   }
 
   getInitials(name: string): string {
@@ -70,7 +85,7 @@ export class UsersComponent implements OnInit {
 
   // Pagination related variables
 
-  displayedColumns: string[] = ['orderId', 'paymentStatus', 'allocationTime','allocationDate'];
+  displayedColumns: string[] = ['orderId', 'undo', 'paymentStatus', 'allocationDate', 'allocationTime'];
 
 
   paymentModes: string[] = ['PhonepeW', 'Upi'];
@@ -99,7 +114,7 @@ export class UsersComponent implements OnInit {
     });
   
     this.http
-      .get<any>('http://localhost:5000/api/lead-allocations', { headers })
+      .get<any>(' http://localhost:5000/api/lead-allocations', { headers })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
@@ -129,7 +144,7 @@ export class UsersComponent implements OnInit {
     });
   
     const leadIdsQuery = this.leadIds.join(',');
-    const url = `http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
+    const url = ` http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
   
     this.http.get<any>(url, { headers }).subscribe({
       next: (response) => {
@@ -160,24 +175,31 @@ export class UsersComponent implements OnInit {
     leadId: '',           // Populate this based on the specific lead/task
   };
   
-  savePaymentStatus(): void {
+  updatePaymentStatus(order: any): void {
+    if (order.paymentStatus === 'Paid') {
+      return; // Prevent multiple updates for already paid orders
+    }
+  
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
   
-    // Create an array of payloads with orderId and paymentStatus for each order that has been modified
-    const payload = this.paginatedData.map((order: any) => ({
-      orderId: order.orderId,  // Order ID
-      paymentStatus: order.paymentStatus,  // Updated payment status
-    }));
-    console.log('Payload being sent to the server:', payload);
-
-    // Send all updates in one request
+    const payload = {
+      orderId: order.orderId,
+      paymentStatus: 'Paid',
+    };
+  
     this.http
-      .patch('http://localhost:5000/api/orders/payment-status', { orders: payload }, { headers })
+      .patch('http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response) => {
           console.log('Payment status updated:', response);
+  
+          // Update the local table data to reflect the status change
+          order.paymentStatus = 'Paid';
+          this.allocatedLeadsCount--; // Decrease leads remaining when an order is marked as paid
+
+          
         },
         error: (error) => {
           console.error('Error updating payment status:', error);
@@ -185,6 +207,37 @@ export class UsersComponent implements OnInit {
       });
   }
   
+  undoPaymentStatus(order: any): void {
+    if (order.paymentStatus !== 'Paid') {
+      return; // Only allow undo if the payment status is "Paid"
+    }
+  
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    const payload = {
+      orderId: order.orderId,
+      paymentStatus: 'Unpaid',
+    };
+  
+    this.http
+      .patch('http://localhost:5000/api/orders/payment-status', payload, { headers })
+      .subscribe({
+        next: (response) => {
+          console.log('Payment status reverted:', response);
+  
+          // Update the local table data to reflect the status change
+          order.paymentStatus = 'Unpaid';
+
+          this.allocatedLeadsCount++; // Increase leads remaining when the status is reverted
+
+        },
+        error: (error) => {
+          console.error('Error reverting payment status:', error);
+        },
+      });
+  }
   
   
   
