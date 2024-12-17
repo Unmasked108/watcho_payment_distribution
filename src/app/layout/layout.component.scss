@@ -66,4 +66,20 @@
       }
     }
   }
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 0.5rem;
+  
+      .nav-link {
+        padding: 0.5rem;
+        text-align: center;
+      }
+  
+      .user-info {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+    }
+  }
   

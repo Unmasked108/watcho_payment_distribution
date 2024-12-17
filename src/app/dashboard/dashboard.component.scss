@@ -379,34 +379,250 @@
   }
 }
 
+.cards-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
 
-.dashboard-container {
-  .cards-container {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
+  .leads-card {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
 
-    .leads-card {
-      width: 300px;
-      text-align: center;
+    // Half-circle container
+    .circle {
+      width: 100%;
+      height: 0;
+      padding-bottom: 50%; // Makes it a perfect circle
+      background-color: #0d6efd;
+      border-bottom-left-radius: 100%;
+      border-bottom-right-radius: 100%;
+      position: relative;
 
-      mat-card-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .circle-title {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: white;
         font-size: 18px;
         font-weight: bold;
       }
+    }
 
-      mat-card-content {
-        font-size: 24px;
+    .card-body {
+      padding: 1.5rem;
+
+      .circle-content {
+        font-size: 28px;
         font-weight: bold;
       }
-
-      &.allocated mat-card-content {
-        color: red;
-      }
-
-      &.completed mat-card-content {
-        color: green;
-      }
     }
+
+    &.allocated .circle-content {
+      color: red;
+    }
+
+    &.completed .circle-content {
+      color: green;
+    }
+  }
+
+  // Responsive behavior for smaller screens
+  @media (max-width: 768px) {
+    .leads-card {
+      max-width: 100%;
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+.card-outline {
+  border: 2px solid #0d6efd;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  position: relative;
+  background-color: white;
+  width: 100%;  /* Ensure card is responsive */
+
+  .price-label {
+    position: absolute;
+    top: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 2px solid #0d6efd;
+    border-radius: 0.5rem;
+    color: #0d6efd;
+    font-weight: bold;
+    font-size: 1.25rem;
+    padding: 0.25rem 1rem;
+  }
+
+  // Wrapper for circular containers
+  .circular-container-wrapper {
+    display: flex;
+    gap: 3.5rem;  /* Gap between circles */
+    margin-bottom: 1rem;
+    // margin-left: 60px;
+    margin-top: 1rem;
+    flex-wrap: wrap;  // Allow wrapping but will override on mobile
+    justify-content: space-evenly; /* Align the circles in a row */
+  }
+
+  .circular-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;  /* Ensure the circles fit within the available width */
+  }
+
+  .circular-progress {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #0d6efd calc(var(--progress) * 1%), #e9ecef calc(var(--progress) * 1%)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d6efd;
+    font-weight: bold;
+    font-size: 1.2rem;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: white;
+    }
+
+    .progress-value {
+      position: relative;
+      z-index: 1;
+      color: #495057;
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    // .progress-arrow {
+    //   font-size: 1.5rem;
+    //   color: #0d6efd;
+    // }
+
+    .percentage {
+      font-size: 0.9rem;
+    }
+  }
+
+  .meter-title {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+// Green and red arrows and percentage values
+.progress-arrow.up {
+        font-size: 2rem;
+
+  color: green;  // Upwards arrow for profit
+}
+
+.progress-arrow.down {
+  color: red;  // Downwards arrow for loss
+}
+
+.percentage {
+  font-weight: bold;
+}
+
+// Ensure cards are stacked in a responsive manner
+.cards-container-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f8f9fa;  /* Light background for contrast */
+  border-radius: 10px;
+}
+
+/* Media Query for smaller screens (max-width: 1440px, as in the Galaxy S20 Ultra) */
+@media (max-width: 1440px) {
+  .card-outline {
+    width: 100%;  /* Cards will take full width on small screens */
+    padding: 0.5rem;  /* Optional: reduce padding for smaller screens */
+  }
+
+  .circular-container-wrapper {
+    gap: 2rem;  /* Reduce gap between circles for mobile */
+    flex-wrap: nowrap;  /* Prevent wrapping of circular meters */
+    margin-left: auto;
+    margin-right: auto;  /* Center the circular containers */
+  }
+
+  .circular-container {
+    width: 45%;  /* Allow each circular container to take up more width */
+  }
+
+  .circular-progress {
+    width: 100px;  /* Reduce size of circular progress on mobile */
+    height: 100px;  /* Adjust height */
+    font-size: 1.1rem;  /* Slightly smaller font size on mobile */
+  }
+
+  .progress-value {
+    font-size: 0.9rem;  /* Smaller font size for progress value */
+  }
+
+  .meter-title {
+    font-size: 0.8rem;  /* Reduce meter title font size */
+  }
+}
+
+/* Further Adjustments for Smallest Screens (max-width: 768px) */
+@media (max-width: 768px) {
+  .card-outline {
+    width: 100%;  /* Cards will take full width on small screens */
+    padding: 0.5rem;
+  }
+
+  .circular-container-wrapper {
+    gap: 3rem;  /* Reduce gap between circles for smaller screens */
+    flex-wrap: nowrap;  /* Prevent wrapping of circular meters */
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+    margin-right: 3rem;
+  }
+
+  .circular-container {
+    width: 45%;  /* Adjust width for better fit on mobile */
+  }
+
+  .circular-progress {
+    width: 80px;  /* Further reduce size of circular progress on mobile */
+    height: 80px;  /* Adjust height */
+    font-size: 1rem;  /* Reduce font size on mobile */
+  }
+
+  .progress-value {
+    font-size: 0.8rem;  /* Smaller font size for progress value */
+  }
+
+  .meter-title {
+    font-size: 0.8rem;  /* Reduce meter title font size */
   }
 }

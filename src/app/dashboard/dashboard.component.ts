@@ -12,6 +12,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core'
+import { CookieService } from 'ngx-cookie-service';  // Import the CookieService
 
 interface Team {
   teamName: string;
@@ -58,6 +59,11 @@ export class DashboardComponent  {
 
   totalLeadsAllocated: number = 0; // Total allocated leads
   totalLeadsCompleted: number = 0; // Total completed leads
+
+   card149Leads : number=0;
+  card299Leads : number=0;
+   card149Profit : number=0;
+   card299Profit : number=0;
 // Add the global date range variables
 selectedStartDate: Date | null = null;
 selectedEndDate: Date | null = null;
@@ -170,7 +176,7 @@ applyDateFilter(): void {
   // private apiUrl = ' http://localhost:5000/api/teams';
   // private allocationUrl = ' http://localhost:5000/api/allocate-orders';
   // private ordersUrl = ' http://localhost:5000/api/orders';
-  constructor(private http: HttpClient, private cdRef: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdRef: ChangeDetectorRef,private cookieService: CookieService) {}
 
   ngOnInit(): void {
     // Fetch teams data on component initialization
@@ -243,7 +249,11 @@ applyDateFilter(): void {
         let totalLeadsAllocated = 0;
         let totalLeadsCompleted = 0;
       
-  
+        // New variables for cards
+        let card149Leads = 0;
+        let card299Leads = 0;
+        let card149Profit = 0;
+        let card299Profit = 0;
         // Clear previous data
         this.teams.forEach((team) => {
           team.leadsAllocated = 0;
@@ -271,6 +281,21 @@ applyDateFilter(): void {
             totalLeadsAllocated += allocation.leadsAllocated || 0;
             totalLeadsCompleted += allocation.leadsCompleted || 0;
   
+            // Process orders in allocation
+          allocation.orderIds.forEach((order: any) => {
+            if (order.coupon && order.coupon === 'not given'  || order.coupon === null) {
+              card299Leads++;
+              if (order.paymentStatus === 'Paid') {
+                card299Profit += 61; // Add 61 for paid orders
+              }
+            } else {
+              card149Leads++;
+              if (order.paymentStatus === 'Paid') {
+                card149Profit += 71; // Add 71 for paid orders
+              }
+            }
+          });
+          
             console.log('Updated team:', team);
           } else {
             console.log('No matching team found for teamId:', teamId);
@@ -281,10 +306,21 @@ applyDateFilter(): void {
         console.log('Total Leads Allocated:', totalLeadsAllocated);
         console.log('Total Leads Completed:', totalLeadsCompleted);
   
+        console.log('149 Card Leads:', card149Leads, 'Profit:', card149Profit);
+        console.log('299 Card Leads:', card299Leads, 'Profit:', card299Profit);
+  
+        // Update frontend variables
+        this.card149Leads = card149Leads;
+        this.card299Leads = card299Leads;
+        this.card149Profit = card149Profit;
+        this.card299Profit = card299Profit;
         // Store totals in variables for the UI
         this.totalLeadsAllocated = totalLeadsAllocated;
         this.totalLeadsCompleted = totalLeadsCompleted;
   
+
+        
+
         // Trigger change detection to update the UI
         this.cdRef.detectChanges();
         console.log('Allocation data:', allocations);
