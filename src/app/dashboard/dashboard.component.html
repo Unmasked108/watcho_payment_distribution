@@ -33,21 +33,93 @@
       </div>
     </div>
   
-    <div class="cards-container">
-      <mat-card class="leads-card allocated">
-        <mat-card-title>Total Leads Allocated</mat-card-title>
-        <mat-card-content>{{ totalLeadsAllocated }}</mat-card-content>
-      </mat-card>
-  
-      <mat-card class="leads-card completed">
-        <mat-card-title>Total Leads Completed</mat-card-title>
-        <mat-card-content>{{ totalLeadsCompleted }}</mat-card-content>
-      </mat-card>
+    
+<div class="container mt-5">
+  <div class="row justify-content-center g-4 cards-container">
+    <!-- Total Leads Allocated Card -->
+    <div class="col-6 d-flex justify-content-center">
+      <div class="card leads-card allocated shadow-sm">
+        <div class="circle">
+          <div class="circle-title">Total Leads Allocated</div>
+        </div>
+        <div class="card-body text-center">
+          <div class="circle-content">{{ totalLeadsAllocated }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Leads Completed Card -->
+    <div class="col-6 d-flex justify-content-center">
+      <div class="card leads-card completed shadow-sm">
+        <div class="circle">
+          <div class="circle-title">Total Leads Completed</div>
+        </div>
+        <div class="card-body text-center">
+          <div class="circle-content">{{ totalLeadsCompleted }}</div>
+        </div>
+      </div>
     </div>
   </div>
-  
-  
-  
+</div>
+<!-- Card Section -->
+<!-- Card Section -->
+<div class="cards-container-wrapper mt-5">
+  <div class="row justify-content-center g-4">
+    <!-- First Card: Premium Plan -->
+    <!-- First Card: Premium Plan -->
+<div class="col-md-6 col-12 d-flex justify-content-center">
+  <div class="card card-outline shadow-sm" style="width: 28rem;">
+    <div class="card-body text-center">
+      <label class="price-label">
+        <i class="bi bi-currency-rupee"></i> 299
+      </label>
+      <div class="circular-container-wrapper mb-4">
+        <div class="circular-container">
+          <div class="circular-progress" style="--progress: 75;">
+            <div class="progress-value">₹{{ card299Profit }} </div>
+          </div>
+          <p class="meter-title">Profit & Loss</p>
+        </div>
+        <div class="circular-container">
+          <div class="circular-progress" style="--progress: 50;">
+            <div class="progress-value">{{ card299Leads }}</div>
+          </div>
+          <p class="meter-title">Total Leads</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Second Card: Standard Plan -->
+<div class="col-md-6 col-12 d-flex justify-content-center">
+  <div class="card card-outline shadow-sm" style="width: 28rem;">
+    <div class="card-body text-center">
+      <label class="price-label">
+        <i class="bi bi-currency-rupee"></i> 149
+      </label>
+      <div class="circular-container-wrapper mb-4">
+        <div class="circular-container">
+          <div class="circular-progress" style="--progress: 65;">
+            <div class="progress-value">₹{{ card149Profit }} </div>
+          </div>
+          <p class="meter-title">Profit & Loss</p>
+        </div>
+        <div class="circular-container">
+          <div class="circular-progress" style="--progress: 40;">
+            <div class="progress-value">{{ card149Leads }}</div>
+          </div>
+          <p class="meter-title">Total Leads</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+
+
   <!-- Card Component -->
   <mat-card class="custom-card">
     <div class="card-header">

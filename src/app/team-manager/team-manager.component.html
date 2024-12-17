@@ -173,6 +173,13 @@
         <button mat-raised-button color="primary" (click)="saveData()">Save</button>
       </div>
 
+      <!-- Overlay Card -->
+<div class="overlay" *ngIf="isCardVisible">
+  <div class="response-card">
+    <h3>{{ responseMessage }}</h3>
+    <button mat-raised-button color="accent" (click)="closeCard()">OK</button>
+  </div>
+</div>
       <!-- <div class="custom-alert" *ngIf="showAlert">
         <div class="alert-content">
           <p>{{ alertMessage }}</p>

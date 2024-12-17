@@ -1,12 +1,26 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow">
-    <div class="container-fluid">
-      <!-- Company Name -->
-      <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
-        <i class="bi bi-building fs-4 me-2"></i> Rescale
-      </a>
-  
-      <!-- Navigation Links -->
-      <ul class="navbar-nav me-auto">
+  <div class="container-fluid">
+    <!-- Company Name -->
+    <a class="navbar-brand d-flex align-items-center" routerLink="/layout/dashboard">
+      <i class="bi bi-building fs-4 me-2"></i> Rescale
+    </a>
+
+    <!-- Navbar Toggler -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Collapsible Navigation Links -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a
             class="nav-link"
@@ -38,7 +52,7 @@
           </a>
         </li>
       </ul>
-  
+
       <!-- User Info -->
       <div class="d-flex align-items-center ms-auto user-info dropdown">
         <button
@@ -93,7 +107,8 @@
         </ul>
       </div>
     </div>
-  </nav>
-  <div>
-    <router-outlet></router-outlet>
   </div>
+</nav>
+<div>
+  <router-outlet></router-outlet>
+</div>

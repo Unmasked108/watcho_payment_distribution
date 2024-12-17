@@ -195,7 +195,9 @@ export class TeamManagerComponent implements OnInit {
   
   
   
-
+  isCardVisible: boolean = false; // Control card visibility
+  responseMessage: string = '';  // Store the message to display
+  
   saveData(): void {
     
     const selectedMembers = this.teamMembers
@@ -227,6 +229,7 @@ export class TeamManagerComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Data saved successfully:', response);
+          this.showCard('Data saved successfully!');
   
           // Log the total allocated leads
 
@@ -234,11 +237,18 @@ export class TeamManagerComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error saving data:', err);
+          this.showCard('Failed to save data. Please try again.');
         },
       });
   }
+  showCard(message: string): void {
+    this.responseMessage = message;
+    this.isCardVisible = true;
+  }
   
-  
+  closeCard(): void {
+    this.isCardVisible = false;
+  }
   openEditCard(member: any): void {
     this.editingMember = { ...member }; // Create a copy of the member
     this.isEditing = true;
