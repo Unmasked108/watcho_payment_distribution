@@ -66,6 +66,9 @@ applyDateFilter(): void {
   let startDate: Date | null = null;
   let endDate: Date | null = null;
 
+  // Save the selected date range option to localStorage
+  localStorage.setItem('selectedDateRange', this.selectedDateRange);
+
   // Determine the date range based on the selected option
   if (this.selectedDateRange === 'today') {
     const today = new Date();
@@ -92,6 +95,11 @@ applyDateFilter(): void {
     }
     startDate = new Date(this.customStartDate);
     endDate = new Date(this.customEndDate);
+
+    // Save custom date range as well
+    localStorage.setItem('customStartDate', this.customStartDate.toISOString());
+localStorage.setItem('customEndDate', this.customEndDate.toISOString());
+
   }
 
   // Store the selected date range globally
@@ -104,6 +112,7 @@ applyDateFilter(): void {
   // Call method to update allocations based on the selected date range
   this.updateAllocationsBasedOnDateRange();
 }
+
 
   fetchLeadsData(startDate: Date | null, endDate: Date | null): void {
     const headers = new HttpHeaders({
@@ -177,7 +186,22 @@ applyDateFilter(): void {
     this.getTeams();
     this.getAllocations();
     console.log('Teams:', this.teams);  // Log teams to see if the data is populated
-    this.applyDateFilter(); // Fetch data for "Today" by default
+    const savedDateRange = localStorage.getItem('selectedDateRange');
+    if (savedDateRange) {
+        this.selectedDateRange = savedDateRange;
+    
+        // Restore custom dates if applicable
+        if (savedDateRange === 'custom') {
+          const savedStartDate = localStorage.getItem('customStartDate');
+          const savedEndDate = localStorage.getItem('customEndDate');
+          
+          if (savedStartDate && savedEndDate) {
+            this.customStartDate = new Date(savedStartDate);
+            this.customEndDate = new Date(savedEndDate);
+          }
+        }
+    this.applyDateFilter();
+    } 
     this.username = localStorage.getItem('username') || ''; 
     this.initials = this.getInitials(this.username); // Generate initials from username
 

@@ -35,6 +35,8 @@ export class TeamManagerComponent implements OnInit {
   isDarkMode: boolean = false; // Tracks the current theme mode
 
   totalLeads: number = 0; // Total leads allocated to the team
+  totalAllocatedLeads: number = 0;
+
   displayedColumns: string[] = ['select', 'name', 'id', 'leads', 'time', 'status', 'edit'];
   teamMembers: any[] = []; // Holds team members' data
   isEditing: boolean = false;
@@ -158,58 +160,85 @@ export class TeamManagerComponent implements OnInit {
       return;
     }
   
-    const leadsPerMember = Math.floor(this.totalLeads / selectedMembers.length);
-    const currentTime = new Date().toLocaleTimeString();
-    const currentDate = new Date().toISOString(); // Get current date in ISO format
+    const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds); // Flatten all orders
+    let orderIndex = 0; // Track the index of `allOrderIds`
   
-    const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
+    // Update each member based on their manually set `leads`
+    this.teamMembers = this.teamMembers.map((member) => {
+      if (member.selected) {
+        const leadsToAllocate = member.leads || 0; // Number of leads assigned manually
+        const assignedOrderIds = allOrderIds.slice(orderIndex, orderIndex + leadsToAllocate);
   
-    this.teamMembers = this.teamMembers.map((member, index) =>
-      member.selected
-        ? {
-            ...member,
-            leads: leadsPerMember,
-            orderIds: allOrderIds.slice(
-              index * leadsPerMember,
-              (index + 1) * leadsPerMember
-            ),
-            time: currentTime,
-            date: currentDate, // Add the date
-            status: 'Completed',
-          }
-        : member
-    );
+        orderIndex += leadsToAllocate; // Update the index for next member
   
-    console.log('Leads allocated:', selectedMembers);
+        return {
+          ...member,
+          orderIds: assignedOrderIds, // Assign only the required number of orders
+          time: new Date().toLocaleTimeString(),
+          date: new Date().toISOString(),
+          status: assignedOrderIds.length > 0 ? 'Completed' : 'Pending',
+        };
+      } else {
+        return member;
+      }
+    });
+  
+    // Update total allocated leads
+    
+    
+    console.log('Total Leads Allocated:', this.totalAllocatedLeads);
+  
+    console.log('Leads allocated:', this.teamMembers);
   }
+  
+  
+  
+  
   
 
   saveData(): void {
+    
     const selectedMembers = this.teamMembers
-    .filter((member) => member.selected)
-    .map((member) => ({
-      ...member,
-      teamId: this.teamId, // Add teamId to each member
-    }));
+      .filter((member) => member.selected)
+      .map((member) => ({
+        ...member,
+        teamId: this.teamId, // Add teamId to each member
+      }));
+      
+      this.totalAllocatedLeads = selectedMembers.reduce(
+        (sum, member) => sum + (member.leads || 0),
+        0
+      );
     if (selectedMembers.length === 0) {
       console.warn('No team members selected for allocation.');
       return;
     }
-
+  
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-
-    this.http.post(' http://localhost:5000/api/lead-allocations', { selectedMembers }, { headers })
+  
+    this.http
+      .post(
+        'http://localhost:5000/api/lead-allocations',
+        { selectedMembers },
+        { headers }
+      )
       .subscribe({
         next: (response) => {
           console.log('Data saved successfully:', response);
+  
+          // Log the total allocated leads
+
+          console.log('Total Leads Allocated:', this.totalAllocatedLeads);
         },
         error: (err) => {
           console.error('Error saving data:', err);
         },
       });
   }
+  
+  
   openEditCard(member: any): void {
     this.editingMember = { ...member }; // Create a copy of the member
     this.isEditing = true;

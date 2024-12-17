@@ -80,13 +80,18 @@
     <div class="container mt-4">
       <!-- Card Component -->
       <mat-card class="allocation-card">
-        <h3>The leads that are allocated: <span class="lead-count">{{ totalLeads }}</span></h3>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3>The leads to be allocate: <span class="lead-count">{{ totalLeads }}</span></h3>
+          <h3>Total Leads Allocated: <span class="leads">{{ totalAllocatedLeads }}</span></h3>
+        </div>
+        
         <div class="d-flex justify-content-between align-items-center">
           <span>Allocate the leads to the team members:</span>
           <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate Leads</button>
         </div>
       </mat-card>
     </div>
+    
     
     <div class="table-container mt-4">
       <!-- Material Table -->
@@ -123,7 +128,7 @@
           <ng-container matColumnDef="leads">
             <mat-header-cell *matHeaderCellDef> Leads Allocated </mat-header-cell>
             <mat-cell *matCellDef="let member">
-              <input type="number" [(ngModel)]="member.leads" class="leads-input" />
+              <input type="number" min='0' [(ngModel)]="member.leads" class="leads-input" />
             </mat-cell>
           </ng-container>
     
