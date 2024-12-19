@@ -160,8 +160,12 @@ export class TeamManagerComponent implements OnInit {
       return;
     }
   
-    const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds); // Flatten all orders
-    let orderIndex = 0; // Track the index of `allOrderIds`
+ // Filter out already allocated orderIds
+ const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
+ const unallocatedOrderIds = allOrderIds.filter((orderId) =>
+   !this.teamMembers.some((member) => member.orderIds.includes(orderId))
+ );
+     let orderIndex = 0; // Track the index of `allOrderIds`
   
     // Update each member based on their manually set `leads`
     this.teamMembers = this.teamMembers.map((member) => {

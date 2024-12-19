@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule,HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import moment from 'moment';
 
 @Component({
@@ -22,51 +22,76 @@ import moment from 'moment';
     MatTableModule,
     FormsModule,
     CommonModule,
-    HttpClientModule
+    // HttpClientModule, // HttpClientModule only needed in app.module.ts, can be removed here
   ],
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoryComponent {
-  selectedDate: Date = new Date(); // Default to current date
+export class HistoryComponent implements OnInit {
+  selectedDate: Date = new Date(); // Default to the current date
+  selectedTeamId: string | null = null; // Optional team filter
+  selectedMemberName: string | null = null; // Optional member filter
+
   displayedColumns: string[] = [
-    'assignedTeams',
-    'allocatedDate',
-    'completionDate',
     'orderId',
-    'completionStatus',
+    'allocatedTeamId',
+    'allocatedMember',
+    'paymentStatus',
+    'profit',
+    'memberProfit',
   ];
+
   data: any[] = [];
   filteredData: any[] = [];
-
-  // Replace with your actual API endpoint
-  private readonly apiUrl = ' http://localhost:5000/api/history-data';
+  private readonly apiUrl = 'http://localhost:5000/api/results';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadHistoryData(); // Load data for the default date
+    this.loadAllResults(); // Load all results initially
   }
 
-  loadHistoryData(): void {
-    const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD'); // Format date for API
+  /**
+   * Fetch all results for Admin based on the selected date
+   */
+  loadAllResults(): void {
+    const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`, // Add the token for authorization
+      Authorization: `Bearer ${localStorage.getItem('token')}`, // Include token from localStorage
     });
-  
-    this.http.get<any[]>(`${this.apiUrl}?date=${formattedDate}`, { headers }).subscribe({
-      next: (response) => {
-        this.data = response;
-        this.filteredData = [...this.data]; // Initialize filtered data
-      },
-      error: (error) => {
-        console.error('Error fetching history data:', error);
-      },
-    });
+
+    this.http
+      .get<any[]>(`${this.apiUrl}?date=${formattedDate}`, { headers })
+      .subscribe({
+        next: (response) => {
+          this.data = response.map((item) => this.formatResult(item));
+          this.filteredData = [...this.data];
+        },
+        error: (error) => {
+          console.error('Error fetching results:', error);
+        },
+      });
   }
-  
+
+  /**
+   * Format API result into table-compatible data
+   */
+  private formatResult(item: any): any {
+    return {
+      orderId: item.orderId || 'N/A',
+      allocatedTeamId: item.teamName || 'N/A',
+      allocatedMember: item.memberName || 'N/A',
+      paymentStatus: item.paymentStatus || 'N/A',
+      profit: item.profitBehindOrder || 0,
+      memberProfit: item.membersProfit || 0,
+    };
+  }
+
+  /**
+   * Search by date
+   */
   searchByDate(): void {
-    this.loadHistoryData(); // Reload data for the selected date
+    this.loadAllResults();
   }
 }

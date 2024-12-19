@@ -17,36 +17,41 @@
   <div class="table-header">
     <h2 class="table-heading">Leads Table - {{ selectedDate | date: 'MM/dd/yyyy' }}</h2>
   </div>
-  
   <mat-table [dataSource]="filteredData" class="custom-table">
-    <!-- Assigned Teams Column -->
-    <ng-container matColumnDef="assignedTeams">
-      <mat-header-cell *matHeaderCellDef>Assigned Teams</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.assignedTeams }}</mat-cell>
-    </ng-container>
-  
-    <!-- Allocated Date Column -->
-    <ng-container matColumnDef="allocatedDate">
-      <mat-header-cell *matHeaderCellDef>Allocated Date</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.allocatedDate | date: 'MM/dd/yyyy' }}</mat-cell>
-    </ng-container>
-  
-    <!-- Completion Date Column -->
-    <ng-container matColumnDef="completionDate">
-      <mat-header-cell *matHeaderCellDef>Completion Date</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.completionDate | date: 'MM/dd/yyyy' }}</mat-cell>
-    </ng-container>
-  
     <!-- Order ID Column -->
     <ng-container matColumnDef="orderId">
       <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
       <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
     </ng-container>
   
-    <!-- Completion Status Column -->
-    <ng-container matColumnDef="completionStatus">
-      <mat-header-cell *matHeaderCellDef>Completion Status</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.completionStatus }}</mat-cell>
+    <!-- Allocated Team ID Column -->
+    <ng-container matColumnDef="allocatedTeamId">
+      <mat-header-cell *matHeaderCellDef>Allocated Team ID</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.allocatedTeamId }}</mat-cell>
+    </ng-container>
+  
+    <!-- Allocated Member Column -->
+    <ng-container matColumnDef="allocatedMember">
+      <mat-header-cell *matHeaderCellDef>Allocated Member</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.allocatedMember }}</mat-cell>
+    </ng-container>
+  
+    <!-- Payment Status Column -->
+    <ng-container matColumnDef="paymentStatus">
+      <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.paymentStatus }}</mat-cell>
+    </ng-container>
+  
+    <!-- Profit Column -->
+    <ng-container matColumnDef="profit">
+      <mat-header-cell *matHeaderCellDef>Profit</mat-header-cell>
+      <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.profit }}</mat-cell>
+    </ng-container>
+  
+    <!-- Member Profit Column -->
+    <ng-container matColumnDef="memberProfit">
+      <mat-header-cell *matHeaderCellDef>Member Profit</mat-header-cell>
+      <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.memberProfit }}</mat-cell>
     </ng-container>
   
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
