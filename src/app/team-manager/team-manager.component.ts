@@ -154,10 +154,10 @@ export class TeamManagerComponent implements OnInit {
 
   allocateLeads(): void {
     const selectedMembers = this.teamMembers.filter((member) => member.selected);
-  
+
     if (selectedMembers.length === 0) {
-      console.warn('No team members selected for allocation.');
-      return;
+        console.warn('No team members selected for allocation.');
+        return;
     }
   
  // Filter out already allocated orderIds
@@ -169,31 +169,30 @@ export class TeamManagerComponent implements OnInit {
   
     // Update each member based on their manually set `leads`
     this.teamMembers = this.teamMembers.map((member) => {
-      if (member.selected) {
-        const leadsToAllocate = member.leads || 0; // Number of leads assigned manually
-        const assignedOrderIds = allOrderIds.slice(orderIndex, orderIndex + leadsToAllocate);
-  
-        orderIndex += leadsToAllocate; // Update the index for next member
-  
-        return {
-          ...member,
-          orderIds: assignedOrderIds, // Assign only the required number of orders
-          time: new Date().toLocaleTimeString(),
-          date: new Date().toISOString(),
-          status: assignedOrderIds.length > 0 ? 'Completed' : 'Pending',
-        };
-      } else {
-        return member;
-      }
+        if (member.selected) {
+            const allocatedLeads = member.leads || 0; // Total leads allocated to this member
+            const allocatedOrderIds = allOrderIds.slice(orderIndex, orderIndex + allocatedLeads);
+            orderIndex += allocatedLeads; // Move index forward
+
+            return {
+                ...member,
+                orderIds: allocatedOrderIds, // Correctly sliced order IDs
+                time: new Date().toLocaleTimeString(),
+                date: new Date().toISOString(),
+                status: 'Completed',
+            };
+        } else {
+            return member;
+        }
     });
+
+    console.log('Leads allocated:', selectedMembers);
+}
+
+
   
-    // Update total allocated leads
-    
-    
-    console.log('Total Leads Allocated:', this.totalAllocatedLeads);
   
-    console.log('Leads allocated:', this.teamMembers);
-  }
+  
   
   
   
@@ -245,6 +244,7 @@ export class TeamManagerComponent implements OnInit {
         },
       });
   }
+  
   showCard(message: string): void {
     this.responseMessage = message;
     this.isCardVisible = true;
