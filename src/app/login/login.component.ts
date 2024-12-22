@@ -85,11 +85,10 @@ export class LoginComponent {
 
   onSignup(form: any) {
     if (form.valid) {
-      const { name, email, password, confirmPassword } = form.value;
+      const { name, email, mobile, password, confirmPassword } = form.value;
   
       if (password === confirmPassword) {
-        this.http.post(' http://localhost:5000/register' // http://localhost:5000/register
-          , { name, email, password }).subscribe(
+        this.http.post('http://localhost:5000/register', { name, email, mobile, password }).subscribe(
           () => {
             this.showSuccessModal = true; // Show the success modal
           },
@@ -103,6 +102,7 @@ export class LoginComponent {
       }
     }
   }
+  
   
   redirectToLogin() {
     this.showSuccessModal = false; // Hide the modal
