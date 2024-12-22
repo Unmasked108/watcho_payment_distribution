@@ -1,60 +1,68 @@
 <mat-card class="history-card">
-    <h2 class="card-heading">See History of Particular Date</h2>
-    <div class="form-container">
-      <mat-form-field class="example-full-width">
-        <mat-label>Choose a date</mat-label>
-        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
-        <mat-hint>MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matIconSuffix [for]="picker">
-          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-        </mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-      <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()">Search</button>
-    </div>
-  </mat-card>
-  
-  <div class="table-header">
-    <h2 class="table-heading">Leads Table - {{ selectedDate | date: 'MM/dd/yyyy' }}</h2>
+  <h2 class="card-heading">Orders Data</h2>
+  <div class="form-container">
+    <mat-form-field class="example-full-width">
+      <mat-label>Choose a date</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="picker">
+        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()">Search</button>
   </div>
-  <mat-table [dataSource]="filteredData" class="custom-table">
-    <!-- Order ID Column -->
-    <ng-container matColumnDef="orderId">
-      <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
-    </ng-container>
-  
-    <!-- Allocated Team ID Column -->
-    <ng-container matColumnDef="allocatedTeamId">
-      <mat-header-cell *matHeaderCellDef>Allocated Team ID</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.allocatedTeamId }}</mat-cell>
-    </ng-container>
-  
-    <!-- Allocated Member Column -->
-    <ng-container matColumnDef="allocatedMember">
-      <mat-header-cell *matHeaderCellDef>Allocated Member</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.allocatedMember }}</mat-cell>
-    </ng-container>
-  
-    <!-- Payment Status Column -->
-    <ng-container matColumnDef="paymentStatus">
-      <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
-      <mat-cell *matCellDef="let element">{{ element.paymentStatus }}</mat-cell>
-    </ng-container>
-  
-    <!-- Profit Column -->
-    <ng-container matColumnDef="profit">
-      <mat-header-cell *matHeaderCellDef>Profit</mat-header-cell>
-      <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.profit }}</mat-cell>
-    </ng-container>
-  
-    <!-- Member Profit Column -->
-    <ng-container matColumnDef="memberProfit">
-      <mat-header-cell *matHeaderCellDef>Member Profit</mat-header-cell>
-      <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.memberProfit }}</mat-cell>
-    </ng-container>
-  
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  </mat-table>
-  
+</mat-card>
+
+<div class="table-header">
+  <h2 class="table-heading">Leads Table - {{ selectedDate | date: 'MM/dd/yyyy' }}</h2>
+</div>
+
+
+<!-- Export Section -->
+<div class="export-section">
+  <h3 class="export-heading">Export Today's Data</h3>
+  <button mat-raised-button color="accent" class="export-btn" (click)="downloadData()">Download</button>
+</div>
+
+
+<mat-table [dataSource]="filteredData" class="custom-table">
+  <!-- Order ID Column -->
+  <ng-container matColumnDef="orderId">
+    <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
+  </ng-container>
+
+  <!-- Allocated Team ID Column -->
+  <ng-container matColumnDef="allocatedTeamId">
+    <mat-header-cell *matHeaderCellDef>Allocated Team ID</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.allocatedTeamId }}</mat-cell>
+  </ng-container>
+
+  <!-- Allocated Member Column -->
+  <ng-container matColumnDef="allocatedMember">
+    <mat-header-cell *matHeaderCellDef>Allocated Member</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.allocatedMember }}</mat-cell>
+  </ng-container>
+
+  <!-- Payment Status Column -->
+  <ng-container matColumnDef="paymentStatus">
+    <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.paymentStatus }}</mat-cell>
+  </ng-container>
+
+  <!-- Profit Column -->
+  <ng-container matColumnDef="profit">
+    <mat-header-cell *matHeaderCellDef>Profit</mat-header-cell>
+    <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.profit }}</mat-cell>
+  </ng-container>
+
+  <!-- Member Profit Column -->
+  <ng-container matColumnDef="memberProfit">
+    <mat-header-cell *matHeaderCellDef>Member Profit</mat-header-cell>
+    <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.memberProfit }}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

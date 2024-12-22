@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import moment from 'moment';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-history',
@@ -65,6 +66,8 @@ export class HistoryComponent implements OnInit {
       .get<any[]>(`${this.apiUrl}?date=${formattedDate}`, { headers })
       .subscribe({
         next: (response) => {
+          console.log('Response from API:', response); // Add this line
+
           this.data = response.map((item) => this.formatResult(item));
           this.filteredData = [...this.data];
         },
@@ -79,13 +82,38 @@ export class HistoryComponent implements OnInit {
    */
   private formatResult(item: any): any {
     return {
-      orderId: item.orderId || 'N/A',
-      allocatedTeamId: item.teamName || 'N/A',
+      orderId: item.orderId || 'N/A', // Correct mapping
+      allocatedTeamId: item.teamId?.teamName || 'N/A', // Access nested `teamName`
       allocatedMember: item.memberName || 'N/A',
       paymentStatus: item.paymentStatus || 'N/A',
       profit: item.profitBehindOrder || 0,
       memberProfit: item.membersProfit || 0,
     };
+  }
+  /**
+   * Download data as CSV
+   */
+  downloadData(): void {
+    const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
+    const headers = ['Order ID', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit'];
+    const csvData = this.filteredData.map((row) => ({
+      'Order ID': row.orderId,
+      'Team Name': row.allocatedTeamId,
+      'Member Name': row.allocatedMember,
+      'Payment Status': row.paymentStatus,
+      'Profit': `₹${row.profit}`, // Include icon representation in text
+      'Member Profit': `₹${row.memberProfit}`, // Include icon representation in text
+    }));
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map((row) => Object.values(row).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `orders_${formattedDate}.csv`;
+
+    FileSaver.saveAs(blob, fileName);
   }
 
   /**

@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core'
 import { CookieService } from 'ngx-cookie-service';  // Import the CookieService
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 interface Team {
   teamName: string;
@@ -23,6 +24,8 @@ interface Team {
   teamCapacity: number | null; // Add this field
   leadsAllocated: number | null;  // Allowing null
   leadsCompleted: number | null;  // Allowing null
+  isSelected?: boolean; // Add this property
+
 }
 
 @Component({
@@ -41,7 +44,8 @@ interface Team {
     MatInputModule,
     MatNativeDateModule,
     MatFormFieldModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatCheckboxModule
     
   ],
   templateUrl: './dashboard.component.html',
@@ -166,9 +170,9 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   
 
   displayedColumns: string[] = [
+    'select',
     'teamName',
     'teamId',
-    'teamStatus',
     'allocation',
     'allocatedTime',
     'teamCapacity', // Add this
@@ -176,6 +180,12 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
     // 'completion',
   ];
   teams: Team[] = [];  // Update the type here
+
+  selectAll(event: any): void {
+    const isChecked = event.checked;
+    this.teams.forEach((team) => (team.isSelected = isChecked));
+  }
+
 
   private apiUrl = ' http://localhost:5000/api/teams';
   private allocationUrl = ' http://localhost:5000/api/allocate-orders';
@@ -220,6 +230,56 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
       .join('')
       .toUpperCase(); // Ensure initials are uppercase
   }
+
+//o open the card for team
+  // Added for modal functionality
+  selectedTeam: Team | null = null; // Holds the team data for the opened modal
+  isModalOpen: boolean = false; // Controls the modal visibility
+  // Open modal for a specific team
+  openTeamDetails(team: Team): void {
+    this.selectedTeam = team;
+    this.isModalOpen = true;
+  }
+
+  // Close the modal
+  closeModal(): void {
+    this.selectedTeam = null;
+    this.isModalOpen = false;
+  }
+
+  unallocateOrders(): void {
+    if (this.selectedTeam) {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      });
+  
+      // Reuse allocationDate logic from allocateLeads
+      const allocationDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
+      console.log('Frontend allocationDate:', allocationDate); // Log the allocation date sent to the backend
+  
+      const payload = {
+        teamId: this.selectedTeam.teamId,
+        allocationDate,
+      };
+  
+      this.http.post('http://localhost:5000/api/unallocate', payload, { headers }).subscribe(
+        (response) => {
+          console.log('Unallocation response:', response);
+          alert('Orders unallocated successfully.');
+          this.getTeams(); // Refresh team data
+        },
+        (error) => {
+          console.error('Error unallocating orders:', error);
+          alert('Failed to unallocate orders. Check console for details.');
+        }
+      );
+    } else {
+      alert('Please select a team.');
+    }
+  }
+  
+  
+
   // Fetch teams from backend
  
   getTeams(): void {
@@ -500,7 +560,26 @@ closeFileUploadAlert() {
   }
   showAlert = false; // Tracks if the alert is visible
   alertMessage = ''; // Stores the alert message
-  allocateLeads(): void {
+  showPopup: boolean = false; // Add this property to the component
+
+  closePopup(): void {
+    this.showPopup = false;
+  }
+
+onAllocateLeads(): void {
+  const selectedTeams = this.teams.filter((team) => team.isSelected);
+
+  if (selectedTeams.length === 0) {
+    this.showPopup = true; // Show popup if no team is selected
+    return;
+  }
+
+  const teamIds = selectedTeams.map((team) => team.teamId); // Use teamId from frontend
+
+  this.allocateLeads(teamIds);
+}
+
+  allocateLeads(teamIds: string[]): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
@@ -510,7 +589,7 @@ closeFileUploadAlert() {
   
     this.http.post(
       ' http://localhost:5000/api/allocate-orders',
-      { allocationDate },
+      { allocationDate , teamIds},
       { headers }
     ).subscribe(
       (response: any) => {

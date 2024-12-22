@@ -50,56 +50,55 @@
   </mat-card>
 </form>
 
+<!-- Manage Team Table -->
+<div *ngIf="selectedOption === 'manage'" class="table-container">
+  <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
+    <!-- Team Name Column -->
+    <ng-container matColumnDef="teamName">
+      <mat-header-cell *matHeaderCellDef> Team Name </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.teamName }} </mat-cell>
+    </ng-container>
 
-  <!-- Manage Team Table -->
-  <div *ngIf="selectedOption === 'manage'">
-    <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
-      <!-- Team Name Column -->
-      <ng-container matColumnDef="teamName">
-        <mat-header-cell *matHeaderCellDef> Team Name </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.teamName }} </mat-cell>
-      </ng-container>
+    <!-- Team ID Column -->
+    <ng-container matColumnDef="teamId">
+      <mat-header-cell *matHeaderCellDef> Team ID </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.teamId }} </mat-cell>
+    </ng-container>
 
-      <!-- Team ID Column -->
-      <ng-container matColumnDef="teamId">
-        <mat-header-cell *matHeaderCellDef> Team ID </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.teamId }} </mat-cell>
-      </ng-container>
+    <!-- Capacity Column -->
+    <ng-container matColumnDef="capacity">
+      <mat-header-cell *matHeaderCellDef> Capacity </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.capacity }} </mat-cell>
+    </ng-container>
 
-      <!-- Capacity Column -->
-      <ng-container matColumnDef="capacity">
-        <mat-header-cell *matHeaderCellDef> Capacity </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.capacity }} </mat-cell>
-      </ng-container>
+    <!-- No. of Members Column -->
+    <ng-container matColumnDef="numMembers">
+      <mat-header-cell *matHeaderCellDef> No. of Members </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.numMembers }} </mat-cell>
+    </ng-container>
 
-      <!-- No. of Members Column -->
-      <ng-container matColumnDef="numMembers">
-        <mat-header-cell *matHeaderCellDef> No. of Members </mat-header-cell>
-        <mat-cell *matCellDef="let team"> {{ team.numMembers }} </mat-cell>
-      </ng-container>
+    <!-- Members Column -->
+    <ng-container matColumnDef="members">
+      <mat-header-cell *matHeaderCellDef> Members </mat-header-cell>
+      <mat-cell *matCellDef="let team">
+        <button mat-button color="primary" (click)="selectTeam(team); showMembers(team.membersList)">Show Members</button>
+      </mat-cell>
+    </ng-container>
 
-      <!-- Members Column -->
-      <ng-container matColumnDef="members">
-        <mat-header-cell *matHeaderCellDef> Members </mat-header-cell>
-        <mat-cell *matCellDef="let team">
-          <button mat-button color="primary" (click)="selectTeam(team); showMembers(team.membersList)">Show Members</button>
-        </mat-cell>
-      </ng-container>
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+      <mat-cell *matCellDef="let team">
+        <button mat-button color="primary" (click)="editTeam(team)">Edit</button>
+        <button mat-button color="warn" (click)="deleteTeam(team.teamId)">Delete</button>
+      </mat-cell>
+    </ng-container>
 
-      <!-- Actions Column -->
-      <ng-container matColumnDef="actions">
-        <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
-        <mat-cell *matCellDef="let team">
-          <button mat-button color="primary" (click)="editTeam(team)">Edit</button>
-          <button mat-button color="warn" (click)="deleteTeam(team.teamId)">Delete</button>
-        </mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
-  </div>
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
 </div>
+
 
     <!-- Background Overlay -->
 <div class="overlay" *ngIf="selectedTeam || editingTeam"></div>

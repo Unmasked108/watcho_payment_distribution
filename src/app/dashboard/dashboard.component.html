@@ -123,7 +123,7 @@
   <!-- Card Component -->
   <mat-card class="custom-card">
     <div class="card-header">
-      <div class="greeting">Good Morning</div>
+      <!-- <div class="greeting">Good Morning</div> -->
       <div class="task">
         <span>Task Generation</span>
         <mat-form-field class="dropdown" appearance="outline">
@@ -157,11 +157,17 @@
     
     <div class="allocation-action">
       <span>Allocate the leads to the Team Leader</span>
-      <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate</button>
+      <button mat-raised-button color="primary" (click)="onAllocateLeads()">Allocate Leads</button>
     </div>
     
   </mat-card>
-
+<!-- Popup for No Team Selected -->
+<div *ngIf="showPopup" class="popup-overlay">
+  <div class="popup-card">
+    <p>Please select at least one team to allocate leads.</p>
+    <button mat-button (click)="closePopup()">Close</button>
+  </div>
+</div>
    
   <div *ngIf="showFileUploadAlert" class="custom-alert">
     <div class="alert-content">
@@ -185,13 +191,45 @@
         <p><strong>Team ID:</strong> {{ team.teamId }}</p>
         <p><strong>Leads Allocated:</strong> {{ team.leadsAllocated }}</p>
         <p><strong>Leads Completed:</strong> {{ team.leadsCompleted }}</p>
+        <button (click)="openTeamDetails(team)">See Details</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal" *ngIf="selectedTeam">
+    <div class="modal-backdrop" (click)="closeModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ selectedTeam.teamName }}</h3>
+        <button class="close-button" (click)="closeModal()">X</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Team ID:</strong> {{ selectedTeam.teamId }}</p>
+        <p><strong>Leads Allocated:</strong> {{ selectedTeam.leadsAllocated }}</p>
+        <p><strong>Leads Completed:</strong> {{ selectedTeam.leadsCompleted }}</p>
+      </div>
+      <div class="modal-footer">
+        <h4>Unallocate today's Orders</h4>
+        <button (click)="unallocateOrders()">Unallocate</button>
       </div>
     </div>
   </div>
   
   
+  
   <!-- Table Component -->
   <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
+    
+    <ng-container matColumnDef="select">
+      <mat-header-cell *matHeaderCellDef>
+        <mat-checkbox (change)="selectAll($event)"></mat-checkbox>
+      </mat-header-cell>
+      <mat-cell *matCellDef="let team">
+        <mat-checkbox [(ngModel)]="team.isSelected"></mat-checkbox>
+      </mat-cell>
+    </ng-container>
+
     <!-- Team Name Column -->
     <ng-container matColumnDef="teamName">
       <mat-header-cell *matHeaderCellDef> Team Name </mat-header-cell>
@@ -205,10 +243,10 @@
     </ng-container>
 
     <!-- Team Status Column -->
-    <ng-container matColumnDef="teamStatus">
+    <!-- <ng-container matColumnDef="teamStatus">
       <mat-header-cell *matHeaderCellDef> Team Status </mat-header-cell>
       <mat-cell *matCellDef="let team"> {{ team.teamStatus }} </mat-cell>
-    </ng-container>
+    </ng-container> -->
 
     <!-- Allocation Column -->
     <ng-container matColumnDef="allocation">
