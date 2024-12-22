@@ -58,7 +58,7 @@ export class LoginComponent {
       const email = form.value.email;
       const password = form.value.password;
   
-      this.http.post(' http://localhost:5000/login' // http://localhost:5000/login
+      this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apilogin' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apilogin
         , { email, password })
       .subscribe(
         (response: any) => {
@@ -88,7 +88,7 @@ export class LoginComponent {
       const { name, email, password, confirmPassword } = form.value;
   
       if (password === confirmPassword) {
-        this.http.post(' http://localhost:5000/register' // http://localhost:5000/register
+        this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiregister' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiregister
           , { name, email, password }).subscribe(
           () => {
             this.showSuccessModal = true; // Show the success modal
