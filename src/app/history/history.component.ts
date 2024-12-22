@@ -45,7 +45,7 @@ export class HistoryComponent implements OnInit {
 
   data: any[] = [];
   filteredData: any[] = [];
-  private readonly apiUrl = 'http://localhost:5000/api/results';
+  private readonly apiUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/results';
 
   constructor(private http: HttpClient) {}
 
