@@ -157,17 +157,46 @@
     
     <div class="allocation-action">
       <span>Allocate the leads to the Team Leader</span>
-      <button mat-raised-button color="primary" (click)="onAllocateLeads()">Allocate Leads</button>
+      <button mat-raised-button color="primary" (click)="openAllocationModalCard()">Allocate Leads</button>
     </div>
-    
+    <!-- Allocation Modal Card -->
+<div *ngIf="isAllocationModalOpen" class="modal-overlay">
+  <div class="modal-card">
+    <h2>Allocate Leads</h2>
+    <p><strong>Orders Remaining to be Allocated:</strong> {{ allocationRemainingOrders }}</p>
+    <p><strong>Total Leads:</strong> {{ allocationTotalLeads }}</p>
+
+    <div *ngIf="showAlert" class="error-message">
+      <p>{{ alertMessage }}</p>
+    </div>
+
+    <div class="team-allocation">
+      <div *ngFor="let team of teams">
+        <p><strong>Team:</strong> {{ team.teamName }}</p>
+        <p><strong>Orders:</strong> 
+          <input type="number" [(ngModel)]="team.ordersToAllocate" />
+        </p>
+        <p><strong>Amount:</strong> 
+          <input type="number" [(ngModel)]="team.amount" />
+        </p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button mat-button color="warn" (click)="closeAllocationModalCard()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="saveAllocations()">Save</button>
+    </div>
+  </div>
+</div>
+
   </mat-card>
 <!-- Popup for No Team Selected -->
-<div *ngIf="showPopup" class="popup-overlay">
+<!-- <div *ngIf="showPopup" class="popup-overlay">
   <div class="popup-card">
     <p>Please select at least one team to allocate leads.</p>
     <button mat-button (click)="closePopup()">Close</button>
   </div>
-</div>
+</div> -->
    
   <div *ngIf="showFileUploadAlert" class="custom-alert">
     <div class="alert-content">
@@ -221,14 +250,14 @@
   <!-- Table Component -->
   <mat-table [dataSource]="teams" class="mat-elevation-z8 custom-table">
     
-    <ng-container matColumnDef="select">
+    <!-- <ng-container matColumnDef="select">
       <mat-header-cell *matHeaderCellDef>
         <mat-checkbox (change)="selectAll($event)"></mat-checkbox>
       </mat-header-cell>
       <mat-cell *matCellDef="let team">
         <mat-checkbox [(ngModel)]="team.isSelected"></mat-checkbox>
       </mat-cell>
-    </ng-container>
+    </ng-container> -->
 
     <!-- Team Name Column -->
     <ng-container matColumnDef="teamName">

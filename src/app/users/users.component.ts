@@ -11,12 +11,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table'; // Import MatTableDataSource
 import { ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'; // Import BreakpointObserver
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
 
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [MatIconModule, MatCardModule, FormsModule,MatPaginatorModule,MatTableModule,MatSortModule,CommonModule,MatSelectModule], // Include FormsModule here
+  imports: [MatIconModule, MatCardModule, FormsModule,MatPaginatorModule,MatTableModule,MatSortModule,CommonModule,MatSelectModule,MatButtonModule,MatTooltipModule], // Include FormsModule here
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })
@@ -114,7 +116,7 @@ export class UsersComponent implements OnInit {
     });
   
     this.http
-      .get<any>('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/lead-allocations', { headers })
+      .get<any>('  http://localhost:5000/api/lead-allocations', { headers })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
@@ -144,7 +146,7 @@ export class UsersComponent implements OnInit {
     });
   
     const leadIdsQuery = this.leadIds.join(',');
-    const url = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders?leadIds=${leadIdsQuery}`;
+    const url = `  http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
   
     this.http.get<any>(url, { headers }).subscribe({
       next: (response) => {
@@ -190,7 +192,7 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders/payment-status', payload, { headers })
+      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response) => {
           console.log('Payment status updated:', response);
@@ -222,7 +224,7 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders/payment-status', payload, { headers })
+      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response) => {
           console.log('Payment status reverted:', response);

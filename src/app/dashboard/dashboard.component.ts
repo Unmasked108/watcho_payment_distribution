@@ -25,6 +25,8 @@ interface Team {
   leadsAllocated: number | null;  // Allowing null
   leadsCompleted: number | null;  // Allowing null
   isSelected?: boolean; // Add this property
+  ordersToAllocate?: number; // Optional or initialize to 0
+  amount?: number; // Optional or initialize to 0
 
 }
 
@@ -170,7 +172,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   
 
   displayedColumns: string[] = [
-    'select',
+    // 'select',
     'teamName',
     'teamId',
     'allocation',
@@ -187,14 +189,14 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   }
 
 
-  private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/teams';
-  private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/allocate-orders';
-  private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders';
+  private apiUrl = '  http://localhost:5000/api/teams';
+  private allocationUrl = '  http://localhost:5000/api/allocate-orders';
+  private ordersUrl = '  http://localhost:5000/api/orders';
 
 
-  // private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/teams';
-  // private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/allocate-orders';
-  // private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders';
+  // private apiUrl = '  http://localhost:5000/api/teams';
+  // private allocationUrl = '  http://localhost:5000/api/allocate-orders';
+  // private ordersUrl = '  http://localhost:5000/api/orders';
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef,private cookieService: CookieService) {}
 
   ngOnInit(): void {
@@ -262,7 +264,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
         allocationDate,
       };
   
-      this.http.post(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/unallocate', payload, { headers }).subscribe(
+      this.http.post(' http://localhost:5000/api/unallocate', payload, { headers }).subscribe(
         (response) => {
           console.log('Unallocation response:', response);
           alert('Orders unallocated successfully.');
@@ -497,7 +499,7 @@ private processCSV() {
     });
 
     // Send data to the backend
-    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders ' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders
+    this.http.post('  http://localhost:5000/api/orders ' //  http://localhost:5000/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
         console.log('Data saved successfully:', response);
@@ -548,7 +550,7 @@ closeFileUploadAlert() {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders/upload-pdf' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders/upload-pdf
+    this.http.post('  http://localhost:5000/api/orders/upload-pdf' //  http://localhost:5000/api/orders/upload-pdf
       , formData).subscribe(
       (response) => {
         console.log('PDF uploaded successfully:', response);
@@ -560,52 +562,92 @@ closeFileUploadAlert() {
   }
   showAlert = false; // Tracks if the alert is visible
   alertMessage = ''; // Stores the alert message
-  showPopup: boolean = false; // Add this property to the component
+//   showPopup: boolean = false; // Add this property to the component
 
-  closePopup(): void {
-    this.showPopup = false;
-  }
+//   closePopup(): void {
+//     this.showPopup = false;
+//   }
 
-onAllocateLeads(): void {
-  const selectedTeams = this.teams.filter((team) => team.isSelected);
+// onAllocateLeads(): void {
+//   const selectedTeams = this.teams.filter((team) => team.isSelected);
 
-  if (selectedTeams.length === 0) {
-    this.showPopup = true; // Show popup if no team is selected
-    return;
-  }
+//   if (selectedTeams.length === 0) {
+//     this.showPopup = true; // Show popup if no team is selected
+//     return;
+//   }
 
-  const teamIds = selectedTeams.map((team) => team.teamId); // Use teamId from frontend
+//   const teamIds = selectedTeams.map((team) => team.teamId); // Use teamId from frontend
 
-  this.allocateLeads(teamIds);
+//   this.allocateLeads(teamIds);
+// }
+
+isAllocationModalOpen = false;
+allocationRemainingOrders: number | null = null;
+allocationTotalLeads: number | null = null;
+
+
+openAllocationModalCard(): void {
+  this.fetchAllocationOrderCounts().subscribe((data: any) => {
+    this.allocationRemainingOrders = data.remainingOrders;
+    this.allocationTotalLeads = data.totalLeads;
+    this.isAllocationModalOpen = true;
+  });
 }
 
-  allocateLeads(teamIds: string[]): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-  
-    const allocationDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
-    console.log('Frontend allocationDate:', allocationDate); // Log the allocation date sent to the backend
-  
-    this.http.post(
-      '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/allocate-orders',
-      { allocationDate , teamIds},
-      { headers }
-    ).subscribe(
+closeAllocationModalCard(): void {
+  this.isAllocationModalOpen = false;
+}
+
+fetchAllocationOrderCounts() {
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  });
+  return this.http.get('http://localhost:5000/api/orders/remaining', { headers });
+}
+// teams: Team[] = []; // Existing teams array
+saveAllocations(): void {
+  const totalOrdersToAllocate = this.teams.reduce((sum, team) => sum + (team.ordersToAllocate || 0), 0);
+
+  // Check if total orders exceed the available remaining orders
+  if (totalOrdersToAllocate > (this.allocationRemainingOrders || 0)) {
+    this.alertMessage = 'Error: Total orders allocated exceed the available orders for today.';
+    this.showAlert = true;
+    return; // Prevent the request from being sent
+  }
+
+  const allocations = this.teams
+    .filter(team => (team.ordersToAllocate || 0) > 0) // Avoid errors if ordersToAllocate is undefined
+    .map(team => ({
+      teamId: team.teamId,
+      orders: team.ordersToAllocate || 0,
+      amount: team.amount || 0, // Default to 0
+    }));
+
+  this.allocateLeads(allocations);
+}
+
+allocateLeads(allocations: { teamId: string; orders: number; amount: number }[]): void {
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  });
+
+  const allocationDate = new Date().toISOString().split('T')[0];
+  this.http
+    .post('http://localhost:5000/api/allocate-orders', { allocationDate, allocations }, { headers })
+    .subscribe(
       (response: any) => {
         console.log('Leads allocated successfully:', response);
         this.alertMessage = response.message || 'Leads allocated successfully!';
-        this.showAlert = true; // Show the alert
-        this.getTeams(); // Refresh the teams' data to reflect updated allocations
+        this.showAlert = true;
+        this.getTeams(); // Refresh the teams' data
       },
-      (error) => {
+      error => {
         console.error('Error during lead allocation:', error);
         this.alertMessage = 'Error during lead allocation.';
-        this.showAlert = true; // Show the alert with error message
+        this.showAlert = true;
       }
     );
-  }
-  
+}
   
   
 closeAlert(): void {

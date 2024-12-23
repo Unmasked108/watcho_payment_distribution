@@ -58,8 +58,8 @@ export class TeamManagerComponent implements OnInit {
     const role = localStorage.getItem('role'); // Fetch role from localStorage
   
     if (role === 'TeamLeader') {
-      const teamUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/teams`;
-      const allocationUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/allocate-orders`;
+      const teamUrl = `  http://localhost:5000/api/teams`;
+      const allocationUrl = `  http://localhost:5000/api/allocate-orders`;
   
       this.http.get(teamUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -225,7 +225,7 @@ export class TeamManagerComponent implements OnInit {
   
     this.http
       .post(
-        ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/lead-allocations',
+        ' http://localhost:5000/api/lead-allocations',
         { selectedMembers },
         { headers }
       )
