@@ -111,27 +111,27 @@
       </ng-container>
   
       <!-- Member Name Column -->
-      <ng-container matColumnDef="membername">
-        <mat-header-cell *matHeaderCellDef> Member Name </mat-header-cell>
-        <mat-cell *matCellDef="let member"> {{ member.membername }} </mat-cell>
+      <ng-container matColumnDef="orderLink">
+        <mat-header-cell *matHeaderCellDef> Order Link </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.orderLink}} </mat-cell>
       </ng-container>
   
       <!-- Payment Status Column -->
-      <ng-container matColumnDef="paymentstatus">
-        <mat-header-cell *matHeaderCellDef> Payment Status </mat-header-cell>
-        <mat-cell *matCellDef="let member"> {{ member.paymentstatus }} </mat-cell>
+      <ng-container matColumnDef="memberName">
+        <mat-header-cell *matHeaderCellDef> Member Name</mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.memberName }} </mat-cell>
       </ng-container>
   
       <!-- Payment Money Column -->
-      <ng-container matColumnDef="paymentMethod">
-        <mat-header-cell *matHeaderCellDef> Payment Method </mat-header-cell>
-        <mat-cell *matCellDef="let member"> {{ member.paymentMethod }} </mat-cell>
+      <ng-container matColumnDef="paymentStatus">
+        <mat-header-cell *matHeaderCellDef> Payment Status </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.paymentStatus}} </mat-cell>
       </ng-container>
   
       <!-- Completed Time Column -->
-      <ng-container matColumnDef="completedTime">
-        <mat-header-cell *matHeaderCellDef> Completed Time </mat-header-cell>
-        <mat-cell *matCellDef="let member"> {{ member.completedTime }} </mat-cell>
+      <ng-container matColumnDef="completionDate">
+        <mat-header-cell *matHeaderCellDef> Completed Date </mat-header-cell>
+        <mat-cell *matCellDef="let member"> {{ member.completionDate | date:'yyyy-MM-dd' }} </mat-cell>
       </ng-container>
   
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

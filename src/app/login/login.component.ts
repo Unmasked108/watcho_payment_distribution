@@ -31,6 +31,8 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class LoginComponent {
   isLoginMode: boolean = true;
+  loading = false;
+  errorMessage: string = '';
 
   constructor(private http: HttpClient, private router: Router, private snackBar: MatSnackBar) {}
   showLoginPassword = false;
@@ -50,6 +52,7 @@ export class LoginComponent {
   }
   
   toggleMode() {
+    this.showSuccessModal = false;
     this.isLoginMode = !this.isLoginMode;
   }
 
@@ -58,27 +61,44 @@ export class LoginComponent {
       const email = form.value.email;
       const password = form.value.password;
   
-      this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apilogin' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apilogin
-        , { email, password })
-      .subscribe(
+      this.loading = true; // Show loading spinner
+      this.http.post('http://localhost:5000/login', { email, password }).subscribe(
         (response: any) => {
-          const { token, id: userId, role ,username} = response;
-
-          if (userId && role) {
-            // Save user data in localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('userId', userId);
-            localStorage.setItem('role', role);
-            localStorage.setItem('username', username); // Store username
-
-       // Navigate based on role
-       this.redirectUserByRole(role);
-      } else {
-        console.error('User ID or role missing in the response');
-      }
-    },error => {
+          setTimeout(() => { // Add 5 seconds delay
+            this.loading = false; // Hide loading spinner after delay
+            const { token, id: userId, role, username } = response;
+  
+            if (userId && role) {
+              // Save user data in localStorage
+              localStorage.setItem('token', token);
+              localStorage.setItem('userId', userId);
+              localStorage.setItem('role', role);
+              localStorage.setItem('username', username); // Store username
+  
+              // Navigate based on role
+              this.redirectUserByRole(role);
+            } else {
+              console.error('User ID or role missing in the response');
+            }
+          }, 1000); // Delay for 5 seconds (5000 milliseconds)
+        },
+        (error) => {
+          this.loading = false;
+          if (error.status === 401) {
+            // Check for specific error messages
+            if (error.error.message === 'Password is Incorrect') {
+              this.errorMessage = 'Password is Incorrect';
+            } else if (error.error.message === 'User not found. Please check your email.') {
+              this.errorMessage = 'User not found. Please check your email.';
+            } else {
+              this.errorMessage = 'An error occurred during login. Please try again.';
+            }
+          } else {
+            this.errorMessage = 'An error occurred during login. Please try again.';
+          }// Hide spinner if there's an error
           console.error('Login error:', error);
-        });
+        }
+      );
     }
   }
   showSuccessModal = false;
@@ -88,21 +108,27 @@ export class LoginComponent {
       const { name, email, password, confirmPassword } = form.value;
   
       if (password === confirmPassword) {
-        this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiregister' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiregister
-          , { name, email, password }).subscribe(
+        this.loading = true; // Show loading spinner
+        this.http.post('http://localhost:5000/register', { name, email, password }).subscribe(
           () => {
-            this.showSuccessModal = true; // Show the success modal
+            setTimeout(() => { // Add 5 seconds delay
+              this.loading = false; // Hide loading spinner after delay
+              this.showSuccessModal = true; // Show success modal
+            },1000); // Delay for 5 seconds (5000 milliseconds)
           },
           (error) => {
+            this.loading = false; // Hide spinner if there's an error
             console.error('Signup error:', error);
-            alert('Signup failed. Please try again.'); // Use a simple alert for failure
+            alert('Signup failed. Please try again.');
           }
         );
       } else {
-        alert('Passwords do not match.'); // Use a simple alert for password mismatch
+        this.loading = false;
+        alert('Passwords do not match.');
       }
     }
   }
+ 
   
   redirectToLogin() {
     this.showSuccessModal = false; // Hide the modal

@@ -35,7 +35,7 @@ export class TLHistoryComponent implements OnInit {
   initials: string = '';
   isDarkMode: boolean = false;
   selectedDate: Date = new Date();
-  displayedColumns: string[] = [ 'orderId', 'membername', 'paymentstatus', 'paymentMethod', 'completedTime'];
+  displayedColumns: string[] = [ 'orderId', 'orderLink','memberName', 'paymentStatus', 'completionDate'];
   dataSource = new MatTableDataSource<any>([]);
   teamMembers: any[] = [];
 
@@ -61,68 +61,36 @@ export class TLHistoryComponent implements OnInit {
     });
   
     console.log('Selected Date:', this.selectedDate);
-
+  
     // Format the selected date to YYYY-MM-DD
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
     console.log('Formatted Date:', formattedDate); // Debugging
-    
-    const allocationsUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/lead-allocations`;
   
-    // Fetch allocations for the selected date
+    // Fetch results for the selected date
     this.http
-      .get<any[]>(allocationsUrl, { headers, params: { date: formattedDate } })
+      .get<any[]>(`http://localhost:5000/api/results`, {
+        headers,
+        params: { date: formattedDate }, // Send the formatted date as query parameter
+      })
       .subscribe({
-        
-        next: (allocations: any[]) => {
-          const leadIds = allocations.flatMap((allocation) => allocation.leadIds);
-          const memberMap = new Map(
-            allocations.map((allocation) => [
-              allocation.leadIds.join(','), 
-              allocation.memberId._id, // Use populated memberId
-            ])
-            
-          );
-          console.log('Allocations:', allocations);
-
+        next: (response: any[]) => {
+          console.log('Response:', response);
   
-          const userMap = new Map(
-            allocations.map((allocation) => [
-              allocation.memberId._id,
-              allocation.memberId.name, // Use populated member name
-            ])
-          );
+          // Map the response to the required structure
+          this.teamMembers = response.map((item: any) => ({
+            orderId: item.orderId || 'N/A', // Default value if null
+            orderLink: item.orderLink || 'N/A', // Default value if null
+            paymentStatus: item.paymentStatus || 'N/A', // Default value if null
+            memberName: item.memberName || 'N/A', // Default value if null
+            completionDate: item.completionDate || 'N/A', // Default value if null
+          }));
   
-          // Fetch orders using leadIds
-          this.http
-            .get<any>(`  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders`, {
-              headers,
-              params: { leadIds: leadIds.join(',') },
-            })
-            .subscribe({
-              next: (response: any) => {
-                const orders = response.data;
-  
-                // Map member names to orders and set up table data
-                this.teamMembers = orders.map((order: any) => {
-                  const memberId = memberMap.get(order._id);
-                  return {
-                    orderId: order._id,
-                    membername: userMap.get(memberId),
-                    paymentstatus: order.paymentStatus, // Adjusted for schema field name
-                    paymentMethod: order.paymentModeBy || 0, // Add default value if null
-                    completedTime: order.completedTime || 'N/A', // Add default if null
-                    selected: false,
-                  };
-                });
-  
-                // Update the dataSource with the new data
-                this.dataSource.data = this.teamMembers;
-              },
-              error: (err) => console.error('Error fetching orders:', err),
-            });
+          // Update the dataSource with the new data
+          this.dataSource.data = this.teamMembers;
         },
-        error: (err) => console.error('Error fetching allocations:', err),
+        error: (err) => console.error('Error fetching results:', err),
       });
   }
+  
   
 }
