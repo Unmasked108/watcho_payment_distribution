@@ -154,26 +154,43 @@ export class TeamManagerComponent implements OnInit {
 
   allocateLeads(): void {
     const selectedMembers = this.teamMembers.filter((member) => member.selected);
-
     if (selectedMembers.length === 0) {
         console.warn('No team members selected for allocation.');
         return;
     }
-  
- // Filter out already allocated orderIds
- const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
- const unallocatedOrderIds = allOrderIds.filter((orderId) =>
-   !this.teamMembers.some((member) => member.orderIds.includes(orderId))
- );
-     let orderIndex = 0; // Track the index of `allOrderIds`
-  
-    // Update each member based on their manually set `leads`
+    // Step 1: Calculate manually allocated leads
+    const manuallyAllocatedLeads = selectedMembers.reduce((total, member) => {
+        return total + (member.leads || 0); // Sum up manually specified leads
+    }, 0);
+    if (manuallyAllocatedLeads > this.totalLeads) {
+        console.error('Manually allocated leads exceed total available leads.');
+        return;
+    }
+    // Step 2: Calculate remaining leads to distribute
+    const remainingLeads = this.totalLeads - manuallyAllocatedLeads;
+    // Step 3: Filter members without manual input
+    const autoAllocateMembers = selectedMembers.filter((member) => !member.leads || member.leads === 0);
+    if (autoAllocateMembers.length > 0) {
+        const autoAllocatedLeads = Math.floor(remainingLeads / autoAllocateMembers.length);
+        const extraLeads = remainingLeads % autoAllocateMembers.length;
+        let extraLeadIndex = 0;
+        // Step 4: Allocate remaining leads
+        autoAllocateMembers.forEach((member) => {
+            const additionalLead = extraLeadIndex < extraLeads ? 1 : 0;
+            member.leads = autoAllocatedLeads + additionalLead;
+            if (additionalLead) {
+                extraLeadIndex++;
+            }
+        });
+    }
+    // Step 5: Distribute order IDs correctly
+    const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds); // All available order IDs
+    let orderIndex = 0;
     this.teamMembers = this.teamMembers.map((member) => {
         if (member.selected) {
             const allocatedLeads = member.leads || 0; // Total leads allocated to this member
             const allocatedOrderIds = allOrderIds.slice(orderIndex, orderIndex + allocatedLeads);
             orderIndex += allocatedLeads; // Move index forward
-
             return {
                 ...member,
                 orderIds: allocatedOrderIds, // Correctly sliced order IDs
@@ -185,7 +202,6 @@ export class TeamManagerComponent implements OnInit {
             return member;
         }
     });
-
     console.log('Leads allocated:', selectedMembers);
 }
 

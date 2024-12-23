@@ -109,7 +109,7 @@ export class LoginComponent {
   
       if (password === confirmPassword) {
         this.loading = true; // Show loading spinner
-        this.http.post('http://localhost:5000/register', { name, email, password }).subscribe(
+        this.http.post('http://localhost:5000/register', { name, email, mobile,password }).subscribe(
           () => {
             setTimeout(() => { // Add 5 seconds delay
               this.loading = false; // Hide loading spinner after delay
