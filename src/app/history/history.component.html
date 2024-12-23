@@ -10,7 +10,8 @@
       </mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
-    <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()">Search</button>
+    
+    <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()" [disabled]="loading">Search</button>
   </div>
 </mat-card>
 
@@ -33,10 +34,15 @@
     <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
   </ng-container>
 
+  <ng-container matColumnDef="orderLink">
+    <mat-header-cell *matHeaderCellDef>Order Link</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.orderLink }}</mat-cell>
+  </ng-container>
+
   <!-- Allocated Team ID Column -->
-  <ng-container matColumnDef="allocatedTeamId">
-    <mat-header-cell *matHeaderCellDef>Allocated Team ID</mat-header-cell>
-    <mat-cell *matCellDef="let element">{{ element.allocatedTeamId }}</mat-cell>
+  <ng-container matColumnDef="allocatedTeamName">
+    <mat-header-cell *matHeaderCellDef>Allocated Team Name</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.allocatedTeamName }}</mat-cell>
   </ng-container>
 
   <!-- Allocated Member Column -->
@@ -66,3 +72,8 @@
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
 </mat-table>
+
+<div  *ngIf="loading" class="loader-container">
+  <div class="loader"></div>
+  <div class="loader-text">Loading...</div>
+</div>

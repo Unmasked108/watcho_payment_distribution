@@ -13,11 +13,16 @@
           <mat-icon>{{ showLoginPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
         </button>
       </mat-form-field>
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
       <button mat-raised-button color="primary" type="submit" class="full-width">Login</button>
       <p class="text-center mt-2">
         Don't have an account? 
         <a href="javascript:void(0)" (click)="toggleMode()" class="link-primary">Sign Up</a>
       </p>
+      <div  *ngIf="loading" class="loader-container">
+        <div class="loader"></div>
+        <div class="loader-text">Loading...</div>
+      </div>
     </form>
 
     <ng-template #signupTemplate>
@@ -63,6 +68,10 @@
           <p>You have successfully signed up!</p>
           <button (click)="redirectToLogin()">OK</button>
         </div>
+      </div>
+      <div  *ngIf="loading" class="loader-container">
+        <div class="loader"></div>
+        <div class="loader-text">Loading...</div>
       </div>
     </ng-template>
   </mat-card>

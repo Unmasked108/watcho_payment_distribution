@@ -35,7 +35,7 @@ export class TLHistoryComponent implements OnInit {
   initials: string = '';
   isDarkMode: boolean = false;
   selectedDate: Date = new Date();
-  displayedColumns: string[] = [ 'orderId', 'membername', 'paymentstatus', 'paymentMethod', 'completedTime'];
+  displayedColumns: string[] = [ 'orderId', 'orderLink','memberName', 'paymentStatus', 'completionDate'];
   dataSource = new MatTableDataSource<any>([]);
   teamMembers: any[] = [];
 
@@ -61,14 +61,12 @@ export class TLHistoryComponent implements OnInit {
     });
   
     console.log('Selected Date:', this.selectedDate);
-
+  
     // Format the selected date to YYYY-MM-DD
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
     console.log('Formatted Date:', formattedDate); // Debugging
-    
-    const allocationsUrl = `  http://localhost:5000/api/lead-allocations`;
   
-    // Fetch allocations for the selected date
+    // Fetch results for the selected date
     this.http
       .get<any[]>(allocationsUrl, { headers, params: { date: formattedDate } })
       .subscribe({
@@ -94,7 +92,7 @@ export class TLHistoryComponent implements OnInit {
   
           // Fetch orders using leadIds
           this.http
-            .get<any>(`  http://localhost:5000/api/orders`, {
+            .get<any>(`  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_apiapi/orders`, {
               headers,
               params: { leadIds: leadIds.join(',') },
             })
@@ -115,14 +113,12 @@ export class TLHistoryComponent implements OnInit {
                   };
                 });
   
-                // Update the dataSource with the new data
-                this.dataSource.data = this.teamMembers;
-              },
-              error: (err) => console.error('Error fetching orders:', err),
-            });
+          // Update the dataSource with the new data
+          this.dataSource.data = this.teamMembers;
         },
-        error: (err) => console.error('Error fetching allocations:', err),
+        error: (err) => console.error('Error fetching results:', err),
       });
   }
+  
   
 }
