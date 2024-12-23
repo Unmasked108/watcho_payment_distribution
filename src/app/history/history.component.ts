@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -49,16 +49,18 @@ export class HistoryComponent implements OnInit {
   loading: boolean = false;
   private readonly apiUrl = ' http://localhost:5000/api/results';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.loadAllResults(); // Load all results initially
+    // this.loadAllResults(); // Load all results initially
   }
 
   /**
    * Fetch all results for Admin based on the selected date
    */
   loadAllResults(): void {
+    this.loading = true
+
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`, // Include token from localStorage
@@ -73,6 +75,9 @@ export class HistoryComponent implements OnInit {
           this.data = response.map((item) => this.formatResult(item));
           this.filteredData = [...this.data];
           this.loading = false; // Stop spinner after data is loaded
+
+              // Trigger change detection
+              this.cdr.detectChanges(); // OR use markForCheck()
         },
         error: (error) => {
           console.error('Error fetching results:', error);
@@ -104,6 +109,8 @@ export class HistoryComponent implements OnInit {
    * Download data as CSV
    */
   downloadData(): void {
+    this.loading = true; // Start the loader before processing the data
+
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
     const headers = ['Order ID', 'Order Link', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit'];
     const csvData = this.filteredData.map((row) => ({
@@ -130,15 +137,18 @@ export class HistoryComponent implements OnInit {
     const blob = new Blob([utf8Bom + csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `orders_${formattedDate}.csv`;
   
-    FileSaver.saveAs(blob, fileName);
-  }
+    setTimeout(() => {
+      FileSaver.saveAs(blob, fileName);
+      this.loading = false; // Stop the loader after download starts
+      this.cdr.detectChanges(); // Ensure UI updates
+    }, 100); // Simulated delay for async operation  }
   
-
+  }
   /**
    * Search by date
    */
   searchByDate(): void {
-    
+    // this.loading = true
     this.loadAllResults();
     
   }

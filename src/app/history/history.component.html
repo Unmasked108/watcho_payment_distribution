@@ -34,9 +34,15 @@
     <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
   </ng-container>
 
-  <ng-container matColumnDef="orderLink">
+   <!-- Order Link Column -->
+   <ng-container matColumnDef="orderLink">
     <mat-header-cell *matHeaderCellDef>Order Link</mat-header-cell>
-    <mat-cell *matCellDef="let element">{{ element.orderLink }}</mat-cell>
+    <mat-cell *matCellDef="let element">
+      <a [href]="element.orderLink" target="_blank" *ngIf="element.orderLink !== 'N/A'">
+        {{ element.orderLink }}
+      </a>
+      <span *ngIf="element.orderLink === 'N/A'">N/A</span>
+    </mat-cell>
   </ng-container>
 
   <!-- Allocated Team ID Column -->
