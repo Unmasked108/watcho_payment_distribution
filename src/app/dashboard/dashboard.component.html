@@ -159,26 +159,38 @@
       <span>Allocate the leads to the Team Leader</span>
       <button mat-raised-button color="primary" (click)="openAllocationModalCard()">Allocate Leads</button>
     </div>
-    <!-- Allocation Modal Card -->
+  <!-- Allocation Modal Card -->
 <div *ngIf="isAllocationModalOpen" class="modal-overlay">
   <div class="modal-card">
-    <h2>Allocate Leads</h2>
-    <p><strong>Orders Remaining to be Allocated:</strong> {{ allocationRemainingOrders }}</p>
-    <p><strong>Total Leads:</strong> {{ allocationTotalLeads }}</p>
+    <!-- Sticky Header -->
+    <div class="modal-header">
+      <h2>Allocate Leads</h2> <br>
+      <p><strong>Orders Remaining to be Allocated:</strong> {{ allocationRemainingOrders }}</p>
+      <p><strong>Total Leads:</strong> {{ allocationTotalLeads }}</p>
 
-    <div *ngIf="showAlert" class="error-message">
-      <p>{{ alertMessage }}</p>
+      <div *ngIf="showAlert" class="error-message">
+        <p>{{ alertMessage }}</p>
+      </div>
     </div>
 
-    <div class="team-allocation">
-      <div *ngFor="let team of teams">
-        <p><strong>Team:</strong> {{ team.teamName }}</p>
-        <p><strong>Orders:</strong> 
-          <input type="number" [(ngModel)]="team.ordersToAllocate" />
-        </p>
-        <p><strong>Amount:</strong> 
-          <input type="number" [(ngModel)]="team.amount" />
-        </p>
+    <!-- Scrollable Content -->
+    <div class="modal-content">
+      <div class="team-allocation">
+        <div *ngFor="let team of teams" class="team-card">
+          <p><strong>Team:</strong> {{ team.teamName }}</p>
+          <p><strong>Orders:</strong>
+            <input type="number" [(ngModel)]="team.ordersToAllocate" />
+          </p>
+          <p><strong>Order Type:</strong></p>
+          <p>
+            <input type="number" [(ngModel)]="team.orderType" placeholder="Enter Order Type" />
+          </p>
+          <p><strong>Amount:</strong></p>
+          <div class="input-with-icon">
+            <span class="icon">&#8377;</span>
+            <input type="number" [(ngModel)]="team.amount" />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -188,6 +200,8 @@
     </div>
   </div>
 </div>
+
+
 
   </mat-card>
 <!-- Popup for No Team Selected -->
@@ -211,7 +225,6 @@
       <button (click)="closeAlert()">OK</button>
     </div>
   </div>
-
   <div class="team-container">
     <div class="team-card" *ngFor="let team of teams">
       <div class="card-header"></div>
@@ -220,6 +233,10 @@
         <p><strong>Team ID:</strong> {{ team.teamId }}</p>
         <p><strong>Leads Allocated:</strong> {{ team.leadsAllocated }}</p>
         <p><strong>Leads Completed:</strong> {{ team.leadsCompleted }}</p>
+        <p>
+          <strong>Payment Allocated Today:</strong>
+          <span [ngStyle]="{ color: backendColor }">₹{{ team.paymentToday }}</span>
+        </p>
         <button (click)="openTeamDetails(team)">See Details</button>
       </div>
     </div>
@@ -237,6 +254,10 @@
         <p><strong>Team ID:</strong> {{ selectedTeam.teamId }}</p>
         <p><strong>Leads Allocated:</strong> {{ selectedTeam.leadsAllocated }}</p>
         <p><strong>Leads Completed:</strong> {{ selectedTeam.leadsCompleted }}</p>
+        <p>
+          <strong>Payment Allocated Today:</strong>
+          <span [ngStyle]="{ color: backendColor }">₹{{ selectedTeam.paymentToday }}</span>
+        </p>
       </div>
       <div class="modal-footer">
         <h4>Unallocate today's Orders</h4>
@@ -244,6 +265,7 @@
       </div>
     </div>
   </div>
+  
   
   
   
