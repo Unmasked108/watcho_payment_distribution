@@ -47,6 +47,7 @@ export class TeamManagerComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchTeamData();
+    
   }
 
   fetchTeamData(): void {
@@ -112,11 +113,13 @@ export class TeamManagerComponent implements OnInit {
                   });
   
                   console.log('Order IDs for allocation:', this.teamMembers);
+                  this.getOrdersAllocatedForToday(this.teamId);
                 },
                 error: (err) => {
                   console.error('Error fetching allocations:', err);
                 },
               });
+
           } else {
             console.warn('No teams found for this TeamLeader');
           }
@@ -249,10 +252,7 @@ export class TeamManagerComponent implements OnInit {
         next: (response) => {
           console.log('Data saved successfully:', response);
           this.showCard('Data saved successfully!');
-  
-          // Log the total allocated leads
 
-          console.log('Total Leads Allocated:', this.totalAllocatedLeads);
         },
         error: (err) => {
           console.error('Error saving data:', err);
@@ -260,6 +260,26 @@ export class TeamManagerComponent implements OnInit {
         },
       });
   }
+  
+  getOrdersAllocatedForToday(teamId: string): void {
+    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const payload = {
+      teamId, // Use the passed teamId
+      date: today,
+    };
+  
+    console.log('Fetching orders allocated for today with payload:', payload);
+  
+    this.http.post('http://localhost:5000/api/orders-allocated', payload).subscribe(
+      (response) => {
+        console.log('Orders allocated:', response);
+      },
+      (error) => {
+        console.error('Error fetching orders allocated:', error);
+      }
+    );
+  }
+  
   
   showCard(message: string): void {
     this.responseMessage = message;

@@ -3,13 +3,32 @@
   <div class="form-container">
     <mat-form-field class="example-full-width">
       <mat-label>Choose a date</mat-label>
-      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate">
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (selectionChange)="onFilterChange()">
       <mat-hint>MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matIconSuffix [for]="picker">
         <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
       </mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
+
+    <mat-form-field class="example-full-width">
+      <mat-select placeholder="Paid Status" [(ngModel)]="selectedPaidStatus" (selectionChange)="onFilterChange()">
+        <mat-option [value]="null">All</mat-option>
+        <mat-option [value]="'Paid'">Paid</mat-option>
+        <mat-option [value]="'Unpaid'">Unpaid</mat-option>
+      </mat-select>
+    </mat-form-field>
+    
+    <!-- Team Names Filter -->
+    <mat-form-field class="example-full-width">
+      <mat-select placeholder="Team Name" [(ngModel)]="selectedTeamName" (selectionChange)="onFilterChange()">
+        <mat-option [value]="null">All</mat-option>
+        <mat-option *ngFor="let team of teamNames" [value]="team.name">
+          {{ team.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    
     
     <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()" [disabled]="loading">Search</button>
   </div>
@@ -34,6 +53,11 @@
     <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
   </ng-container>
 
+  <ng-container matColumnDef="coupon">
+    <mat-header-cell *matHeaderCellDef>Coupon</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.coupon }}</mat-cell>
+  </ng-container>
+
    <!-- Order Link Column -->
    <ng-container matColumnDef="orderLink">
     <mat-header-cell *matHeaderCellDef>Order Link</mat-header-cell>
@@ -54,26 +78,22 @@
   <!-- Allocated Member Column -->
   <ng-container matColumnDef="allocatedMember">
     <mat-header-cell *matHeaderCellDef>Allocated Member</mat-header-cell>
-    <mat-cell *matCellDef="let element">{{ element.allocatedMember }}</mat-cell>
+    <mat-cell *matCellDef="let element">{{ element.allocatedMember || 'Not Allocated' }}</mat-cell>
   </ng-container>
 
   <!-- Payment Status Column -->
-  <ng-container matColumnDef="paymentStatus">
-    <mat-header-cell *matHeaderCellDef>Payment Status</mat-header-cell>
-    <mat-cell *matCellDef="let element">{{ element.paymentStatus }}</mat-cell>
-  </ng-container>
+  <!-- Merged Column -->
+<ng-container matColumnDef="mergedColumn">
+  <mat-header-cell *matHeaderCellDef>Details</mat-header-cell>
+  <mat-cell *matCellDef="let element">
+    <div>
+      <div><strong>Pay Status:</strong> {{ element.paymentStatus }}</div>
+      <div><strong>Profit:</strong> <i class="bi bi-currency-rupee"></i>{{ element.profit }}</div>
+      <div><strong>Member Profit:</strong> <i class="bi bi-currency-rupee"></i>{{ element.memberProfit }}</div>
+    </div>
+  </mat-cell>
+</ng-container>
 
-  <!-- Profit Column -->
-  <ng-container matColumnDef="profit">
-    <mat-header-cell *matHeaderCellDef>Profit</mat-header-cell>
-    <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.profit }}</mat-cell>
-  </ng-container>
-
-  <!-- Member Profit Column -->
-  <ng-container matColumnDef="memberProfit">
-    <mat-header-cell *matHeaderCellDef>Member Profit</mat-header-cell>
-    <mat-cell *matCellDef="let element"><i class="bi bi-currency-rupee"></i>{{ element.memberProfit }}</mat-cell>
-  </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
