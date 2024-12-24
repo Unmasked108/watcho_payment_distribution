@@ -65,6 +65,7 @@ export class DashboardComponent  {
   customEndDate: Date | null = null;
   username: string = ''; 
   initials: string = ''; 
+  loading: boolean = false;
 
   totalLeadsAllocated: number = 0; // Total allocated leads
   totalLeadsCompleted: number = 0; // Total completed leads
@@ -480,7 +481,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
     const fileExtension = this.selectedFile.name.split('.').pop()?.toLowerCase();
     if (fileExtension === 'csv') {
       this.processCSV();
-
+      this.loading = true
     } else if (fileExtension === 'pdf') {
       this.uploadPDF();
     } else {
@@ -514,6 +515,7 @@ private processCSV() {
     this.http.post('  http://localhost:5000/api/orders ' //  http://localhost:5000/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
+        this.loading = false
         console.log('Data saved successfully:', response);
         this.fileUploadAlertMessage = 'Data saved successfully!';
         this.showFileUploadAlert = true;
@@ -594,14 +596,15 @@ closeFileUploadAlert() {
 // }
 
 isAllocationModalOpen = false;
-allocationRemainingOrders: number | null = null;
+allocationRemainingOrders299: number | null = null;
+allocationRemainingOrders149: number | null = null;
 allocationTotalLeads: number | null = null;
 
 
 openAllocationModalCard(): void {
   this.fetchAllocationOrderCounts().subscribe((data: any) => {
-    this.allocationRemainingOrders = data.remainingOrders;
-    this.allocationTotalLeads = data.totalLeads;
+    this.allocationRemainingOrders299 = data.remainingOrders299;
+    this.allocationRemainingOrders149 = data.remainingOrders149;    this.allocationTotalLeads = data.totalLeads;
     this.isAllocationModalOpen = true;
   });
 }
@@ -618,11 +621,26 @@ fetchAllocationOrderCounts() {
 }
 // teams: Team[] = []; // Existing teams array
 saveAllocations(): void {
-  const totalOrdersToAllocate = this.teams.reduce((sum, team) => sum + (team.ordersToAllocate || 0), 0);
+   // Calculate the total orders to allocate for each order type (299 and 149)
+  const totalOrdersToAllocate299 = this.teams.reduce(
+    (sum, team) => sum + (team.orderType === 299 ? (team.ordersToAllocate || 0) : 0),
+    0
+  );
+  
+  const totalOrdersToAllocate149 = this.teams.reduce(
+    (sum, team) => sum + (team.orderType === 149 ? (team.ordersToAllocate || 0) : 0),
+    0
+  );
 
-  // Check if total orders exceed the available remaining orders
-  if (totalOrdersToAllocate > (this.allocationRemainingOrders || 0)) {
-    this.alertMessage = 'Error: Total orders allocated exceed the available orders for today.';
+  // Check if total orders allocated exceed the available remaining orders for each type
+  if (totalOrdersToAllocate299 > (this.allocationRemainingOrders299 || 0)) {
+    this.alertMessage = 'Error: Total orders allocated for ₹299 exceed the available orders for today.';
+    this.showAlert = true;
+    return; // Prevent the request from being sent
+  }
+
+  if (totalOrdersToAllocate149 > (this.allocationRemainingOrders149 || 0)) {
+    this.alertMessage = 'Error: Total orders allocated for ₹149 exceed the available orders for today.';
     this.showAlert = true;
     return; // Prevent the request from being sent
   }
