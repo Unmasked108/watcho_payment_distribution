@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import moment from 'moment';
 import * as FileSaver from 'file-saver';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'app-history',
@@ -23,6 +24,8 @@ import * as FileSaver from 'file-saver';
     MatTableModule,
     FormsModule,
     CommonModule,
+    MatSelect,
+    MatOption
     // HttpClientModule, // HttpClientModule only needed in app.module.ts, can be removed here
   ],
   templateUrl: './history.component.html',
@@ -31,64 +34,90 @@ import * as FileSaver from 'file-saver';
 })
 export class HistoryComponent implements OnInit {
   selectedDate: Date = new Date(); // Default to the current date
-  selectedTeamId: string | null = null; // Optional team filter
-  selectedMemberName: string | null = null; // Optional member filter
+ 
+  selectedPaidStatus: string | null = null;
+  selectedTeamName: string | null = null;
+  teamNames: any[] = [];// Optional member filter
 
   displayedColumns: string[] = [
     'orderId',
     'orderLink',
     'allocatedTeamName',
     'allocatedMember',
-    'paymentStatus',
-    'profit',
-    'memberProfit',
+    'mergedColumn'
   ];
 
   data: any[] = [];
   filteredData: any[] = [];
   loading: boolean = false;
   private readonly apiUrl = ' http://localhost:5000/api/results';
+  private teamsApiUrl = 'http://localhost:5000/api/teams'
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+    this.fetchTeams();
     // this.loadAllResults(); // Load all results initially
   }
-
-  /**
-   * Fetch all results for Admin based on the selected date
-   */
-  loadAllResults(): void {
-    this.loading = true
-
-    const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
+  fetchTeams(): void {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${localStorage.getItem('token')}`, // Include token from localStorage
     });
-  
-    this.http
-      .get<any[]>(`${this.apiUrl}?date=${formattedDate}`, { headers })
-      .subscribe({
-        next: (response) => {
-          console.log('Response from API:', response); // Debugging log
-  
-          this.data = response.map((item) => this.formatResult(item));
-          this.filteredData = [...this.data];
-          this.loading = false; // Stop spinner after data is loaded
 
-              // Trigger change detection
-              this.cdr.detectChanges(); // OR use markForCheck()
-        },
-        error: (error) => {
-          console.error('Error fetching results:', error);
-          this.loading = false; // Stop spinner even on error
-        },
-        complete: () => {
-          console.log('Request complete.');
-          this.loading = false; // Additional safeguard to stop spinner
-        },
-      });
+    this.http.get<any[]>(this.teamsApiUrl, { headers }).subscribe({
+      next: (response) => {
+        this.teamNames = response.map(team => ({
+          id: team._id,
+          name: team.teamName
+        }));
+      },
+      error: (error) => {
+        console.error('Error fetching teams:', error);
+      }
+    });
   }
+  onFilterChange(): void {
+    this.loadAllResults(); // Re-fetch results based on current filter values
+  }
+
+  loadAllResults(): void {
+    this.loading = true;
+
+    const formattedDate = this.selectedDate
+      ? moment(this.selectedDate).format('YYYY-MM-DD')
+      : null;
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`, // Include token from localStorage
+    });
+
+    // Build query params dynamically
+    const queryParams: any = {};
+    if (formattedDate) queryParams.date = formattedDate;
+    if (this.selectedPaidStatus) queryParams.paidStatus = this.selectedPaidStatus;
+    if (this.selectedTeamName) queryParams.teamName = this.selectedTeamName;
+
+    const queryString = new URLSearchParams(queryParams).toString();
+    console.log(queryString)
+
+    this.http.get<any[]>(`${this.apiUrl}?${queryString}`, { headers }).subscribe({
+      next: (response) => {
+        console.log('Response from API:', response);
+         // Debugging log
+         this.data = response.map((item) => this.formatResult(item));
+         this.filteredData = [...this.data]; // Ensure filteredData is initialized
+         this.loading = false; // Stop spinner after data is loaded
+         this.cdr.detectChanges();
+        // Handle the response data
+        this.loading = false; // Stop spinner after data is loaded
+      },
+      error: (error) => {
+        console.error('Error fetching results:', error);
+        this.loading = false; // Stop spinner even on error
+      }
+    });
+  }
+
   
 
   /**
