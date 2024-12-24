@@ -53,6 +53,11 @@
     <mat-cell *matCellDef="let element">{{ element.orderId }}</mat-cell>
   </ng-container>
 
+  <ng-container matColumnDef="coupon">
+    <mat-header-cell *matHeaderCellDef>Coupon</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.coupon }}</mat-cell>
+  </ng-container>
+
    <!-- Order Link Column -->
    <ng-container matColumnDef="orderLink">
     <mat-header-cell *matHeaderCellDef>Order Link</mat-header-cell>
@@ -73,7 +78,7 @@
   <!-- Allocated Member Column -->
   <ng-container matColumnDef="allocatedMember">
     <mat-header-cell *matHeaderCellDef>Allocated Member</mat-header-cell>
-    <mat-cell *matCellDef="let element">{{ element.allocatedMember }}</mat-cell>
+    <mat-cell *matCellDef="let element">{{ element.allocatedMember || 'Not Allocated' }}</mat-cell>
   </ng-container>
 
   <!-- Payment Status Column -->

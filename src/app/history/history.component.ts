@@ -41,10 +41,12 @@ export class HistoryComponent implements OnInit {
 
   displayedColumns: string[] = [
     'orderId',
+    'coupon',
     'orderLink',
     'allocatedTeamName',
     'allocatedMember',
-    'mergedColumn'
+    'mergedColumn',
+    
   ];
 
   data: any[] = [];
@@ -126,6 +128,7 @@ export class HistoryComponent implements OnInit {
   private formatResult(item: any): any {
     return {
       orderId: item.orderId || 'N/A',
+      coupon:item.coupon || 'N/A',
       orderLink:item.orderLink || 'N/A' , // Correct mapping
       allocatedTeamName: item.teamId?.teamName || 'N/A', // Access nested `teamName`
       allocatedMember: item.memberName || 'N/A',
@@ -144,6 +147,7 @@ export class HistoryComponent implements OnInit {
     const headers = ['Order ID', 'Order Link', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit'];
     const csvData = this.filteredData.map((row) => ({
       'Order ID': row.orderId,
+      'Coupon' : row.coupon,
       'Order Link': row.orderLink,
       'Team Name': row.allocatedTeamId,
       'Member Name': row.allocatedMember,
