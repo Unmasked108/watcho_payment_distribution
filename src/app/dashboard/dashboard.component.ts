@@ -27,6 +27,9 @@ interface Team {
   isSelected?: boolean; // Add this property
   ordersToAllocate?: number; // Optional or initialize to 0
   amount?: number; // Optional or initialize to 0
+  paymentToday?: number; // Add paymentToday field
+  orderType?: number; // Add this line
+
 
 }
 
@@ -316,7 +319,8 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
       }
     );
   }
-  
+  backendColor = 'blue'; // Define color for backend data
+
    // Fetch allocations and update the table
    getAllocations(): void {
     const headers = new HttpHeaders({
@@ -346,6 +350,8 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
           team.leadsCompleted = 0;
           team.allocation = 'Not Allocated';
           team.allocatedTime = null;
+          team.paymentToday = 0; // Initialize paymentToday
+
         });
   
         allocations.forEach((allocation) => {
@@ -362,7 +368,9 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
 
             team.leadsAllocated = (team.leadsAllocated || 0) + (allocation.leadsAllocated || 0);
             team.leadsCompleted = (team.leadsCompleted || 0) + (allocation.leadsCompleted || 0);
-  
+  // Directly use paymentToday sent from the backend
+  team.paymentToday = allocation.PaymentGivenToday || 0;
+
             // Add to total leads
             totalLeadsAllocated += allocation.leadsAllocated || 0;
             totalLeadsCompleted += allocation.leadsCompleted || 0;
@@ -381,6 +389,10 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
               }
             }
           });
+          // Calculate paymentToday from orders
+        
+          console.log(`Before updating paymentToday for ${team.teamName}:`, team.paymentToday);
+
           
             console.log('Updated team:', team);
           } else {
@@ -621,12 +633,14 @@ saveAllocations(): void {
       teamId: team.teamId,
       orders: team.ordersToAllocate || 0,
       amount: team.amount || 0, // Default to 0
+      orderType: team.orderType || 0, // Default to 'N/A' if not specified
+
     }));
 
   this.allocateLeads(allocations);
 }
 
-allocateLeads(allocations: { teamId: string; orders: number; amount: number }[]): void {
+allocateLeads(allocations: { teamId: string; orders: number; amount: number ; orderType: number}[]): void {
   const headers = new HttpHeaders({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   });
