@@ -35,7 +35,7 @@ export class TeamManagerComponent implements OnInit {
   isDarkMode: boolean = false; // Tracks the current theme mode
 
   totalLeads: number = 0; // Total leads allocated to the team
-  totalAllocatedLeads: number = 0;
+  totalAllocatedLeads: number=0;
 
   displayedColumns: string[] = ['select', 'name', 'id', 'leads', 'time', 'status', 'edit'];
   teamMembers: any[] = []; // Holds team members' data
@@ -47,6 +47,7 @@ export class TeamManagerComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchTeamData();
+    
     
   }
 
@@ -113,7 +114,7 @@ export class TeamManagerComponent implements OnInit {
                   });
   
                   console.log('Order IDs for allocation:', this.teamMembers);
-                  this.getOrdersAllocatedForToday(this.teamId);
+                  this.getOrdersAllocatedForToday(team._id);
                 },
                 error: (err) => {
                   console.error('Error fetching allocations:', err);
@@ -252,6 +253,7 @@ export class TeamManagerComponent implements OnInit {
         next: (response) => {
           console.log('Data saved successfully:', response);
           this.showCard('Data saved successfully!');
+          this.fetchTeamData();
 
         },
         error: (err) => {
@@ -261,24 +263,30 @@ export class TeamManagerComponent implements OnInit {
       });
   }
   
+  
   getOrdersAllocatedForToday(teamId: string): void {
-    const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    const payload = {
-      teamId, // Use the passed teamId
-      date: today,
-    };
-  
-    console.log('Fetching orders allocated for today with payload:', payload);
-  
-    this.http.post('http://localhost:5000/api/orders-allocated', payload).subscribe(
-      (response) => {
-        console.log('Orders allocated:', response);
-      },
-      (error) => {
-        console.error('Error fetching orders allocated:', error);
-      }
-    );
+    console.log('Fetching orders allocated for today with teamId:', teamId);
+
+    // Set up the headers, including the Authorization token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`, // Get token from localStorage
+    });
+
+    // Send teamId as a query parameter for GET request with headers
+    this.http.get<{ totalAllocatedLeads: number }>(`http://localhost:5000/api/total-allocated-leads?teamId=${teamId}`, { headers })
+      .subscribe(
+        (response) => {
+          console.log('Orders allocated:', response);
+          this.totalAllocatedLeads = response.totalAllocatedLeads; // Assign the response to the variable
+        },
+        (error) => {
+          console.error('Error fetching orders allocated:', error);
+        }
+      );
   }
+  
+  
+  
   
   
   showCard(message: string): void {

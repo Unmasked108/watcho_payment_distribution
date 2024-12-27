@@ -144,12 +144,12 @@ export class HistoryComponent implements OnInit {
     this.loading = true; // Start the loader before processing the data
 
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
-    const headers = ['Order ID', 'Order Link', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit'];
+    const headers = ['Order ID', 'Coupon','Order Link', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit'];
     const csvData = this.filteredData.map((row) => ({
       'Order ID': row.orderId,
       'Coupon' : row.coupon,
       'Order Link': row.orderLink,
-      'Team Name': row.allocatedTeamId,
+      'Team Name': row.allocatedTeamName,
       'Member Name': row.allocatedMember,
       'Payment Status': row.paymentStatus,
       'Profit': `₹${row.profit}`, // Include icon representation in text
