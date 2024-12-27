@@ -29,7 +29,7 @@ interface Team {
   amount?: number; // Optional or initialize to 0
   paymentToday?: number; // Add paymentToday field
   orderType?: number; // Add this line
-
+commission?: number
 
 }
 
@@ -622,43 +622,51 @@ fetchAllocationOrderCounts() {
 // teams: Team[] = []; // Existing teams array
 saveAllocations(): void {
    // Calculate the total orders to allocate for each order type (299 and 149)
+  // Calculate the total orders to allocate for each order type (299 and 149)
   const totalOrdersToAllocate299 = this.teams.reduce(
-    (sum, team) => sum + (team.orderType === 299 ? (team.ordersToAllocate || 0) : 0),
+    (sum, team) => sum + (team.orderType === 299 ? (team.ordersToAllocate ?? 0) : 0),
     0
   );
-  
+
   const totalOrdersToAllocate149 = this.teams.reduce(
-    (sum, team) => sum + (team.orderType === 149 ? (team.ordersToAllocate || 0) : 0),
+    (sum, team) => sum + (team.orderType === 149 ? (team.ordersToAllocate ?? 0) : 0),
     0
   );
 
   // Check if total orders allocated exceed the available remaining orders for each type
-  if (totalOrdersToAllocate299 > (this.allocationRemainingOrders299 || 0)) {
+  if (totalOrdersToAllocate299 > (this.allocationRemainingOrders299 ?? 0)) {
     this.alertMessage = 'Error: Total orders allocated for ₹299 exceed the available orders for today.';
     this.showAlert = true;
     return; // Prevent the request from being sent
   }
 
-  if (totalOrdersToAllocate149 > (this.allocationRemainingOrders149 || 0)) {
+  if (totalOrdersToAllocate149 > (this.allocationRemainingOrders149 ?? 0)) {
     this.alertMessage = 'Error: Total orders allocated for ₹149 exceed the available orders for today.';
     this.showAlert = true;
     return; // Prevent the request from being sent
   }
 
+
   const allocations = this.teams
-    .filter(team => (team.ordersToAllocate || 0) > 0) // Avoid errors if ordersToAllocate is undefined
-    .map(team => ({
+  .filter(
+    (team) =>
+      (team.ordersToAllocate ?? 0) > 0 && 
+      (team.orderType ?? 0) > 0 // Ensure only relevant teams are included
+  )  .map(team => ({
       teamId: team.teamId,
       orders: team.ordersToAllocate || 0,
       amount: team.amount || 0, // Default to 0
       orderType: team.orderType || 0, // Default to 'N/A' if not specified
+      commission: team.commission || 0,
 
     }));
 
   this.allocateLeads(allocations);
+
+console.log("Data to be allocated to teams",allocations)
 }
 
-allocateLeads(allocations: { teamId: string; orders: number; amount: number ; orderType: number}[]): void {
+allocateLeads(allocations: { teamId: string; orders: number; amount: number ; orderType: number; commission: number}[]): void {
   const headers = new HttpHeaders({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   });
@@ -681,7 +689,12 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
     );
 }
   
-  
+updateAmount(team: any): void {
+  const orderType = team.orderType || 0;
+  const commission = team.commission || 0;
+  const orders = team.ordersToAllocate || 0;
+  team.amount = (orderType + commission) * orders;
+}
 closeAlert(): void {
   this.showAlert = false; // Hide the alert
 }
