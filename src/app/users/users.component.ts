@@ -127,7 +127,11 @@ export class UsersComponent implements OnInit {
   
           if (currentMember) {
             this.leadIds = currentMember.leadIds || [];
-            this.allocatedLeadsCount = this.leadIds.length;
+            const totalAllocatedLeads = this.leadIds.length;
+            const completedLeads = response.completedLeadsCount || 0;
+  
+            // Subtract completed leads from total allocated leads
+            this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;
             this.fetchOrders(); // Fetch orders based on leads
           } else {
             console.warn('No allocations found for the logged-in user.');

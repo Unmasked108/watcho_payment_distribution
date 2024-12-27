@@ -522,6 +522,8 @@ private processCSV() {
         
       },
       (error) => {
+        this.loading = false
+
         console.error('Error saving data:', error);
         this.fileUploadAlertMessage = 'Error saving data. Please try again.';
         this.showFileUploadAlert = true; // Show the file upload alert
@@ -623,6 +625,7 @@ fetchAllocationOrderCounts() {
 saveAllocations(): void {
    // Calculate the total orders to allocate for each order type (299 and 149)
   // Calculate the total orders to allocate for each order type (299 and 149)
+  this.loading= true
   const totalOrdersToAllocate299 = this.teams.reduce(
     (sum, team) => sum + (team.orderType === 299 ? (team.ordersToAllocate ?? 0) : 0),
     0
@@ -676,12 +679,14 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
     .post('http://localhost:5000/api/allocate-orders', { allocationDate, allocations }, { headers })
     .subscribe(
       (response: any) => {
+        this.loading=false
         console.log('Leads allocated successfully:', response);
         this.alertMessage = response.message || 'Leads allocated successfully!';
         this.showAlert = true;
         this.getTeams(); // Refresh the teams' data
       },
       error => {
+        this.loading=false
         console.error('Error during lead allocation:', error);
         this.alertMessage = 'Error during lead allocation.';
         this.showAlert = true;
