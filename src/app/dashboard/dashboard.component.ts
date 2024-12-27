@@ -29,7 +29,7 @@ interface Team {
   amount?: number; // Optional or initialize to 0
   paymentToday?: number; // Add paymentToday field
   orderType?: number; // Add this line
-
+commission?: number
 
 }
 
@@ -65,6 +65,7 @@ export class DashboardComponent  {
   customEndDate: Date | null = null;
   username: string = ''; 
   initials: string = ''; 
+  loading: boolean = false;
 
   totalLeadsAllocated: number = 0; // Total allocated leads
   totalLeadsCompleted: number = 0; // Total completed leads
@@ -480,7 +481,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
     const fileExtension = this.selectedFile.name.split('.').pop()?.toLowerCase();
     if (fileExtension === 'csv') {
       this.processCSV();
-
+      this.loading = true
     } else if (fileExtension === 'pdf') {
       this.uploadPDF();
     } else {
@@ -514,12 +515,15 @@ private processCSV() {
     this.http.post('  http://localhost:5000/api/orders ' //  http://localhost:5000/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
+        this.loading = false
         console.log('Data saved successfully:', response);
         this.fileUploadAlertMessage = 'Data saved successfully!';
         this.showFileUploadAlert = true;
         
       },
       (error) => {
+        this.loading = false
+
         console.error('Error saving data:', error);
         this.fileUploadAlertMessage = 'Error saving data. Please try again.';
         this.showFileUploadAlert = true; // Show the file upload alert
@@ -594,14 +598,15 @@ closeFileUploadAlert() {
 // }
 
 isAllocationModalOpen = false;
-allocationRemainingOrders: number | null = null;
+allocationRemainingOrders299: number | null = null;
+allocationRemainingOrders149: number | null = null;
 allocationTotalLeads: number | null = null;
 
 
 openAllocationModalCard(): void {
   this.fetchAllocationOrderCounts().subscribe((data: any) => {
-    this.allocationRemainingOrders = data.remainingOrders;
-    this.allocationTotalLeads = data.totalLeads;
+    this.allocationRemainingOrders299 = data.remainingOrders299;
+    this.allocationRemainingOrders149 = data.remainingOrders149;    this.allocationTotalLeads = data.totalLeads;
     this.isAllocationModalOpen = true;
   });
 }
@@ -618,29 +623,53 @@ fetchAllocationOrderCounts() {
 }
 // teams: Team[] = []; // Existing teams array
 saveAllocations(): void {
-  const totalOrdersToAllocate = this.teams.reduce((sum, team) => sum + (team.ordersToAllocate || 0), 0);
+   // Calculate the total orders to allocate for each order type (299 and 149)
+  // Calculate the total orders to allocate for each order type (299 and 149)
+  this.loading= true
+  const totalOrdersToAllocate299 = this.teams.reduce(
+    (sum, team) => sum + (team.orderType === 299 ? (team.ordersToAllocate ?? 0) : 0),
+    0
+  );
 
-  // Check if total orders exceed the available remaining orders
-  if (totalOrdersToAllocate > (this.allocationRemainingOrders || 0)) {
-    this.alertMessage = 'Error: Total orders allocated exceed the available orders for today.';
+  const totalOrdersToAllocate149 = this.teams.reduce(
+    (sum, team) => sum + (team.orderType === 149 ? (team.ordersToAllocate ?? 0) : 0),
+    0
+  );
+
+  // Check if total orders allocated exceed the available remaining orders for each type
+  if (totalOrdersToAllocate299 > (this.allocationRemainingOrders299 ?? 0)) {
+    this.alertMessage = 'Error: Total orders allocated for ₹299 exceed the available orders for today.';
     this.showAlert = true;
     return; // Prevent the request from being sent
   }
 
+  if (totalOrdersToAllocate149 > (this.allocationRemainingOrders149 ?? 0)) {
+    this.alertMessage = 'Error: Total orders allocated for ₹149 exceed the available orders for today.';
+    this.showAlert = true;
+    return; // Prevent the request from being sent
+  }
+
+
   const allocations = this.teams
-    .filter(team => (team.ordersToAllocate || 0) > 0) // Avoid errors if ordersToAllocate is undefined
-    .map(team => ({
+  .filter(
+    (team) =>
+      (team.ordersToAllocate ?? 0) > 0 && 
+      (team.orderType ?? 0) > 0 // Ensure only relevant teams are included
+  )  .map(team => ({
       teamId: team.teamId,
       orders: team.ordersToAllocate || 0,
       amount: team.amount || 0, // Default to 0
       orderType: team.orderType || 0, // Default to 'N/A' if not specified
+      commission: team.commission || 0,
 
     }));
 
   this.allocateLeads(allocations);
+
+console.log("Data to be allocated to teams",allocations)
 }
 
-allocateLeads(allocations: { teamId: string; orders: number; amount: number ; orderType: number}[]): void {
+allocateLeads(allocations: { teamId: string; orders: number; amount: number ; orderType: number; commission: number}[]): void {
   const headers = new HttpHeaders({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   });
@@ -650,12 +679,14 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
     .post('http://localhost:5000/api/allocate-orders', { allocationDate, allocations }, { headers })
     .subscribe(
       (response: any) => {
+        this.loading=false
         console.log('Leads allocated successfully:', response);
         this.alertMessage = response.message || 'Leads allocated successfully!';
         this.showAlert = true;
         this.getTeams(); // Refresh the teams' data
       },
       error => {
+        this.loading=false
         console.error('Error during lead allocation:', error);
         this.alertMessage = 'Error during lead allocation.';
         this.showAlert = true;
@@ -663,7 +694,12 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
     );
 }
   
-  
+updateAmount(team: any): void {
+  const orderType = team.orderType || 0;
+  const commission = team.commission || 0;
+  const orders = team.ordersToAllocate || 0;
+  team.amount = (orderType + commission) * orders;
+}
 closeAlert(): void {
   this.showAlert = false; // Hide the alert
 }

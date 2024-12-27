@@ -784,48 +784,47 @@
   }
 }
 
-
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); // Slightly darker overlay
   display: flex;
-  align-items: flex-start; /* Align items at the top */
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
   box-sizing: border-box;
-  overflow-y: auto; /* Add scrolling to the overlay itself */
+  overflow-y: auto;
 }
 
 .modal-card {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); // Subtle shadow for depth
+  padding: 2rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin: auto; /* Center the modal within the overlay */
   position: relative;
+  animation: fadeIn 0.3s ease-in-out;
 
   /* Sticky Header */
   .modal-header {
     position: sticky;
-    top: 0; /* Stick to the top of the card */
-    background-color: #fff; /* Match background to modal card */
+    top: 0;
+    background-color: #ffffff;
     z-index: 1;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 2px solid #f0f0f0;
 
     h2 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       color: #333;
       text-align: center;
     }
@@ -834,29 +833,40 @@
       font-size: 1rem;
       color: #555;
       margin: 0.5rem 0;
+
+      &.highlight {
+        color: #28a745; // Green color for highlights
+        font-weight: bold;
+      }
     }
   }
 
   .modal-content {
-    overflow-y: auto; /* Enable scrolling for the content */
-    max-height: 60vh; /* Restrict the scrollable height */
-    padding-right: 0.5rem; /* Space for scrollbar */
+    overflow-y: auto;
+    max-height: 60vh;
+    padding-right: 0.5rem;
   }
+  /* Highlighted counts in green */
+.highlight {
+  color: #28a745; // Green for counts
+  font-weight: bold;
+}
 
   .team-allocation {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.2rem;
 
     .team-card {
-      background-color: #f9f9f9;
+      background-color: #f8f9fa;
       padding: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ddd;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
       p {
         margin: 0.5rem 0;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: #444;
 
         strong {
@@ -878,8 +888,8 @@
 
         input {
           width: 100%;
-          padding: 0.5rem 0.5rem 0.5rem 2rem; // Adjust padding for the icon
-          border: 1px solid #ccc;
+          padding: 0.5rem 0.5rem 0.5rem 2.5rem; // Adjust padding for the icon
+          border: 1px solid #ced4da;
           border-radius: 4px;
           font-size: 1rem;
           color: #333;
@@ -909,22 +919,34 @@
 
       &.mat-button {
         background-color: transparent;
-        color: #d32f2f;
+        color: #d9534f;
 
         &:hover {
-          background-color: rgba(211, 47, 47, 0.1);
+          background-color: rgba(217, 83, 79, 0.1);
         }
       }
 
       &.mat-raised-button {
         background-color: #007bff;
-        color: #fff;
+        color: #ffffff;
 
         &:hover {
           background-color: #0056b3;
         }
       }
     }
+  }
+}
+
+/* Fade-in animation for the modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -938,4 +960,97 @@
   .modal-content {
     max-height: 50vh;
   }
+}
+
+
+//loader
+
+
+.loader-container { 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw; /* Ensure it spans the full width */
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.8); /* Optional: Add a background overlay */
+  z-index: 1000;
+}
+
+.loader {
+  position: relative; /* Fixed typo by adding a semicolon */
+  width: 70px;
+  height: 70px;
+}
+
+.loader:before {
+  content: "";
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 6px solid #007bff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.loader:after {
+  content: "";
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 6px solid transparent;
+  border-top-color: #007bff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: spin 2s linear infinite;
+}
+
+.loader-text {
+  font-size: 24px;
+  margin-top: 20px;
+  color: #007bff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@keyframes pulse {
+0% {
+  transform: scale(0.6);
+  opacity: 1;
+}
+50% {
+  transform: scale(1.2);
+  opacity: 0;
+}
+100% {
+  transform: scale(0.6);
+  opacity: 1;
+}
+}
+
+@keyframes spin {
+0% {
+  transform: rotate(0deg);
+}
+100% {
+  transform: rotate(360deg);
+}
+}
+
+.content {
+display: none;
+}
+
+.loaded .loader-container {
+display: none;
+}
+
+.loaded .content {
+display: block;
 }

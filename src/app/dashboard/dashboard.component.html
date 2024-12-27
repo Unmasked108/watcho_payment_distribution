@@ -154,53 +154,62 @@
       <span>Generate the token</span>
       <button mat-raised-button color="accent" (click)="generateToken()">Generate</button>
     </div>
-    
     <div class="allocation-action">
       <span>Allocate the leads to the Team Leader</span>
       <button mat-raised-button color="primary" (click)="openAllocationModalCard()">Allocate Leads</button>
     </div>
-  <!-- Allocation Modal Card -->
-<div *ngIf="isAllocationModalOpen" class="modal-overlay">
-  <div class="modal-card">
-    <!-- Sticky Header -->
-    <div class="modal-header">
-      <h2>Allocate Leads</h2> <br>
-      <p><strong>Orders Remaining to be Allocated:</strong> {{ allocationRemainingOrders }}</p>
-      <p><strong>Total Leads:</strong> {{ allocationTotalLeads }}</p>
-
-      <div *ngIf="showAlert" class="error-message">
-        <p>{{ alertMessage }}</p>
-      </div>
-    </div>
-
-    <!-- Scrollable Content -->
-    <div class="modal-content">
-      <div class="team-allocation">
-        <div *ngFor="let team of teams" class="team-card">
-          <p><strong>Team:</strong> {{ team.teamName }}</p>
-          <p><strong>Orders:</strong>
-            <input type="number" [(ngModel)]="team.ordersToAllocate" />
-          </p>
-          <p><strong>Order Type:</strong></p>
-          <p>
-            <input type="number" [(ngModel)]="team.orderType" placeholder="Enter Order Type" />
-          </p>
-          <p><strong>Amount:</strong></p>
-          <div class="input-with-icon">
-            <span class="icon">&#8377;</span>
-            <input type="number" [(ngModel)]="team.amount" />
+    
+    <!-- Allocation Modal Card -->
+    <div *ngIf="isAllocationModalOpen" class="modal-overlay">
+      <div class="modal-card">
+        <!-- Sticky Header -->
+        <div class="modal-header">
+          <h2>Allocate Leads</h2> <br>
+          <p><strong>Orders Remaining of ₹299 = </strong> <span class="highlight">{{ allocationRemainingOrders299 }}</span></p>
+          <p><strong>Orders Remaining of ₹149 = </strong> <span class="highlight">{{ allocationRemainingOrders149 }}</span></p>
+          <p><strong>Total Leads:</strong> <span class="highlight">{{ allocationTotalLeads }}</span></p>
+           <div *ngIf="showAlert" class="error-message">
+            <p>{{ alertMessage }}</p>
           </div>
+        </div>
+    
+        <!-- Scrollable Content -->
+        <div class="modal-content">
+          <div class="team-allocation">
+            <div *ngFor="let team of teams" class="team-card">
+              <div class="form-group">
+                <p><strong>Team:</strong> {{ team.teamName }}</p>
+              </div>
+              <div class="form-group">
+                <p><strong>Orders:</strong></p>
+                <input type="number" [(ngModel)]="team.ordersToAllocate" (input)="updateAmount(team)" />
+              </div>
+              <div class="form-group">
+                <p><strong>Order Type:</strong></p>
+                <input type="number" [(ngModel)]="team.orderType" placeholder="Enter Order Type" (input)="updateAmount(team)" />
+              </div>
+              <div class="form-group">
+                <p><strong>Commission:</strong></p>
+                <input type="number" [(ngModel)]="team.commission" placeholder="Enter Commission" (input)="updateAmount(team)" />
+              </div>
+              <div class="form-group">
+                <p><strong>Amount:</strong></p>
+                <div class="input-with-icon">
+                  <span class="icon">&#8377;</span>
+                  <input type="number" [(ngModel)]="team.amount" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <div class="actions">
+          <button mat-button color="warn" (click)="closeAllocationModalCard()">Cancel</button>
+          <button mat-raised-button color="primary" (click)="saveAllocations()">Save</button>
         </div>
       </div>
     </div>
-
-    <div class="actions">
-      <button mat-button color="warn" (click)="closeAllocationModalCard()">Cancel</button>
-      <button mat-raised-button color="primary" (click)="saveAllocations()">Save</button>
-    </div>
-  </div>
-</div>
-
+    
 
 
   </mat-card>
@@ -266,7 +275,10 @@
     </div>
   </div>
   
-  
+  <div  *ngIf="loading" class="loader-container">
+    <div class="loader"></div>
+    <div class="loader-text">Loading...</div>
+  </div>
   
   
   <!-- Table Component -->

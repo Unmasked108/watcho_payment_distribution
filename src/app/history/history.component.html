@@ -29,7 +29,14 @@
       </mat-select>
     </mat-form-field>
     
-    
+    <!-- Verify Orders Filter -->
+  <mat-form-field class="example-full-width">
+    <mat-select placeholder="Verify Orders" [(ngModel)]="selectedVerifyStatus" (selectionChange)="onFilterChange()">
+      <mat-option [value]="'NoVerify'">Don't Verify</mat-option>
+      <mat-option [value]="'Verify'">Verify</mat-option>
+    </mat-select>
+  </mat-form-field>
+
     <button mat-raised-button color="primary" class="search-btn" (click)="searchByDate()" [disabled]="loading">Search</button>
   </div>
 </mat-card>
@@ -57,6 +64,10 @@
     <mat-header-cell *matHeaderCellDef>Coupon</mat-header-cell>
     <mat-cell *matCellDef="let element">{{ element.coupon }}</mat-cell>
   </ng-container>
+  <ng-container matColumnDef="orderType">
+    <mat-header-cell *matHeaderCellDef>OrderType</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.orderType }}</mat-cell>
+  </ng-container>
 
    <!-- Order Link Column -->
    <ng-container matColumnDef="orderLink">
@@ -73,6 +84,10 @@
   <ng-container matColumnDef="allocatedTeamName">
     <mat-header-cell *matHeaderCellDef>Allocated Team Name</mat-header-cell>
     <mat-cell *matCellDef="let element">{{ element.allocatedTeamName }}</mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="verification">
+    <mat-header-cell *matHeaderCellDef>Verification</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.verification }}</mat-cell>
   </ng-container>
 
   <!-- Allocated Member Column -->

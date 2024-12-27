@@ -38,11 +38,15 @@ export class HistoryComponent implements OnInit {
   selectedPaidStatus: string | null = null;
   selectedTeamName: string | null = null;
   teamNames: any[] = [];// Optional member filter
+  selectedVerifyStatus: string | null=null;
+
 
   displayedColumns: string[] = [
     'orderId',
     'coupon',
+    'orderType',
     'orderLink',
+    'verification',
     'allocatedTeamName',
     'allocatedMember',
     'mergedColumn',
@@ -98,6 +102,7 @@ export class HistoryComponent implements OnInit {
     if (formattedDate) queryParams.date = formattedDate;
     if (this.selectedPaidStatus) queryParams.paidStatus = this.selectedPaidStatus;
     if (this.selectedTeamName) queryParams.teamName = this.selectedTeamName;
+    if (this.selectedVerifyStatus) queryParams.verifyStatus = this.selectedVerifyStatus; // Add Verify Orders filter
 
     const queryString = new URLSearchParams(queryParams).toString();
     console.log(queryString)
@@ -130,7 +135,10 @@ export class HistoryComponent implements OnInit {
       orderId: item.orderId || 'N/A',
       coupon:item.coupon || 'N/A',
       orderLink:item.orderLink || 'N/A' , // Correct mapping
+      orderType: item.orderType || 0, // Include orderType
+
       allocatedTeamName: item.teamId?.teamName || 'N/A', // Access nested `teamName`
+      verification: item.completionStatus || 'N/A',
       allocatedMember: item.memberName || 'N/A',
       paymentStatus: item.paymentStatus || 'N/A',
       profit: item.profitBehindOrder || 0,
@@ -144,13 +152,18 @@ export class HistoryComponent implements OnInit {
     this.loading = true; // Start the loader before processing the data
 
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
-    const headers = ['Order ID', 'Coupon','Order Link', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit'];
+    const headers = ['Order ID','Coupon','Order Link', 'Order Type', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit','Verification',];
     const csvData = this.filteredData.map((row) => ({
       'Order ID': row.orderId,
       'Coupon' : row.coupon,
       'Order Link': row.orderLink,
+      'Order Type': row.orderType, // Add orderType to CSV data
+
       'Team Name': row.allocatedTeamName,
+      'Verification': row.verification || 'N/A', // Map completion field
+
       'Member Name': row.allocatedMember,
+
       'Payment Status': row.paymentStatus,
       'Profit': `₹${row.profit}`, // Include icon representation in text
       'Member Profit': `₹${row.memberProfit}`, // Include icon representation in text
