@@ -120,15 +120,17 @@ export class UsersComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
+          const allocations = response.allocations || [];
+          const completedLeads = response.completedLeadsCount || 0;
   
-          const currentMember = response.find(
+          const currentMember = allocations.find(
             (alloc: any) => alloc.memberId._id === loggedInUserId
           );
   
           if (currentMember) {
             this.leadIds = currentMember.leadIds || [];
             const totalAllocatedLeads = this.leadIds.length;
-            const completedLeads = response.completedLeadsCount || 0;
+            // const completedLeads = response.completedLeadsCount || 0;
   
             // Subtract completed leads from total allocated leads
             this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;

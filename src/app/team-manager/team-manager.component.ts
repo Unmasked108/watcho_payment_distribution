@@ -270,7 +270,7 @@ export class TeamManagerComponent implements OnInit {
   
     console.log('Fetching orders allocated for today with payload:', payload);
   
-    this.http.post('http://localhost:5000/api/orders-allocated', payload).subscribe(
+    this.http.post('http://localhost:5000/api/total-allocated-leads', payload).subscribe(
       (response) => {
         console.log('Orders allocated:', response);
       },
