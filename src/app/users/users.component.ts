@@ -121,7 +121,7 @@ export class UsersComponent implements OnInit {
         next: (response) => {
           console.log('Lead Allocations Response:', response);
           const allocations = response.allocations || [];
-          const completedLeads = response.completedLeadsCount || 0;
+          const completedLeadsCount = response.completedLeadsCount || 0;
   
           const currentMember = allocations.find(
             (alloc: any) => alloc.memberId._id === loggedInUserId
@@ -133,8 +133,10 @@ export class UsersComponent implements OnInit {
             // const completedLeads = response.completedLeadsCount || 0;
   
             // Subtract completed leads from total allocated leads
-            this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;
-  
+            this.allocatedLeadsCount = totalAllocatedLeads - completedLeadsCount;
+            console.log(
+              `Total Leads Allocated: ${totalAllocatedLeads}, Completed Leads: ${completedLeadsCount}, Remaining Leads: ${this.allocatedLeadsCount}`
+            );
             this.fetchOrders(); // Fetch orders based on leads
           } else {
             console.warn('No allocations found for the logged-in user.');
