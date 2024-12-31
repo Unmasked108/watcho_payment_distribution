@@ -116,22 +116,30 @@ export class UsersComponent implements OnInit {
     });
   
     this.http
-      .get<any>('  http://localhost:5000/api/lead-allocations', { headers })
+      .get<any>('http://localhost:5000/api/lead-allocations', { headers })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
   
-          const currentMember = response.find(
+          const allocations = response.allocations; // Extract the allocations array
+          const completedLeadsCount = response.completedLeadsCount || 0; // Extract the completed leads count
+  
+          if (!allocations || !Array.isArray(allocations)) {
+            console.error('Allocations data is not an array.');
+            return;
+          }
+  
+          const currentMember = allocations.find(
             (alloc: any) => alloc.memberId._id === loggedInUserId
           );
   
           if (currentMember) {
             this.leadIds = currentMember.leadIds || [];
             const totalAllocatedLeads = this.leadIds.length;
-            const completedLeads = response.completedLeadsCount || 0;
   
             // Subtract completed leads from total allocated leads
-            this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;
+            this.allocatedLeadsCount = totalAllocatedLeads - completedLeadsCount;
+  
             this.fetchOrders(); // Fetch orders based on leads
           } else {
             console.warn('No allocations found for the logged-in user.');
@@ -142,6 +150,7 @@ export class UsersComponent implements OnInit {
         },
       });
   }
+  
   
   
   fetchOrders(): void {

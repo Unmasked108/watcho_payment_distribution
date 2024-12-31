@@ -44,7 +44,7 @@ interface Team {
 })
 export class TeamsComponent implements OnInit {
   selectedOption: string = 'manage';
-  displayedColumns: string[] = ['teamName', 'teamId', 'capacity', 'numMembers', 'members', 'actions'];
+  displayedColumns: string[] = ['teamName', 'teamId', 'capacity', 'numMembers','paymentReceived', 'members', 'actions'];
   teams: Team[] = [];
   teamForm: FormGroup;
   editingTeam: Team | null = null;
