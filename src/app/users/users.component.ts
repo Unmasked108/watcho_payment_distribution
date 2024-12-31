@@ -116,7 +116,7 @@ export class UsersComponent implements OnInit {
     });
   
     this.http
-      .get<any>('  http://localhost:5000/api/lead-allocations', { headers })
+      .get<any>('http://localhost:5000/api/lead-allocations', { headers })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
@@ -134,6 +134,7 @@ export class UsersComponent implements OnInit {
   
             // Subtract completed leads from total allocated leads
             this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;
+  
             this.fetchOrders(); // Fetch orders based on leads
           } else {
             console.warn('No allocations found for the logged-in user.');
@@ -144,6 +145,7 @@ export class UsersComponent implements OnInit {
         },
       });
   }
+  
   
   
   fetchOrders(): void {

@@ -77,6 +77,11 @@
       <mat-cell *matCellDef="let team"> {{ team.numMembers }} </mat-cell>
     </ng-container>
 
+    <ng-container matColumnDef="paymentReceived">
+      <mat-header-cell *matHeaderCellDef> Total Payment Given  </mat-header-cell>
+      <mat-cell *matCellDef="let team"> {{ team.paymentReceived  }} </mat-cell>
+    </ng-container>
+
     <!-- Members Column -->
     <ng-container matColumnDef="members">
       <mat-header-cell *matHeaderCellDef> Members </mat-header-cell>
