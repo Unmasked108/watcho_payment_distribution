@@ -82,20 +82,25 @@
       <ng-container matColumnDef="orderId">
         <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          <button
-  mat-raised-button
-  [color]="element.paymentStatus === 'Paid' ? 'primary' : 'accent'"
-  [disabled]="element.paymentStatus === 'Paid'"
-  matTooltip="{{ element.paymentStatus === 'Paid' ? 'Already Paid' : 'Click to Pay' }}"
-  (click)="updatePaymentStatus(element)"
->
-  <a *ngIf="element.link" [href]="element.link" target="_blank" style="color: inherit; text-decoration: none;">
-    Pay
-  </a>
-</button>
+          <a
+              *ngIf="element.link"
+              [href]="element.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              (click)="updatePaymentStatus(element)"
+              mat-raised-button
+              [color]="element.paymentStatus === 'Paid' ? 'primary' : 'accent'"
+              [disabled]="element.paymentStatus === 'Paid'"
+              matTooltip="{{ element.paymentStatus === 'Paid' ? 'Already Paid' : 'Click to Pay' }}"
+              style="text-decoration: none; color: inherit; display: flex; justify-content: center; align-items: center; margin: auto;"
+             >
+              Pay
+          </a>
+
+
         </mat-cell>
       </ng-container>
-
+      
     
       <!-- Link Column
       <ng-container matColumnDef="link">
