@@ -155,62 +155,108 @@ export class TeamManagerComponent implements OnInit {
     const selectedCount = this.teamMembers.filter((member) => member.selected).length;
     return selectedCount > 0 && selectedCount < this.teamMembers.length;
   }
-
   allocateLeads(): void {
-    const selectedMembers = this.teamMembers.filter((member) => member.selected);
-    if (selectedMembers.length === 0) {
-        console.warn('No team members selected for allocation.');
-        return;
-    }
-    // Step 1: Calculate manually allocated leads
-    const manuallyAllocatedLeads = selectedMembers.reduce((total, member) => {
-        return total + (member.leads || 0); // Sum up manually specified leads
-    }, 0);
-    if (manuallyAllocatedLeads > this.totalLeads) {
-        console.error('Manually allocated leads exceed total available leads.');
-        return;
-    }
-    // Step 2: Calculate remaining leads to distribute
-    const remainingLeads = this.totalLeads - manuallyAllocatedLeads;
-    // Step 3: Filter members without manual input
-    const autoAllocateMembers = selectedMembers.filter((member) => !member.leads || member.leads === 0);
-    if (autoAllocateMembers.length > 0) {
-        const autoAllocatedLeads = Math.floor(remainingLeads / autoAllocateMembers.length);
-        const extraLeads = remainingLeads % autoAllocateMembers.length;
-        let extraLeadIndex = 0;
-        // Step 4: Allocate remaining leads
-        autoAllocateMembers.forEach((member) => {
-            const additionalLead = extraLeadIndex < extraLeads ? 1 : 0;
-            member.leads = autoAllocatedLeads + additionalLead;
-            if (additionalLead) {
-                extraLeadIndex++;
-            }
-        });
-    }
-    // Step 5: Distribute order IDs correctly
-    const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds); // All available order IDs
-    let orderIndex = 0;
-    this.teamMembers = this.teamMembers.map((member) => {
-        if (member.selected) {
-            const allocatedLeads = member.leads || 0; // Total leads allocated to this member
-            const allocatedOrderIds = allOrderIds.slice(orderIndex, orderIndex + allocatedLeads);
-            orderIndex += allocatedLeads; // Move index forward
-            return {
-                ...member,
-                orderIds: allocatedOrderIds, // Correctly sliced order IDs
-                time: new Date().toLocaleTimeString(),
-                date: new Date().toISOString(),
-                status: 'Completed',
-            };
-        } else {
-            return member;
-        }
+    const headers = new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
-    console.log('Leads allocated:', selectedMembers);
+
+    if (!this.teamId) {
+        console.error('Team ID is not available.');
+        return;
+    }
+
+    // Fetch already allocated leads for the day
+    const allocationUrl = `http://localhost:5000/api/unallocated-leads?teamId=${this.teamId}`;
+
+    this.http.get(allocationUrl, { headers }).subscribe({
+        next: (response: any) => {
+            const allocatedLeadIds: string[] = response.allocatedLeadIds || [];
+            console.log('Already allocated leads:', allocatedLeadIds);
+
+            // Step 1: Deduplicate and filter unallocated leads
+            const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
+            const uniqueOrderIds = Array.from(new Set(allOrderIds));
+
+            const unallocatedOrderIds = uniqueOrderIds.filter((order) =>
+                !allocatedLeadIds.includes(order._id)
+            );
+
+            console.log('Unallocated leads available for allocation:', unallocatedOrderIds);
+
+            if (unallocatedOrderIds.length === 0) {
+                console.warn('No unallocated leads available.');
+                return;
+            }
+
+            const selectedMembers = this.teamMembers.filter((member) => member.selected);
+            if (selectedMembers.length === 0) {
+                console.warn('No team members selected for allocation.');
+                return;
+            }
+
+            // Step 2: Calculate manually allocated leads
+            const manuallyAllocatedLeads = selectedMembers.reduce((total, member) => {
+                return total + (member.leads || 0);
+            }, 0);
+
+            if (manuallyAllocatedLeads > unallocatedOrderIds.length) {
+                console.error('Manually allocated leads exceed total available leads.');
+                return;
+            }
+
+            // Step 3: Calculate remaining leads to distribute
+            const remainingLeads = unallocatedOrderIds.length - manuallyAllocatedLeads;
+
+            // Step 4: Allocate remaining leads among members without manual input
+            const autoAllocateMembers = selectedMembers.filter(
+                (member) => !member.leads || member.leads === 0
+            );
+
+            if (autoAllocateMembers.length > 0) {
+                const autoAllocatedLeads = Math.floor(remainingLeads / autoAllocateMembers.length);
+                const extraLeads = remainingLeads % autoAllocateMembers.length;
+                let extraLeadIndex = 0;
+
+                autoAllocateMembers.forEach((member) => {
+                    const additionalLead = extraLeadIndex < extraLeads ? 1 : 0;
+                    member.leads = autoAllocatedLeads + additionalLead;
+                    if (additionalLead) {
+                        extraLeadIndex++;
+                    }
+                });
+            }
+
+            // Step 5: Distribute unallocated order IDs
+            let orderIndex = 0;
+            this.teamMembers = this.teamMembers.map((member) => {
+                if (member.selected) {
+                    const allocatedLeads = member.leads || 0;
+                    const allocatedOrderIds = unallocatedOrderIds.slice(
+                        orderIndex,
+                        orderIndex + allocatedLeads
+                    );
+                    orderIndex += allocatedLeads;
+
+                    return {
+                        ...member,
+                        orderIds: allocatedOrderIds,
+                        time: new Date().toLocaleTimeString(),
+                        date: new Date().toISOString(),
+                        status: 'Completed',
+                    };
+                } else {
+                    return member;
+                }
+            });
+
+            console.log('Leads allocated:', selectedMembers);
+        },
+        error: (err) => {
+            console.error('Error fetching unallocated leads:', err);
+        },
+    });
 }
 
-
-  
   
   
   

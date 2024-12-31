@@ -120,14 +120,8 @@ export class UsersComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
-  
-          const allocations = response.allocations; // Extract the allocations array
-          const completedLeadsCount = response.completedLeadsCount || 0; // Extract the completed leads count
-  
-          if (!allocations || !Array.isArray(allocations)) {
-            console.error('Allocations data is not an array.');
-            return;
-          }
+          const allocations = response.allocations || [];
+          const completedLeads = response.completedLeadsCount || 0;
   
           const currentMember = allocations.find(
             (alloc: any) => alloc.memberId._id === loggedInUserId
@@ -136,9 +130,10 @@ export class UsersComponent implements OnInit {
           if (currentMember) {
             this.leadIds = currentMember.leadIds || [];
             const totalAllocatedLeads = this.leadIds.length;
+            // const completedLeads = response.completedLeadsCount || 0;
   
             // Subtract completed leads from total allocated leads
-            this.allocatedLeadsCount = totalAllocatedLeads - completedLeadsCount;
+            this.allocatedLeadsCount = totalAllocatedLeads - completedLeads;
   
             this.fetchOrders(); // Fetch orders based on leads
           } else {
