@@ -35,7 +35,7 @@ export class TLHistoryComponent implements OnInit {
   initials: string = '';
   isDarkMode: boolean = false;
   selectedDate: Date = new Date();
-  displayedColumns: string[] = [ 'orderId', 'orderLink','memberName', 'paymentStatus', 'completionDate'];
+  displayedColumns: string[] = [ 'orderId', 'orderLink','orderType','memberName', 'paymentStatus', 'completionDate'];
   dataSource = new MatTableDataSource<any>([]);
   teamMembers: any[] = [];
 
@@ -81,6 +81,7 @@ export class TLHistoryComponent implements OnInit {
           this.teamMembers = response.map((item: any) => ({
             orderId: item.orderId || 'N/A', // Default value if null
             orderLink: item.orderLink || 'N/A', // Default value if null
+            orderType: item.orderType || 'N?A',
             paymentStatus: item.paymentStatus || 'N/A', // Default value if null
             memberName: item.memberName || 'N/A', // Default value if null
             completionDate: item.completionDate || 'N/A', // Default value if null

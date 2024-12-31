@@ -122,6 +122,11 @@
     </mat-cell>
   </ng-container>
   
+  <ng-container matColumnDef="orderType">
+    <mat-header-cell *matHeaderCellDef> Order Type </mat-header-cell>
+    <mat-cell *matCellDef="let member"> {{ member.orderType }} </mat-cell>
+  </ng-container>
+
       <!-- Payment Status Column -->
       <ng-container matColumnDef="memberName">
         <mat-header-cell *matHeaderCellDef> Member Name</mat-header-cell>
