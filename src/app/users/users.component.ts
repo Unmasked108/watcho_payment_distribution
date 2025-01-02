@@ -6,19 +6,22 @@ import { MatPaginatorModule } from '@angular/material/paginator'; // Import MatP
 import { MatTableModule } from '@angular/material/table'; // Import MatTableModule
 import { MatSortModule } from '@angular/material/sort'; // Import MatSortModule
 import { CommonModule } from '@angular/common';
-import { MatSelectModule } from '@angular/material/select';
+import { MatOption, MatSelect, MatSelectModule } from '@angular/material/select';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table'; // Import MatTableDataSource
 import { ViewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'; // Import BreakpointObserver
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [MatIconModule, MatCardModule, FormsModule,MatPaginatorModule,MatTableModule,MatSortModule,CommonModule,MatSelectModule,MatButtonModule,MatTooltipModule], // Include FormsModule here
+  imports: [MatIconModule, MatCardModule, FormsModule,MatPaginatorModule,MatTableModule,MatSortModule,CommonModule,MatSelectModule,MatButtonModule,MatTooltipModule,MatCardModule,MatDatepickerModule, MatFormFieldModule, MatSelect,MatOption, MatInputModule], // Include FormsModule here
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })
@@ -34,6 +37,8 @@ export class UsersComponent implements OnInit {
   allocatedLeadsCount: number = 0; // Updated to fetch dynamically
   totalLeads: number = 0; // Total leads to calculate remaining leads
   remainingLeads: number = 0; // The remaining leads after allocation
+  selectedDate: Date = new Date(); // Default to the current date
+  selectedPaidStatus: string | null = null;
 
   dataSource = new MatTableDataSource<any>(this.paginatedData);
 
@@ -71,6 +76,8 @@ export class UsersComponent implements OnInit {
 
   downloadLeads() {
     // Implement logic for downloading leads (e.g., triggering a download of a file)
+  }
+  onFilterChange(): void {
   }
 
  
@@ -114,9 +121,30 @@ export class UsersComponent implements OnInit {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`, // Include the token
     });
+
+    // Construct query parameters
+  const params: any = {};
+  if (this.selectedDate) {
+    const localDate = new Date(this.selectedDate.getTime() - this.selectedDate.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split('T')[0]; // Correctly adjust for time zone offset
+    params.date = localDate;
+  }
+  // if (this.selectedPaidStatus !== null) {
+  //   params.paidStatus = this.selectedPaidStatus;
+  // }
+
+  console.log('Query Parameters:', params);
+
+
+  // Construct the request options
+  const options = {
+    headers,
+    params,
+  };
   
     this.http
-      .get<any>('http://localhost:5000/api/lead-allocations', { headers })
+      .get<any>('http://localhost:5000/api/lead-allocations', options)
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);

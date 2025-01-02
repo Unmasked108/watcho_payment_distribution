@@ -266,9 +266,10 @@ export class TeamManagerComponent implements OnInit {
   
   isCardVisible: boolean = false; // Control card visibility
   responseMessage: string = '';  // Store the message to display
-  
+  loading: boolean = false;
+
   saveData(): void {
-    
+    this.loading = true;
     const selectedMembers = this.teamMembers
       .filter((member) => member.selected)
       .map((member) => ({
@@ -297,6 +298,7 @@ export class TeamManagerComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          this.loading = false;
           console.log('Data saved successfully:', response);
           this.showCard('Data saved successfully!');
           this.fetchTeamData();

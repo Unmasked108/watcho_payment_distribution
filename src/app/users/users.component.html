@@ -74,6 +74,32 @@
       </div>
     </div> -->
   </div>
+
+  <div class="filter-container">
+    <!-- Date Picker -->
+    <mat-form-field class="filter-item example-full-width">
+      <mat-label>Choose a date</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate"     (ngModelChange)="fetchAllocatedLeads()"
+      />
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="picker">
+        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  
+    <!-- Paid Status Select -->
+    <!-- <mat-form-field class="filter-item example-full-width">
+      <mat-label>Paid Status</mat-label>
+      <mat-select [(ngModel)]="selectedPaidStatus" (selectionChange)="onFilterChange()">
+        <mat-option [value]="null">All</mat-option>
+        <mat-option [value]="'Paid'">Paid</mat-option>
+        <mat-option [value]="'Unpaid'">Unpaid</mat-option>
+      </mat-select>
+    </mat-form-field> -->
+  </div>
+  
+  
   
 
 
