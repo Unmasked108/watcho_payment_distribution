@@ -7,9 +7,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
-
+import moment from 'moment';
+interface PaymentStatus {
+  name: string;
+  paid: number;
+  unpaid: number;
+}
 @Component({
   selector: 'app-team-manager',
   standalone: true,
@@ -21,6 +26,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     MatCheckboxModule,
     MatIconModule,
     FormsModule,
+    CommonModule,
     NgFor,
     NgIf,
     RouterLink,
@@ -36,17 +42,24 @@ export class TeamManagerComponent implements OnInit {
 
   totalLeads: number = 0; // Total leads allocated to the team
   totalAllocatedLeads: number=0;
-
+  
   displayedColumns: string[] = ['select', 'name', 'id', 'leads', 'time', 'status', 'edit'];
   teamMembers: any[] = []; // Holds team members' data
   isEditing: boolean = false;
   editingMember: any = null;
   teamId: string = ''; // Dynamically set teamId
+  paymentStatusData: PaymentStatus[] = [];
 
   constructor(private http: HttpClient) {} // Inject HttpClient
+  
 
+  private allocationsUrl = ' http://localhost:5000/api/results';
+
+  
   ngOnInit(): void {
     this.fetchTeamData();
+    
+    this.memberPayStatus();
     
     
   }
@@ -332,6 +345,45 @@ export class TeamManagerComponent implements OnInit {
         }
       );
   }
+
+  memberPayStatus(): void {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+  
+    // Get today's date and format it to YYYY-MM-DD
+    const today = moment().format('YYYY-MM-DD');
+  
+    // Fetch results for today's date
+    this.http
+      .get<any[]>(this.allocationsUrl, { headers, params: { date: today } })
+      .subscribe({
+        next: (response: any[]) => {
+          console.log('Response:', response);
+  
+          // Process the response to calculate paid and unpaid counts per member
+          const memberWiseCounts = response.reduce((acc, item) => {
+            const memberName = item.memberName || 'Unknown'; // Default to 'Unknown' if no member name
+            if (!acc[memberName]) {
+              acc[memberName] = { name: memberName, paid: 0, unpaid: 0 };
+            }
+            if (item.paymentStatus === 'Paid') {
+              acc[memberName].paid++;
+            } else if (item.paymentStatus === 'Unpaid') {
+              acc[memberName].unpaid++;
+            }
+            return acc;
+          }, {});
+  
+          // Convert the object to an array for display and assign to a separate property
+          this.paymentStatusData = Object.values(memberWiseCounts);
+          console.log('Member-wise Counts:', this.paymentStatusData);
+        },
+        error: (err) => console.error('Error fetching results:', err),
+      });
+  }
+  
+  
   
   
   
