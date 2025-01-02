@@ -210,4 +210,24 @@
         </mat-card>
       </div>
     </div>
+
+    <div class="team-container mt-4">
+      <!-- Iterate through teamMembers to create cards -->
+      <div class="team-card" *ngFor="let payment of paymentStatusData">
+        <div class="card-header"></div>
+        <div class="card-content">
+          <h3>{{ payment.name }}</h3>
+          <p>
+            <strong>Paid: </strong> 
+            <span [ngStyle]="{ color: 'green' }">{{ payment.paid }}</span>
+          </p>
+          <p>
+            <strong>Unpaid: </strong> 
+            <span [ngStyle]="{ color: 'red' }">{{ payment.unpaid }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    
     

@@ -209,3 +209,60 @@
     }
   }
 }
+.team-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+
+  @media (max-width: 600px) {
+    gap: 16px;
+    padding: 8px;
+  }
+}
+
+.team-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 400px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-header {
+    background-color: #007bff;
+    height: 8px;
+    width: 100%;
+  }
+
+  .card-content {
+    padding: 16px;
+
+    h3 {
+      color: #007bff;
+      font-size: 20px;
+      margin-bottom: 8px;
+
+      @media (max-width: 600px) {
+        font-size: 16px;
+      }
+    }
+
+    p {
+      margin: 4px 0;
+      color: #333;
+      font-size: 16px;
+
+      @media (max-width: 600px) {
+        font-size: 14px;
+      }
+    }
+
+  }}
