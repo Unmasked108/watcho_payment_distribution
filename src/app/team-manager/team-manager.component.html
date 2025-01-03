@@ -226,6 +226,10 @@
         <div class="card-content">
           <h3>{{ payment.name }}</h3>
           <p>
+            <strong>Mobile No. :</strong>
+            <span>{{payment.mobile}}</span>
+          </p>
+          <p>
             <strong>Paid: </strong> 
             <span [ngStyle]="{ color: 'green' }">{{ payment.paid }}</span>
           </p>

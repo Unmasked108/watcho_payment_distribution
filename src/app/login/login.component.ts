@@ -62,7 +62,7 @@ export class LoginComponent {
       const password = form.value.password;
   
       this.loading = true; // Show loading spinner
-      this.http.post('http://localhost:5000/login', { email, password }).subscribe(
+      this.http.post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/login', { email, password }).subscribe(
         (response: any) => {
           setTimeout(() => { // Add 5 seconds delay
             this.loading = false; // Hide loading spinner after delay
@@ -109,7 +109,7 @@ export class LoginComponent {
   
       if (password === confirmPassword) {
         this.loading = true; // Show loading spinner
-        this.http.post('http://localhost:5000/register', { name, email, mobile,password }).subscribe(
+        this.http.post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/register', { name, email, mobile,password }).subscribe(
           () => {
             setTimeout(() => { // Add 5 seconds delay
               this.loading = false; // Hide loading spinner after delay

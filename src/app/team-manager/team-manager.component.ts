@@ -12,6 +12,8 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import moment from 'moment';
 interface PaymentStatus {
   name: string;
+  mobile: string;
+
   paid: number;
   unpaid: number;
 }
@@ -53,7 +55,7 @@ export class TeamManagerComponent implements OnInit {
   constructor(private http: HttpClient) {} // Inject HttpClient
   
 
-  private allocationsUrl = ' http://localhost:5000/api/results';
+  private allocationsUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/results';
 
   
   ngOnInit(): void {
@@ -73,8 +75,8 @@ export class TeamManagerComponent implements OnInit {
     const role = localStorage.getItem('role'); // Fetch role from localStorage
   
     if (role === 'TeamLeader') {
-      const teamUrl = `  http://localhost:5000/api/teams`;
-      const allocationUrl = `  http://localhost:5000/api/allocate-orders`;
+      const teamUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams`;
+      const allocationUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders`;
   
       this.http.get(teamUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -179,7 +181,7 @@ export class TeamManagerComponent implements OnInit {
     }
 
     // Fetch already allocated leads for the day
-    const allocationUrl = `http://localhost:5000/api/unallocated-leads?teamId=${this.teamId}`;
+    const allocationUrl = `https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/unallocated-leads?teamId=${this.teamId}`;
 
     this.http.get(allocationUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -305,7 +307,7 @@ export class TeamManagerComponent implements OnInit {
   
     this.http
       .post(
-        ' http://localhost:5000/api/lead-allocations',
+        ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/lead-allocations',
         { selectedMembers },
         { headers }
       )
@@ -334,7 +336,7 @@ export class TeamManagerComponent implements OnInit {
     });
 
     // Send teamId as a query parameter for GET request with headers
-    this.http.get<{ totalAllocatedLeads: number }>(`http://localhost:5000/api/total-allocated-leads?teamId=${teamId}`, { headers })
+    this.http.get<{ totalAllocatedLeads: number }>(`https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/total-allocated-leads?teamId=${teamId}`, { headers })
       .subscribe(
         (response) => {
           console.log('Orders allocated:', response);
@@ -364,8 +366,14 @@ export class TeamManagerComponent implements OnInit {
           // Process the response to calculate paid and unpaid counts per member
           const memberWiseCounts = response.reduce((acc, item) => {
             const memberName = item.memberName || 'Unknown'; // Default to 'Unknown' if no member name
+            const memberMobile = item.memberMobile || 'N/A'; // Default to 'N/A' if no mobile number
             if (!acc[memberName]) {
-              acc[memberName] = { name: memberName, paid: 0, unpaid: 0 };
+              acc[memberName] = { 
+                name: memberName, 
+                mobile: memberMobile, // Include member mobile
+                paid: 0, 
+                unpaid: 0 
+              };
             }
             if (item.paymentStatus === 'Paid') {
               acc[memberName].paid++;

@@ -41,7 +41,7 @@ export class TLHistoryComponent implements OnInit {
 
   constructor(private http: HttpClient) {}
 
-  private allocationsUrl = ' http://localhost:5000/api/results';
+  private allocationsUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/results';
 
 
   ngOnInit(): void {

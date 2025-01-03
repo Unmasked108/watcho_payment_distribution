@@ -193,14 +193,14 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   }
 
 
-  private apiUrl = '  http://localhost:5000/api/teams';
-  private allocationUrl = '  http://localhost:5000/api/allocate-orders';
-  private ordersUrl = '  http://localhost:5000/api/orders';
+  private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
+  private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders';
+  private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders';
 
 
-  // private apiUrl = '  http://localhost:5000/api/teams';
-  // private allocationUrl = '  http://localhost:5000/api/allocate-orders';
-  // private ordersUrl = '  http://localhost:5000/api/orders';
+  // private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
+  // private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders';
+  // private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders';
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef,private cookieService: CookieService) {}
 
   ngOnInit(): void {
@@ -268,7 +268,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
         allocationDate,
       };
   
-      this.http.post(' http://localhost:5000/api/unallocate', payload, { headers }).subscribe(
+      this.http.post(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/unallocate', payload, { headers }).subscribe(
         (response) => {
           console.log('Unallocation response:', response);
           alert('Orders unallocated successfully.');
@@ -512,7 +512,7 @@ private processCSV() {
     });
 
     // Send data to the backend
-    this.http.post('  http://localhost:5000/api/orders ' //  http://localhost:5000/api/orders
+    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders ' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
         this.loading = false
@@ -566,7 +566,7 @@ closeFileUploadAlert() {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    this.http.post('  http://localhost:5000/api/orders/upload-pdf' //  http://localhost:5000/api/orders/upload-pdf
+    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/upload-pdf' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/upload-pdf
       , formData).subscribe(
       (response) => {
         console.log('PDF uploaded successfully:', response);
@@ -619,7 +619,7 @@ fetchAllocationOrderCounts() {
   const headers = new HttpHeaders({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   });
-  return this.http.get('http://localhost:5000/api/orders/remaining', { headers });
+  return this.http.get('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/remaining', { headers });
 }
 // teams: Team[] = []; // Existing teams array
 saveAllocations(): void {
@@ -676,7 +676,7 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
 
   const allocationDate = new Date().toISOString().split('T')[0];
   this.http
-    .post('http://localhost:5000/api/allocate-orders', { allocationDate, allocations }, { headers })
+    .post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders', { allocationDate, allocations }, { headers })
     .subscribe(
       (response: any) => {
         this.loading=false
