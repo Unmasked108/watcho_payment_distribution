@@ -55,7 +55,7 @@ export class TeamManagerComponent implements OnInit {
   constructor(private http: HttpClient) {} // Inject HttpClient
   
 
-  private allocationsUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/results';
+  private allocationsUrl = ' http://localhost:5000/api/results';
 
   
   ngOnInit(): void {
@@ -75,8 +75,8 @@ export class TeamManagerComponent implements OnInit {
     const role = localStorage.getItem('role'); // Fetch role from localStorage
   
     if (role === 'TeamLeader') {
-      const teamUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams`;
-      const allocationUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders`;
+      const teamUrl = `  http://localhost:5000/api/teams`;
+      const allocationUrl = `  http://localhost:5000/api/allocate-orders`;
   
       this.http.get(teamUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -90,7 +90,13 @@ export class TeamManagerComponent implements OnInit {
   
           if (teams.length > 0) {
             const team = teams[0]; // Assuming the TeamLeader manages a single team
+           
+            if (team && team.teamId) {
+
             this.teamId = team.teamId; // Dynamically set teamId
+          } else {
+            console.error('teamId is missing or undefined');
+          }
             this.username = team.teamLeaderName || 'Team Leader'; // Add teamLeaderName in backend response
             this.initials = this.getInitials(this.username);
   
@@ -105,35 +111,38 @@ export class TeamManagerComponent implements OnInit {
             }));
   
             console.log('Team members:', this.teamMembers);
-            console.log('Fetching allocations for teamId:', team._id); // Log teamId
+            console.log('Fetching allocations for teamId:', this.teamId); // Log teamId
 
             // Fetch allocated leads for the team
             this.http
-              .get(`${allocationUrl}?teamId=${team._id}`, { headers })
+              .get(`${allocationUrl}?teamIds=${team.teamId}`, { headers })
               .subscribe({
                 next: (allocationData: any) => {
-                  const allocatedLeadsCount = allocationData.reduce(
-                    (total: number, allocation: any) =>
-                      total + allocation.orderIds.length,
-                    0
-                  );
-  
-                  this.totalLeads = allocatedLeadsCount;
-                  console.log('Allocated leads count:', this.totalLeads);
-  
-                  // Map orderIds for allocation
-                  this.teamMembers.forEach((member) => {
-                    member.orderIds = allocationData.flatMap(
-                      (allocation: any) => allocation.orderIds
-                    );
-                  });
-  
-                  console.log('Order IDs for allocation:', this.teamMembers);
-                  this.getOrdersAllocatedForToday(team._id);
-                },
-                error: (err) => {
-                  console.error('Error fetching allocations:', err);
-                },
+                    // Extract the `orders` array from the response
+      const orders = allocationData.orders || [];
+      
+      // Calculate allocated leads count from the `orders` array
+      const allocatedLeadsCount = orders.reduce(
+        (total: number, order: any) => total + (order.orderIds?.length || 0),
+        0
+      );
+
+      this.totalLeads = allocatedLeadsCount;
+      console.log('Allocated leads count:', this.totalLeads);
+
+      // Map orderIds for allocation
+      this.teamMembers.forEach((member) => {
+        member.orderIds = orders.flatMap(
+          (order: any) => order.orderIds || []
+        );
+      });
+
+      console.log('Order IDs for allocation:', this.teamMembers);
+      this.getOrdersAllocatedForToday(team.teamId);
+    },
+    error: (err) => {
+      console.error('Error fetching allocations:', err);
+    },
               });
 
           } else {
@@ -181,7 +190,7 @@ export class TeamManagerComponent implements OnInit {
     }
 
     // Fetch already allocated leads for the day
-    const allocationUrl = `https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/unallocated-leads?teamId=${this.teamId}`;
+    const allocationUrl = `http://localhost:5000/api/unallocated-leads?teamId=${this.teamId}`;
 
     this.http.get(allocationUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -307,7 +316,7 @@ export class TeamManagerComponent implements OnInit {
   
     this.http
       .post(
-        ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/lead-allocations',
+        ' http://localhost:5000/api/lead-allocations',
         { selectedMembers },
         { headers }
       )
@@ -320,6 +329,7 @@ export class TeamManagerComponent implements OnInit {
 
         },
         error: (err) => {
+          this.loading=false;
           console.error('Error saving data:', err);
           this.showCard('Failed to save data. Please try again.');
         },
@@ -336,7 +346,7 @@ export class TeamManagerComponent implements OnInit {
     });
 
     // Send teamId as a query parameter for GET request with headers
-    this.http.get<{ totalAllocatedLeads: number }>(`https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/total-allocated-leads?teamId=${teamId}`, { headers })
+    this.http.get<{ totalAllocatedLeads: number }>(`http://localhost:5000/api/total-allocated-leads?teamId=${teamId}`, { headers })
       .subscribe(
         (response) => {
           console.log('Orders allocated:', response);

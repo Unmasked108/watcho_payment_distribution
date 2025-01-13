@@ -144,21 +144,23 @@ export class UsersComponent implements OnInit {
   };
   
     this.http
-      .get<any>('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/lead-allocations', options)
+      .get<any>('http://localhost:5000/api/lead-allocations', options)
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
           const allocations = response.allocations || [];
           const completedLeadsCount = response.completedLeadsCount || 0;
   
-          const currentMember = allocations.find(
-            (alloc: any) => alloc.memberId._id === loggedInUserId
-          );
-  
-          if (currentMember) {
-            this.leadIds = currentMember.leadIds || [];
-            const totalAllocatedLeads = this.leadIds.length;
-            // const completedLeads = response.completedLeadsCount || 0;
+         // Filter all allocations for the logged-in user
+        const userAllocations = allocations.filter(
+          (alloc: any) => alloc.memberId._id === loggedInUserId
+        );
+
+        if (userAllocations.length > 0) {
+          // Combine lead IDs from all allocations for the user
+          this.leadIds = userAllocations.flatMap((alloc: any) => alloc.leadIds) || [];
+          const totalAllocatedLeads = this.leadIds.length;
+  // const completedLeads = response.completedLeadsCount || 0;
   
             // Subtract completed leads from total allocated leads
             this.allocatedLeadsCount = totalAllocatedLeads - completedLeadsCount;
@@ -184,7 +186,7 @@ export class UsersComponent implements OnInit {
     });
   
     const leadIdsQuery = this.leadIds.join(',');
-    const url = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders?leadIds=${leadIdsQuery}`;
+    const url = `  http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
   
     this.http.get<any>(url, { headers }).subscribe({
       next: (response) => {
@@ -230,7 +232,7 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/payment-status', payload, { headers })
+      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response) => {
           console.log('Payment status updated:', response);
@@ -262,7 +264,7 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/payment-status', payload, { headers })
+      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response) => {
           console.log('Payment status reverted:', response);

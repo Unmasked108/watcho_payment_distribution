@@ -247,3 +247,64 @@
     min-width: 100%; /* Make each item take full width */
   }
 }
+
+
+
+.leads-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem;
+  flex-wrap: wrap;
+  align-items: center; // Ensures vertical alignment on mobile
+
+  .leads-card {
+    flex: 1 1 calc(50% - 1rem); // Cards take 50% width with gap
+    max-width: 45%;            // Prevent overflow on larger screens
+    min-width: 250px;          // Ensure cards have a minimum size on small screens
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .card-header {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .lead-count {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    &.paid .lead-count {
+      color: #28a745; // Green for paid
+    }
+
+    &.unpaid .lead-count {
+      color: #dc3545; // Red for unpaid
+    }
+  }
+
+  // Large Screen Adjustments
+  @media (min-width: 1200px) {
+    .leads-card {
+      flex: 1 1 calc(33.33% - 1rem); // Decrease card size to 1/3 of the container
+      max-width: 33%;  // Cards take 33% on large screens
+    }
+  }
+
+  // Mobile Screen Adjustments
+  @media (max-width: 768px) {
+    .leads-summary {
+      flex-direction: column; // Stack cards vertically on smaller screens
+    }
+
+    .leads-card {
+      flex: 1 1 100%;  // Cards take full width on mobile
+      max-width: 100%; // Full width on mobile
+      margin-bottom: 1rem; // Add space between stacked cards
+    }
+  }
+}

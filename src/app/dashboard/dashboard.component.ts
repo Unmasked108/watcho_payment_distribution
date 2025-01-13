@@ -193,14 +193,14 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   }
 
 
-  private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
-  private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders';
-  private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders';
+  private apiUrl = '  http://localhost:5000/api/teams';
+  private allocationUrl = '  http://localhost:5000/api/allocate-orders';
+  private ordersUrl = '  http://localhost:5000/api/orders';
 
 
-  // private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams';
-  // private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders';
-  // private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders';
+  // private apiUrl = '  http://localhost:5000/api/teams';
+  // private allocationUrl = '  http://localhost:5000/api/allocate-orders';
+  // private ordersUrl = '  http://localhost:5000/api/orders';
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef,private cookieService: CookieService) {}
 
   ngOnInit(): void {
@@ -268,7 +268,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
         allocationDate,
       };
   
-      this.http.post(' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/unallocate', payload, { headers }).subscribe(
+      this.http.post(' http://localhost:5000/api/unallocate', payload, { headers }).subscribe(
         (response) => {
           console.log('Unallocation response:', response);
           alert('Orders unallocated successfully.');
@@ -322,142 +322,122 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   }
   backendColor = 'blue'; // Define color for backend data
 
-   // Fetch allocations and update the table
    getAllocations(): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-  
-    const params = {
-      startDate: this.selectedStartDate ? this.selectedStartDate.toISOString() : '',
-      endDate: this.selectedEndDate ? this.selectedEndDate.toISOString() : '',
-    };
-  
-    console.log('Fetching allocations data with params:', params);
-  
-    this.http.get<any[]>(this.allocationUrl, { headers, params }).subscribe(
-      (allocations) => {
-        let totalLeadsAllocated = 0;
-        let totalLeadsCompleted = 0;
-      
-        // New variables for cards
-        let card149Leads = 0;
-        let card299Leads = 0;
-        let card149Profit = 0;
-        let card299Profit = 0;
-        // Clear previous data
-        this.teams.forEach((team) => {
-          team.leadsAllocated = 0;
-          team.leadsCompleted = 0;
-          team.allocation = 'Not Allocated';
-          team.allocatedTime = null;
-          team.paymentToday = 0; // Initialize paymentToday
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+  });
 
-        });
-  
-        allocations.forEach((allocation) => {
-          const teamId = allocation.teamId.teamId;
-          console.log('Processing allocation for teamId:', teamId);
-  
-          // Find the team with the matching teamId
-          const team = this.teams.find((t) => t.teamId === teamId);
-  
-          if (team) {
-            console.log(`Found matching team: ${team.teamName}`);
-            team.allocation = allocation.status || 'Not Allocated';
-            team.allocatedTime = new Date(allocation.allocationDate).toLocaleDateString()||null;
+  // Extract all teamIds as a comma-separated string
+  const teamIds = this.teams.map((team) => team.teamId).join(',');
+  console.log('Sending teamIds:', teamIds);
 
-            team.leadsAllocated = (team.leadsAllocated || 0) + (allocation.leadsAllocated || 0);
-            team.leadsCompleted = (team.leadsCompleted || 0) + (allocation.leadsCompleted || 0);
-  // Directly use paymentToday sent from the backend
-  team.paymentToday = allocation.PaymentGivenToday || 0;
 
-            // Add to total leads
-            totalLeadsAllocated += allocation.leadsAllocated || 0;
-            totalLeadsCompleted += allocation.leadsCompleted || 0;
-  
-            // Process orders in allocation
+  const params = {
+    startDate: this.selectedStartDate ? this.selectedStartDate.toISOString() : '',
+    endDate: this.selectedEndDate ? this.selectedEndDate.toISOString() : '',
+    teamIds: teamIds, // Add teamIds to the query params
+  };
+
+  console.log('Fetching allocations data with params:', params);
+
+  this.http.get<any[]>(this.allocationUrl, { headers, params }).subscribe(
+    (allocations) => {
+      let totalLeadsAllocated = 0;
+      let totalLeadsCompleted = 0;
+
+      let card149Leads = 0;
+      let card299Leads = 0;
+      let card149Profit = 0;
+      let card299Profit = 0;
+
+      // Clear previous data
+      this.teams.forEach((team) => {
+        team.leadsAllocated = 0;
+        team.leadsCompleted = 0;
+        team.allocation = 'Not Allocated';
+        team.allocatedTime = null;
+        team.paymentToday = 0; // Initialize paymentToday
+      });
+
+      allocations.forEach((allocation) => {
+        const teamId = allocation.teamId.teamId;
+
+        // Find the team with the matching teamId
+        const team = this.teams.find((t) => t.teamId === teamId);
+
+        if (team) {
+          team.allocation = allocation.status || 'Not Allocated';
+          team.allocatedTime =
+            new Date(allocation.allocationDate).toLocaleDateString() || null;
+          team.leadsAllocated =
+            (team.leadsAllocated || 0) + (allocation.leadsAllocated || 0);
+          team.leadsCompleted =
+            (team.leadsCompleted || 0) + (allocation.leadsCompleted || 0);
+          team.paymentToday = allocation.PaymentGivenToday || 0;
+
+          totalLeadsAllocated += allocation.leadsAllocated || 0;
+          totalLeadsCompleted += allocation.leadsCompleted || 0;
+
           allocation.orderIds.forEach((order: any) => {
-            if (order.coupon && order.coupon === 'not given'  || order.coupon === null) {
+            if (order.coupon && (order.coupon === 'not given' || order.coupon === null)) {
               card299Leads++;
               if (order.paymentStatus === 'Paid') {
-                card299Profit += 61; // Add 61 for paid orders
+                card299Profit += 61;
               }
             } else {
               card149Leads++;
               if (order.paymentStatus === 'Paid') {
-                card149Profit += 71; // Add 71 for paid orders
+                card149Profit += 71;
               }
             }
           });
-          // Calculate paymentToday from orders
-        
-          console.log(`Before updating paymentToday for ${team.teamName}:`, team.paymentToday);
+        }
+      });
 
-          
-            console.log('Updated team:', team);
-          } else {
-            console.log('No matching team found for teamId:', teamId);
-          }
-        });
-  
-        // Log the total leads
-        console.log('Total Leads Allocated:', totalLeadsAllocated);
-        console.log('Total Leads Completed:', totalLeadsCompleted);
-  
-        console.log('149 Card Leads:', card149Leads, 'Profit:', card149Profit);
-        console.log('299 Card Leads:', card299Leads, 'Profit:', card299Profit);
-  
-        // Update frontend variables
-        this.card149Leads = card149Leads;
-        this.card299Leads = card299Leads;
-        this.card149Profit = card149Profit;
-        this.card299Profit = card299Profit;
-        // Store totals in variables for the UI
-        this.totalLeadsAllocated = totalLeadsAllocated;
-        this.totalLeadsCompleted = totalLeadsCompleted;
-  
+      this.card149Leads = card149Leads;
+      this.card299Leads = card299Leads;
+      this.card149Profit = card149Profit;
+      this.card299Profit = card299Profit;
+      this.totalLeadsAllocated = totalLeadsAllocated;
+      this.totalLeadsCompleted = totalLeadsCompleted;
 
-        
+      this.cdRef.detectChanges();
+    },
+    (error) => {
+      console.error('Error fetching allocations:', error);
+    }
+  );
+}
 
-        // Trigger change detection to update the UI
-        this.cdRef.detectChanges();
-        console.log('Allocation data:', allocations);
-      },
-      (error) => {
-        console.error('Error fetching allocations:', error);
-      }
-    );
-  }
     
   
-  fetchOrderDetails(teamId: string, leadIds: string[]): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
+  // fetchOrderDetails(teamId: string, leadIds: string[]): void {
+  //   const headers = new HttpHeaders({
+  //     Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //   });
   
-    const leadIdsParam = leadIds.join(',');
-    this.http.get<any>(`${this.ordersUrl}?leadIds=${leadIdsParam}`, { headers }).subscribe(
-      (response) => {
-        const orders = response.data || [];
-        const team = this.teams.find((t) => t.teamId === teamId);
-        console.log("This is response", response);
+  //   const leadIdsParam = leadIds.join(',');
+  //   this.http.get<any>(`${this.ordersUrl}?leadIds=${leadIdsParam}`, { headers }).subscribe(
+  //     (response) => {
+  //       const orders = response.data || [];
+  //       const team = this.teams.find((t) => t.teamId === teamId);
+  //       console.log("This is response", response);
         
-        if (team) {
-          // Update the leadsAllocated and leadsCompleted values based on the response
-          team.leadsAllocated = response.leadsAllocated;  // This is the count of allocated orders
-          team.leadsCompleted = response.leadsCompleted;  // This is the count of completed orders (based on paymentStatus)
+  //       if (team) {
+  //         // Update the leadsAllocated and leadsCompleted values based on the response
+  //         team.leadsAllocated = response.leadsAllocated;  // This is the count of allocated orders
+  //         team.leadsCompleted = response.leadsCompleted;  // This is the count of completed orders (based on paymentStatus)
   
-          // Log the updated values to the console
-          console.log(`Leads Allocated: ${team.leadsAllocated}`);
-          console.log(`Leads Completed: ${team.leadsCompleted}`);
-        }
-      },
-      (error) => {
-        console.error(`Error fetching orders for team ${teamId}:`, error);
-      }
-    );
-  }
+  //         // Log the updated values to the console
+  //         console.log(`Leads Allocated: ${team.leadsAllocated}`);
+  //         console.log(`Leads Completed: ${team.leadsCompleted}`);
+  //       }
+  //     },
+  //     (error) => {
+  //       console.error(`Error fetching orders for team ${teamId}:`, error);
+  //     }
+  //   );
+  // }
   
   onOptionSelect() {
     this.showFileInput = this.taskOption === 'import';
@@ -512,7 +492,7 @@ private processCSV() {
     });
 
     // Send data to the backend
-    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders ' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders
+    this.http.post('  http://localhost:5000/api/orders ' //  http://localhost:5000/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
         this.loading = false
@@ -566,7 +546,7 @@ closeFileUploadAlert() {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/upload-pdf' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/upload-pdf
+    this.http.post('  http://localhost:5000/api/orders/upload-pdf' //  http://localhost:5000/api/orders/upload-pdf
       , formData).subscribe(
       (response) => {
         console.log('PDF uploaded successfully:', response);
@@ -619,7 +599,7 @@ fetchAllocationOrderCounts() {
   const headers = new HttpHeaders({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   });
-  return this.http.get('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/orders/remaining', { headers });
+  return this.http.get('http://localhost:5000/api/orders/remaining', { headers });
 }
 // teams: Team[] = []; // Existing teams array
 saveAllocations(): void {
@@ -676,7 +656,7 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
 
   const allocationDate = new Date().toISOString().split('T')[0];
   this.http
-    .post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/allocate-orders', { allocationDate, allocations }, { headers })
+    .post('http://localhost:5000/api/allocate-orders', { allocationDate, allocations }, { headers })
     .subscribe(
       (response: any) => {
         this.loading=false

@@ -56,8 +56,8 @@ export class HistoryComponent implements OnInit {
   data: any[] = [];
   filteredData: any[] = [];
   loading: boolean = false;
-  private readonly apiUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/results';
-  private teamsApiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho1_api/api/teams'
+  private readonly apiUrl = ' http://localhost:5000/api/results';
+  private teamsApiUrl = 'http://localhost:5000/api/teams'
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -152,7 +152,7 @@ export class HistoryComponent implements OnInit {
     this.loading = true; // Start the loader before processing the data
 
     const formattedDate = moment(this.selectedDate).format('YYYY-MM-DD');
-    const headers = ['Order ID','Coupon','Order Link', 'Order Type', 'Team Name', 'Member Name', 'Payment Status', 'Profit', 'Member Profit','Verification',];
+    const headers = ['Order ID','Coupon','Order Link', 'Order Type', 'Team Name','Verification', 'Member Name', 'Payment Status', 'Profit', 'Member Profit',];
     const csvData = this.filteredData.map((row) => ({
       'Order ID': row.orderId,
       'Coupon' : row.coupon,
