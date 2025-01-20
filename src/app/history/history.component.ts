@@ -58,8 +58,8 @@ export class HistoryComponent implements OnInit {
   data: any[] = [];
   filteredData: any[] = [];
   loading: boolean = false;
-  private readonly apiUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/results';
-  private teamsApiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/teams'
+  private readonly apiUrl = ' http://localhost:5000/api/results';
+  private teamsApiUrl = 'http://localhost:5000/api/teams'
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 

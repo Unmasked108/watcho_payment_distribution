@@ -135,7 +135,7 @@ export class UsersComponent implements OnInit {
   
     // API call
     this.http
-      .get<any>('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/lead-allocations', { headers, params })
+      .get<any>('http://localhost:5000/api/lead-allocations', { headers, params })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
@@ -186,7 +186,7 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/payment-status', payload, { headers })
+      .patch('http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response: any) => {
           console.log('Payment status updated:', response);
@@ -217,7 +217,7 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/payment-status', payload, { headers })
+      .patch('http://localhost:5000/api/orders/payment-status', payload, { headers })
       .subscribe({
         next: (response: any) => {
           console.log('Payment status reverted:', response);

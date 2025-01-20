@@ -243,3 +243,37 @@ z-index: 1040;
   font-size: 1.2rem;
 }
 }
+
+
+
+.otp-form-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+
+  .mat-form-field {
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    margin-bottom: 1.5rem;
+    color: #3f51b5;
+    font-weight: 500;
+  }
+
+  button {
+    margin-top: 1rem;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}

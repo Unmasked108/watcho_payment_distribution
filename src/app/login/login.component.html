@@ -48,6 +48,9 @@
         Login
       </button>
     
+
+
+
       <!-- Toggle to Sign Up -->
       <p class="text-center mt-2">
         Don't have an account? 
@@ -223,5 +226,48 @@
         <div class="loader-text">Loading...</div>
       </div>
     </ng-template>
+     <!-- OTP Form (Visible when showOtpForm is true) -->
+     <div *ngIf="showOtpForm">
+      <form (ngSubmit)="verifyOtp()">
+        <h2 class="text-center mat-title">Mobile Verification</h2>
+    
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mobile Number</mat-label>
+          <input
+            matInput
+            type="text"
+            name="mobile"
+            [(ngModel)]="enteredMobile"
+            required
+            placeholder="Enter your mobile number"
+          />
+        </mat-form-field>
+    
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="sendOtpForLogin()"
+          class="full-width"
+        >
+          Send OTP
+        </button>
+    
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Enter OTP</mat-label>
+          <input
+            matInput
+            type="text"
+            name="otp"
+            [(ngModel)]="otp"
+            required
+            placeholder="Enter received OTP"
+          />
+        </mat-form-field>
+    
+        <button mat-raised-button color="primary" class="full-width" type="submit">
+          Verify OTP
+        </button>
+      </form>
+    </div>
   </mat-card>
 </div>

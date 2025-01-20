@@ -55,7 +55,7 @@ export class TeamManagerComponent implements OnInit {
   constructor(private http: HttpClient) {} // Inject HttpClient
   
 
-  private allocationsUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/results';
+  private allocationsUrl = ' http://localhost:5000/api/results';
 
   
   ngOnInit(): void {
@@ -75,8 +75,8 @@ export class TeamManagerComponent implements OnInit {
     const role = localStorage.getItem('role'); // Fetch role from localStorage
   
     if (role === 'TeamLeader') {
-      const teamUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/teams`;
-      const allocationUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/allocate-orders`;
+      const teamUrl = `  http://localhost:5000/api/teams`;
+      const allocationUrl = `  http://localhost:5000/api/allocate-orders`;
   
       this.http.get(teamUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -226,7 +226,7 @@ export class TeamManagerComponent implements OnInit {
     });
   
     this.http
-      .post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/leadallocations', { selectedMembers }, { headers })
+      .post('http://localhost:5000/api/leadallocations', { selectedMembers }, { headers })
       .subscribe({
         next: (response: any) => {
           this.loading = false;
@@ -257,7 +257,7 @@ export class TeamManagerComponent implements OnInit {
     });
 
     // Send teamId as a query parameter for GET request with headers
-    this.http.get<{ totalAllocatedLeads: number }>(`https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/total-allocated-leads?teamId=${teamId}`, { headers })
+    this.http.get<{ totalAllocatedLeads: number }>(`http://localhost:5000/api/total-allocated-leads?teamId=${teamId}`, { headers })
       .subscribe(
         (response) => {
           console.log('Orders allocated:', response);
