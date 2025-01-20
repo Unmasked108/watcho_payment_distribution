@@ -42,6 +42,8 @@ export class HistoryComponent implements OnInit {
 
 
   displayedColumns: string[] = [
+    'srNo',
+
     'orderId',
     'coupon',
     'orderType',
@@ -56,8 +58,8 @@ export class HistoryComponent implements OnInit {
   data: any[] = [];
   filteredData: any[] = [];
   loading: boolean = false;
-  private readonly apiUrl = ' http://localhost:5000/api/results';
-  private teamsApiUrl = 'http://localhost:5000/api/teams'
+  private readonly apiUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/results';
+  private teamsApiUrl = 'https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/teams'
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -133,18 +135,18 @@ export class HistoryComponent implements OnInit {
   private formatResult(item: any): any {
     return {
       orderId: item.orderId || 'N/A',
-      coupon:item.coupon || 'N/A',
-      orderLink:item.orderLink || 'N/A' , // Correct mapping
-      orderType: item.orderType || 0, // Include orderType
-
-      allocatedTeamName: item.teamId?.teamName || 'N/A', // Access nested `teamName`
+      coupon: item.coupon || 'N/A',
+      orderLink: item.orderLink || 'N/A',
+      orderType: item.orderType || 0,
+      allocatedTeamName: item.teamName || 'N/A', // Use `teamName` directly
       verification: item.completionStatus || 'N/A',
-      allocatedMember: item.memberName || 'N/A',
+      allocatedMember: item.memberName || 'N/A', // Use `memberName` directly
       paymentStatus: item.paymentStatus || 'N/A',
       profit: item.profitBehindOrder || 0,
       memberProfit: item.membersProfit || 0,
     };
   }
+  
   /**
    * Download data as CSV
    */

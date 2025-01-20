@@ -50,16 +50,16 @@ export class UsersComponent implements OnInit {
     this.isDarkMode = localStorage.getItem('theme') === 'dark'; 
     this.username = localStorage.getItem('username') || ''; 
     this.initials = this.getInitials(this.username); // Generate initials from username
-    this.fetchAllocatedLeads(); // Fetch allocated leads count
+    this.fetchLeadData(); // Fetch allocated leads count
   
      // Watch for screen size changes
      this.breakpointObserver.observe([Breakpoints.Handset]).subscribe((result) => {
       if (result.matches) {
         // On mobile, show only 'orderId' and 'undo' columns
-        this.displayedColumns = ['orderId', 'undo'];
+        this.displayedColumns = ['serialNumber','orderId', 'undo'];
       } else {
         // On larger screens, show all columns
-        this.displayedColumns = ['orderId', 'undo', 'paymentStatus', 'allocationDate', 'allocationTime'];
+        this.displayedColumns = ['serialNumber', 'orderId', 'paymentStatus', 'allocationDate', 'allocationTime', 'undo'];
       }
     });
   
@@ -104,7 +104,7 @@ export class UsersComponent implements OnInit {
     console.log(`Payment mode updated for Order ID ${element.orderId}:`, element.paymentMode);
     // Additional logic like saving the updated value to the backend can go here
   }
-  fetchAllocatedLeads(): void {
+  fetchLeadData(): void {
     const token = localStorage.getItem('token'); // Retrieve the token
     const loggedInUserId = localStorage.getItem('userId'); // Retrieve the userId from localStorage
   
@@ -121,94 +121,48 @@ export class UsersComponent implements OnInit {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`, // Include the token
     });
-
-    // Construct query parameters
-  const params: any = {};
-  if (this.selectedDate) {
-    const localDate = new Date(this.selectedDate.getTime() - this.selectedDate.getTimezoneOffset() * 60000)
-      .toISOString()
-      .split('T')[0]; // Correctly adjust for time zone offset
-    params.date = localDate;
-  }
-  // if (this.selectedPaidStatus !== null) {
-  //   params.paidStatus = this.selectedPaidStatus;
-  // }
-
-  console.log('Query Parameters:', params);
-
-
-  // Construct the request options
-  const options = {
-    headers,
-    params,
-  };
   
+    // Construct query parameters
+    const params: any = {};
+    if (this.selectedDate) {
+      const localDate = new Date(this.selectedDate.getTime() - this.selectedDate.getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0]; // Adjust for time zone offset
+      params.date = localDate;
+    }
+  
+    console.log('Query Parameters:', params);
+  
+    // API call
     this.http
-      .get<any>('http://localhost:5000/api/lead-allocations', options)
+      .get<any>('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/lead-allocations', { headers, params })
       .subscribe({
         next: (response) => {
           console.log('Lead Allocations Response:', response);
-          const allocations = response.allocations || [];
+  
           const completedLeadsCount = response.completedLeadsCount || 0;
-  
-         // Filter all allocations for the logged-in user
-        const userAllocations = allocations.filter(
-          (alloc: any) => alloc.memberId._id === loggedInUserId
-        );
-
-        if (userAllocations.length > 0) {
-          // Combine lead IDs from all allocations for the user
-          this.leadIds = userAllocations.flatMap((alloc: any) => alloc.leadIds) || [];
-          const totalAllocatedLeads = this.leadIds.length;
-  // const completedLeads = response.completedLeadsCount || 0;
-  
-            // Subtract completed leads from total allocated leads
-            this.allocatedLeadsCount = totalAllocatedLeads - completedLeadsCount;
-            console.log(
-              `Total Leads Allocated: ${totalAllocatedLeads}, Completed Leads: ${completedLeadsCount}, Remaining Leads: ${this.allocatedLeadsCount}`
-            );
-            this.fetchOrders(); // Fetch orders based on leads
-          } else {
-            console.warn('No allocations found for the logged-in user.');
-          }
-        },
-        error: (error) => {
-          console.error('Error fetching allocated leads:', error);
-        },
-      });
-  }
-  
-  
-  
-  fetchOrders(): void {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-  
-    const leadIdsQuery = this.leadIds.join(',');
-    const url = `  http://localhost:5000/api/orders?leadIds=${leadIdsQuery}`;
-  
-    this.http.get<any>(url, { headers }).subscribe({
-      next: (response) => {
-        this.paginatedData = response.data.map((order: any) => {
-          const updatedAt = order.updatedAt ? new Date(order.updatedAt) : null;
-          return {
+          this.paginatedData = response.orders.map((order: any) => ({
             orderId: order.orderId || 'N/A',
             link: order.link || '#', // Fallback to '#' if no link is provided
             paymentStatus: order.paymentStatus || 'Unpaid',
-            paymentMode: order.paymentModeBy || 'N/A', // Adjusted for 'paymentModeBy'
-            allocationDate: updatedAt ? updatedAt.toLocaleDateString() : 'N/A', // Format to show date
-            allocationTime: updatedAt ? updatedAt.toLocaleTimeString() : 'N/A', // Format to show time
-          };
-        });
+            allocationDate: order.allocationDate || 'N/A', // Date from backend
+            allocationTime: order.allocationTime || 'N/A', // Time from backend
+          }));
   
-        this.dataSource.data = this.paginatedData;
-        console.log('Orders Response:', response);
-      },
-      error: (error) => {
-        console.error('Error fetching orders:', error);
-      },
-    });
+          this.dataSource.data = this.paginatedData;
+          const totalAllocatedLeads = this.paginatedData.length;
+  
+          // Subtract completed leads from total allocated leads
+          this.allocatedLeadsCount = totalAllocatedLeads - completedLeadsCount;
+  
+          console.log(
+            `Total Leads Allocated: ${totalAllocatedLeads}, Completed Leads: ${completedLeadsCount}, Remaining Leads: ${this.allocatedLeadsCount}`
+          );
+        },
+        error: (error) => {
+          console.error('Error fetching lead data:', error);
+        },
+      });
   }
   
   
@@ -232,16 +186,15 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
+      .patch('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/payment-status', payload, { headers })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           console.log('Payment status updated:', response);
   
           // Update the local table data to reflect the status change
           order.paymentStatus = 'Paid';
           this.allocatedLeadsCount--; // Decrease leads remaining when an order is marked as paid
-
-          
+          alert(`${order.orderId} marked as Paid successfully.`);
         },
         error: (error) => {
           console.error('Error updating payment status:', error);
@@ -264,16 +217,15 @@ export class UsersComponent implements OnInit {
     };
   
     this.http
-      .patch(' http://localhost:5000/api/orders/payment-status', payload, { headers })
+      .patch('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/payment-status', payload, { headers })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           console.log('Payment status reverted:', response);
   
           // Update the local table data to reflect the status change
           order.paymentStatus = 'Unpaid';
-
           this.allocatedLeadsCount++; // Increase leads remaining when the status is reverted
-
+          alert(`${order.orderId} reverted to Unpaid successfully.`);
         },
         error: (error) => {
           console.error('Error reverting payment status:', error);
@@ -281,13 +233,11 @@ export class UsersComponent implements OnInit {
       });
   }
   
-  
-  
 
   onPageChange(event: any) {
     this.currentPage = event.pageIndex + 1;
     this.itemsPerPage = event.pageSize;
-    this.fetchOrders(); // Fetch paginated data on page change
+    this.fetchLeadData(); // Fetch paginated data on page change
   }
 }
 

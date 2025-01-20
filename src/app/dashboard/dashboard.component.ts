@@ -32,7 +32,33 @@ interface Team {
 commission?: number
 
 }
+interface Order {
+  _id: string;
+  customerId: string;
+  source: string;
+  coupon: string | null;
+  status: string;
+  orderId: string;
+  link: string;
+  paymentStatus: string;
+  orderType: number;
+  createdAt: string;
+  updatedAt: string;
+  allocateDate: string;
+  teamId: string;
+}
 
+interface AllocationResponse {
+  teamIds: string[];
+  startDate: string;
+  endDate: string;
+  leadsAllocated: number;
+  leadsCompleted: number;
+  totalLeadsAllocated: number;
+  totalLeadsCompleted: number;
+
+  orders: Order[];
+}
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -193,14 +219,14 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
   }
 
 
-  private apiUrl = '  http://localhost:5000/api/teams';
-  private allocationUrl = '  http://localhost:5000/api/allocate-orders';
-  private ordersUrl = '  http://localhost:5000/api/orders';
+  private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/teams';
+  private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/allocate-orders';
+  private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders';
 
 
-  // private apiUrl = '  http://localhost:5000/api/teams';
-  // private allocationUrl = '  http://localhost:5000/api/allocate-orders';
-  // private ordersUrl = '  http://localhost:5000/api/orders';
+  // private apiUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/teams';
+  // private allocationUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/allocate-orders';
+  // private ordersUrl = '  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders';
   constructor(private http: HttpClient, private cdRef: ChangeDetectorRef,private cookieService: CookieService) {}
 
   ngOnInit(): void {
@@ -252,14 +278,12 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
     this.selectedTeam = null;
     this.isModalOpen = false;
   }
-
   unallocateOrders(): void {
     if (this.selectedTeam) {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       });
   
-      // Reuse allocationDate logic from allocateLeads
       const allocationDate = new Date().toISOString().split('T')[0]; // Today's date in YYYY-MM-DD format
       console.log('Frontend allocationDate:', allocationDate); // Log the allocation date sent to the backend
   
@@ -268,10 +292,12 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
         allocationDate,
       };
   
-      this.http.post(' http://localhost:5000/api/unallocate', payload, { headers }).subscribe(
-        (response) => {
+      this.http.post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/unallocate', payload, { headers }).subscribe(
+        (response: any) => {
           console.log('Unallocation response:', response);
-          alert('Orders unallocated successfully.');
+          alert(
+            `${response.unallocatedCount} leads were successfully unallocated out of ${response.allocatedCount} allocated leads.`
+          );
           this.getTeams(); // Refresh team data
         },
         (error) => {
@@ -283,7 +309,6 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
       alert('Please select a team.');
     }
   }
-  
   
 
   // Fetch teams from backend
@@ -329,7 +354,19 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
 
   // Extract all teamIds as a comma-separated string
   const teamIds = this.teams.map((team) => team.teamId).join(',');
-  console.log('Sending teamIds:', teamIds);
+  if (!teamIds) {
+    console.error('Error: No team IDs available to fetch allocations.');
+    return; // Exit early if no team IDs
+  }
+
+   // Set default dates to today if not already set
+   if (!this.selectedStartDate) {
+    this.selectedStartDate = new Date();
+  }
+  if (!this.selectedEndDate) {
+    this.selectedEndDate = new Date();
+  }
+
 
 
   const params = {
@@ -340,7 +377,7 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
 
   console.log('Fetching allocations data with params:', params);
 
-  this.http.get<any[]>(this.allocationUrl, { headers, params }).subscribe(
+  this.http.get<AllocationResponse>(this.allocationUrl, { headers, params }).subscribe(
     (allocations) => {
       let totalLeadsAllocated = 0;
       let totalLeadsCompleted = 0;
@@ -359,8 +396,8 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
         team.paymentToday = 0; // Initialize paymentToday
       });
 
-      allocations.forEach((allocation) => {
-        const teamId = allocation.teamId.teamId;
+      allocations.orders.forEach((allocation: Order) => {
+        const teamId = allocation.teamId;
 
         // Find the team with the matching teamId
         const team = this.teams.find((t) => t.teamId === teamId);
@@ -368,29 +405,28 @@ localStorage.setItem('customEndDate', this.customEndDate.toISOString());
         if (team) {
           team.allocation = allocation.status || 'Not Allocated';
           team.allocatedTime =
-            new Date(allocation.allocationDate).toLocaleDateString() || null;
-          team.leadsAllocated =
-            (team.leadsAllocated || 0) + (allocation.leadsAllocated || 0);
-          team.leadsCompleted =
-            (team.leadsCompleted || 0) + (allocation.leadsCompleted || 0);
-          team.paymentToday = allocation.PaymentGivenToday || 0;
+            new Date(allocation.allocateDate).toLocaleDateString() || null;
+          team.leadsAllocated = (team.leadsAllocated || 0) + 1; // Increment count for each order
+          team.paymentToday = 0; // Placeholder, adjust based on your logic
+          totalLeadsAllocated++; // Increment total allocated leads
 
-          totalLeadsAllocated += allocation.leadsAllocated || 0;
-          totalLeadsCompleted += allocation.leadsCompleted || 0;
-
-          allocation.orderIds.forEach((order: any) => {
-            if (order.coupon && (order.coupon === 'not given' || order.coupon === null)) {
-              card299Leads++;
-              if (order.paymentStatus === 'Paid') {
-                card299Profit += 61;
-              }
-            } else {
-              card149Leads++;
-              if (order.paymentStatus === 'Paid') {
-                card149Profit += 71;
-              }
+          if (allocation.paymentStatus === 'Paid') {
+            team.leadsCompleted = (team.leadsCompleted || 0) + 1; // Increment completed leads
+            totalLeadsCompleted++; // Increment total completed leads
+          }
+  
+  
+          if (allocation.coupon === 'not given') {
+            card299Leads++;
+            if (allocation.paymentStatus === 'Paid') {
+              card299Profit += 61;
             }
-          });
+          } else {
+            card149Leads++;
+            if (allocation.paymentStatus === 'Paid') {
+              card149Profit += 71;
+            }
+          }
         }
       });
 
@@ -492,7 +528,7 @@ private processCSV() {
     });
 
     // Send data to the backend
-    this.http.post('  http://localhost:5000/api/orders ' //  http://localhost:5000/api/orders
+    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders ' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders
       , parsedData, { headers: httpHeaders }).subscribe(
       (response) => {
         this.loading = false
@@ -546,7 +582,7 @@ closeFileUploadAlert() {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    this.http.post('  http://localhost:5000/api/orders/upload-pdf' //  http://localhost:5000/api/orders/upload-pdf
+    this.http.post('  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/upload-pdf' //  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/upload-pdf
       , formData).subscribe(
       (response) => {
         console.log('PDF uploaded successfully:', response);
@@ -599,7 +635,7 @@ fetchAllocationOrderCounts() {
   const headers = new HttpHeaders({
     Authorization: `Bearer ${localStorage.getItem('token')}`,
   });
-  return this.http.get('http://localhost:5000/api/orders/remaining', { headers });
+  return this.http.get('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/orders/remaining', { headers });
 }
 // teams: Team[] = []; // Existing teams array
 saveAllocations(): void {
@@ -656,7 +692,7 @@ allocateLeads(allocations: { teamId: string; orders: number; amount: number ; or
 
   const allocationDate = new Date().toISOString().split('T')[0];
   this.http
-    .post('http://localhost:5000/api/allocate-orders', { allocationDate, allocations }, { headers })
+    .post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/allocate-orders', { allocationDate, allocations }, { headers })
     .subscribe(
       (response: any) => {
         this.loading=false
@@ -695,7 +731,4 @@ closeAlert(): void {
 
 
 //this is for grid 
-
-
-
 }

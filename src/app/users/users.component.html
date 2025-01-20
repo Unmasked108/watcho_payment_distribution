@@ -83,7 +83,7 @@
     <!-- Date Picker -->
     <mat-form-field class="filter-item example-full-width">
       <mat-label>Choose a date</mat-label>
-      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate"     (ngModelChange)="fetchAllocatedLeads()"
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate"     (ngModelChange)="fetchLeadData()"
       />
       <mat-hint>MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matIconSuffix [for]="picker">
@@ -108,26 +108,31 @@
 
 
     <mat-table [dataSource]="dataSource" matSort class="custom-table mat-elevation-z8">
+      
+      <ng-container matColumnDef="serialNumber">
+        <mat-header-cell *matHeaderCellDef class="serial-number-header">Sr No.</mat-header-cell>
+        <mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</mat-cell>
+      </ng-container>
+      
+      
       <!-- Order ID Column -->
       <ng-container matColumnDef="orderId">
         <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
         <mat-cell *matCellDef="let element">
           <a
-              *ngIf="element.link"
-              [href]="element.link"
-              target="_blank"
-              rel="noopener noreferrer"
-              (click)="updatePaymentStatus(element)"
-              mat-raised-button
-              [color]="element.paymentStatus === 'Paid' ? 'primary' : 'accent'"
-              [disabled]="element.paymentStatus === 'Paid'"
-              matTooltip="{{ element.paymentStatus === 'Paid' ? 'Already Paid' : 'Click to Pay' }}"
-              style="text-decoration: none; color: inherit; display: flex; justify-content: center; align-items: center; margin: auto;"
-             >
-              Pay
+            *ngIf="element.link"
+            [href]="element.link"
+            target="_blank"
+            rel="noopener noreferrer"
+            (click)="updatePaymentStatus(element)"
+            mat-raised-button
+            [color]="element.paymentStatus === 'Paid' ? 'primary' : 'accent'"
+            [disabled]="element.paymentStatus === 'Paid'"
+            matTooltip="{{ element.paymentStatus === 'Paid' ? 'Already Paid' : 'Click to Pay' }}"
+            style="text-decoration: none; color: inherit; display: flex; justify-content: center; align-items: center; margin: auto;"
+          >
+            {{ element.link.slice(-4) }}
           </a>
-
-
         </mat-cell>
       </ng-container>
       

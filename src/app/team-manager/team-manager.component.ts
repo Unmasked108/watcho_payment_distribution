@@ -45,7 +45,7 @@ export class TeamManagerComponent implements OnInit {
   totalLeads: number = 0; // Total leads allocated to the team
   totalAllocatedLeads: number=0;
   
-  displayedColumns: string[] = ['select', 'name', 'id', 'leads', 'time', 'status', 'edit'];
+  displayedColumns: string[] = ['select', 'name',  'leads', 'ordersAllocated', 'time', 'status', 'edit'];
   teamMembers: any[] = []; // Holds team members' data
   isEditing: boolean = false;
   editingMember: any = null;
@@ -55,7 +55,7 @@ export class TeamManagerComponent implements OnInit {
   constructor(private http: HttpClient) {} // Inject HttpClient
   
 
-  private allocationsUrl = ' http://localhost:5000/api/results';
+  private allocationsUrl = ' https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/results';
 
   
   ngOnInit(): void {
@@ -75,8 +75,8 @@ export class TeamManagerComponent implements OnInit {
     const role = localStorage.getItem('role'); // Fetch role from localStorage
   
     if (role === 'TeamLeader') {
-      const teamUrl = `  http://localhost:5000/api/teams`;
-      const allocationUrl = `  http://localhost:5000/api/allocate-orders`;
+      const teamUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/teams`;
+      const allocationUrl = `  https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/allocate-orders`;
   
       this.http.get(teamUrl, { headers }).subscribe({
         next: (response: any) => {
@@ -110,6 +110,16 @@ export class TeamManagerComponent implements OnInit {
               selected: false,
             }));
   
+            // Check if ordersAllocated is stored in localStorage
+          const storedData = JSON.parse(localStorage.getItem('ordersAllocated') || '{}');
+          this.teamMembers.forEach((member) => {
+            if (storedData[member.id]) {
+              member.ordersAllocated = storedData[member.id];
+            } else {
+              member.ordersAllocated = 0;
+            }
+          });
+          
             console.log('Team members:', this.teamMembers);
             console.log('Fetching allocations for teamId:', this.teamId); // Log teamId
 
@@ -179,109 +189,6 @@ export class TeamManagerComponent implements OnInit {
     const selectedCount = this.teamMembers.filter((member) => member.selected).length;
     return selectedCount > 0 && selectedCount < this.teamMembers.length;
   }
-  allocateLeads(): void {
-    const headers = new HttpHeaders({
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-    });
-
-    if (!this.teamId) {
-        console.error('Team ID is not available.');
-        return;
-    }
-
-    // Fetch already allocated leads for the day
-    const allocationUrl = `http://localhost:5000/api/unallocated-leads?teamId=${this.teamId}`;
-
-    this.http.get(allocationUrl, { headers }).subscribe({
-        next: (response: any) => {
-            const allocatedLeadIds: string[] = response.allocatedLeadIds || [];
-            console.log('Already allocated leads:', allocatedLeadIds);
-
-            // Step 1: Deduplicate and filter unallocated leads
-            const allOrderIds = this.teamMembers.flatMap((member) => member.orderIds);
-            const uniqueOrderIds = Array.from(new Set(allOrderIds));
-
-            const unallocatedOrderIds = uniqueOrderIds.filter((order) =>
-                !allocatedLeadIds.includes(order._id)
-            );
-
-            console.log('Unallocated leads available for allocation:', unallocatedOrderIds);
-
-            if (unallocatedOrderIds.length === 0) {
-                console.warn('No unallocated leads available.');
-                return;
-            }
-
-            const selectedMembers = this.teamMembers.filter((member) => member.selected);
-            if (selectedMembers.length === 0) {
-                console.warn('No team members selected for allocation.');
-                return;
-            }
-
-            // Step 2: Calculate manually allocated leads
-            const manuallyAllocatedLeads = selectedMembers.reduce((total, member) => {
-                return total + (member.leads || 0);
-            }, 0);
-
-            if (manuallyAllocatedLeads > unallocatedOrderIds.length) {
-                console.error('Manually allocated leads exceed total available leads.');
-                return;
-            }
-
-            // Step 3: Calculate remaining leads to distribute
-            const remainingLeads = unallocatedOrderIds.length - manuallyAllocatedLeads;
-
-            // Step 4: Allocate remaining leads among members without manual input
-            const autoAllocateMembers = selectedMembers.filter(
-                (member) => !member.leads || member.leads === 0
-            );
-
-            if (autoAllocateMembers.length > 0) {
-                const autoAllocatedLeads = Math.floor(remainingLeads / autoAllocateMembers.length);
-                const extraLeads = remainingLeads % autoAllocateMembers.length;
-                let extraLeadIndex = 0;
-
-                autoAllocateMembers.forEach((member) => {
-                    const additionalLead = extraLeadIndex < extraLeads ? 1 : 0;
-                    member.leads = autoAllocatedLeads + additionalLead;
-                    if (additionalLead) {
-                        extraLeadIndex++;
-                    }
-                });
-            }
-
-            // Step 5: Distribute unallocated order IDs
-            let orderIndex = 0;
-            this.teamMembers = this.teamMembers.map((member) => {
-                if (member.selected) {
-                    const allocatedLeads = member.leads || 0;
-                    const allocatedOrderIds = unallocatedOrderIds.slice(
-                        orderIndex,
-                        orderIndex + allocatedLeads
-                    );
-                    orderIndex += allocatedLeads;
-
-                    return {
-                        ...member,
-                        orderIds: allocatedOrderIds,
-                        time: new Date().toLocaleTimeString(),
-                        date: new Date().toISOString(),
-                        status: 'Completed',
-                    };
-                } else {
-                    return member;
-                }
-            });
-
-            console.log('Leads allocated:', selectedMembers);
-        },
-        error: (err) => {
-            console.error('Error fetching unallocated leads:', err);
-        },
-    });
-}
-
-  
   
   
   
@@ -291,22 +198,26 @@ export class TeamManagerComponent implements OnInit {
   isCardVisible: boolean = false; // Control card visibility
   responseMessage: string = '';  // Store the message to display
   loading: boolean = false;
-
   saveData(): void {
     this.loading = true;
+  
+    const currentDate = new Date();
+  
+    // Prepare selected members with their IDs, teamId, and maximum leads
     const selectedMembers = this.teamMembers
       .filter((member) => member.selected)
       .map((member) => ({
-        ...member,
-        teamId: this.teamId, // Add teamId to each member
+        id: member.id,
+        name: member.name,
+        teamId: this.teamId,
+        time: currentDate.toISOString(),
+        maxLeads: member.leads || 0, // Use the input value or default to 0
       }));
-      
-      this.totalAllocatedLeads = selectedMembers.reduce(
-        (sum, member) => sum + (member.leads || 0),
-        0
-      );
+  
     if (selectedMembers.length === 0) {
       console.warn('No team members selected for allocation.');
+      this.loading = false;
+      this.showCard('No team members selected for allocation.');
       return;
     }
   
@@ -315,27 +226,27 @@ export class TeamManagerComponent implements OnInit {
     });
   
     this.http
-      .post(
-        ' http://localhost:5000/api/lead-allocations',
-        { selectedMembers },
-        { headers }
-      )
+      .post('https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/leadallocations', { selectedMembers }, { headers })
       .subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.loading = false;
           console.log('Data saved successfully:', response);
-          this.showCard('Data saved successfully!');
-          this.fetchTeamData();
-
+          this.showCard('Leads allocated successfully!');
+            // Store ordersAllocated for each member in localStorage
+        selectedMembers.forEach((member) => {
+          const storedData = JSON.parse(localStorage.getItem('ordersAllocated') || '{}');
+          storedData[member.id] = member.maxLeads;
+          localStorage.setItem('ordersAllocated', JSON.stringify(storedData));
+        });
+          this.fetchTeamData(); // Refresh data
         },
         error: (err) => {
-          this.loading=false;
+          this.loading = false;
           console.error('Error saving data:', err);
-          this.showCard('Failed to save data. Please try again.');
+          this.showCard('Failed to allocate leads. Please try again.');
         },
       });
   }
-  
   
   getOrdersAllocatedForToday(teamId: string): void {
     console.log('Fetching orders allocated for today with teamId:', teamId);
@@ -346,7 +257,7 @@ export class TeamManagerComponent implements OnInit {
     });
 
     // Send teamId as a query parameter for GET request with headers
-    this.http.get<{ totalAllocatedLeads: number }>(`http://localhost:5000/api/total-allocated-leads?teamId=${teamId}`, { headers })
+    this.http.get<{ totalAllocatedLeads: number }>(`https://asia-south1-ads-ai-101.cloudfunctions.net/watcho2_api/api/total-allocated-leads?teamId=${teamId}`, { headers })
       .subscribe(
         (response) => {
           console.log('Orders allocated:', response);

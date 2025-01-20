@@ -54,6 +54,11 @@
 
 
 <mat-table [dataSource]="filteredData" class="custom-table">
+
+  <ng-container matColumnDef="srNo" >
+    <mat-header-cell *matHeaderCellDef >Sr No.</mat-header-cell>
+    <mat-cell *matCellDef="let element; let i = index" >{{ i + 1 }}</mat-cell>
+  </ng-container>
   <!-- Order ID Column -->
   <ng-container matColumnDef="orderId">
     <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>

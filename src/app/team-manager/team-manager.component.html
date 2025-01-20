@@ -87,7 +87,7 @@
         
         <div class="d-flex justify-content-between align-items-center">
           <span>Allocate the leads to the team members:</span>
-          <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate Leads</button>
+          <!-- <button mat-raised-button color="primary" (click)="allocateLeads()">Allocate Leads</button> -->
         </div>
       </mat-card>
     </div>
@@ -119,10 +119,10 @@
           </ng-container>
     
           <!-- Member ID Column -->
-          <ng-container matColumnDef="id">
+          <!-- <ng-container matColumnDef="id">
             <mat-header-cell *matHeaderCellDef> Member ID </mat-header-cell>
             <mat-cell *matCellDef="let member"> {{ member.id }} </mat-cell>
-          </ng-container>
+          </ng-container> -->
     
           <!-- Leads Allocated Column -->
           <ng-container matColumnDef="leads">
@@ -131,6 +131,12 @@
               <input type="number" min='0' [(ngModel)]="member.leads" class="leads-input" />
             </mat-cell>
           </ng-container>
+
+          <ng-container matColumnDef="ordersAllocated">
+            <mat-header-cell *matHeaderCellDef> Orders Allocated </mat-header-cell>
+            <mat-cell *matCellDef="let member"> {{ member.ordersAllocated || 0 }} </mat-cell>
+          </ng-container>
+          
     
           <!-- Time of Allocation Column -->
           <ng-container matColumnDef="time">
